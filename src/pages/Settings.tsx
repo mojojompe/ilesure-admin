@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button';
 
 export function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
-  
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'security', label: 'Security', icon: Shield },
@@ -35,11 +35,10 @@ export function Settings() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-clay-sm text-sm font-semibold transition-all duration-150 ${
-                  isActive 
-                    ? 'bg-burnt-brown text-white shadow-clay-sm' 
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-clay-sm text-sm font-semibold transition-all duration-150 ${isActive
+                    ? 'bg-burnt-brown text-white shadow-clay-sm'
                     : 'bg-transparent text-text-secondary hover:bg-clay-border-light'
-                }`}
+                  }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-mustard-light' : 'text-text-tertiary'}`} />
                 {tab.label}
@@ -53,7 +52,7 @@ export function Settings() {
           {activeTab === 'profile' && (
             <ClayCard padding="md" className="space-y-6">
               <h3 className="text-base font-bold text-text-primary border-b border-clay-border pb-3">Personal Information</h3>
-              
+
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 rounded-pill bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white text-3xl font-bold shadow-clay flex-shrink-0">
                   A
@@ -71,7 +70,7 @@ export function Settings() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Email Address</label>
-                  <input type="email" defaultValue="admin@ilesure.com" className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors" disabled />
+                  <input type="email" defaultValue="admin@iléSure.com" className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors" disabled />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Role</label>
@@ -90,7 +89,7 @@ export function Settings() {
               <h3 className="text-base font-bold text-text-primary border-b border-clay-border pb-3 flex items-center gap-2">
                 <Key className="w-4 h-4 text-mustard" /> Change Password
               </h3>
-              
+
               <div className="space-y-4 max-w-md">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Current Password</label>
@@ -115,7 +114,7 @@ export function Settings() {
           {activeTab === 'notifications' && (
             <ClayCard padding="md" className="space-y-6">
               <h3 className="text-base font-bold text-text-primary border-b border-clay-border pb-3">Email Notifications</h3>
-              
+
               <div className="space-y-4">
                 {[
                   { id: '1', title: 'New Listings', desc: 'Receive emails when a new listing is submitted for approval', checked: true },

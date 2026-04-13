@@ -6,13 +6,13 @@ import {
 import { clsx } from 'clsx';
 
 const navItems = [
-  { path: '/',            label: 'Dashboard',         icon: LayoutDashboard },
-  { path: '/listings',    label: 'Listings',          icon: Building2 },
-  { path: '/verification',label: 'Verification Queue',icon: ShieldCheck },
-  { path: '/users',       label: 'Users',             icon: Users },
-  { path: '/companies',   label: 'Companies',         icon: Briefcase },
-  { path: '/waitlist',    label: 'Waitlist Data',     icon: ClipboardList },
-  { path: '/analytics',   label: 'Analytics',         icon: BarChart3 },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/listings', label: 'Listings', icon: Building2 },
+  { path: '/verification', label: 'Verification Queue', icon: ShieldCheck },
+  { path: '/users', label: 'Users', icon: Users },
+  { path: '/companies', label: 'Companies', icon: Briefcase },
+  { path: '/waitlist', label: 'Waitlist Data', icon: ClipboardList },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -31,10 +31,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
         <div className="w-10 h-10 rounded-clay-sm overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0 shadow-clay-sm">
-          <img src="/NoBG Logo.png" alt="IleSure" className="w-8 h-8 object-contain" />
+          <img src="/NoBG Logo.png" alt="iléSure" className="w-8 h-8 object-contain" />
         </div>
         <div>
-          <div className="text-white font-bold text-lg leading-tight tracking-tight">IleSure</div>
+          <div className="text-white font-bold text-lg leading-tight tracking-tight">iléSure</div>
           <div className="text-white/50 text-xs font-medium tracking-widest uppercase">Admin Panel</div>
         </div>
       </div>
@@ -85,8 +85,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             A
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-white text-sm font-semibold truncate">ilesure Admin</div>
-            <div className="text-white/40 text-xs truncate">admin@ilesure.com</div>
+            <div className="text-white text-sm font-semibold truncate">iléSure Admin</div>
+            <div className="text-white/40 text-xs truncate">admin@iléSure.com</div>
           </div>
           <button onClick={handleLogout} className="text-white/40 hover:text-status-error transition-colors duration-150" title="Logout">
             <LogOut className="w-4 h-4" />

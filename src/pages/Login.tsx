@@ -23,7 +23,7 @@ export function Login() {
 
     // Hardcoded auth check per user request
     setTimeout(() => {
-      if (email === 'admin@ilesure.com' && password === 'TeamNova@04') {
+      if (email === 'admin@iléSure.com' && password === 'TeamNova@04') {
         localStorage.setItem('ilesure_admin_auth', 'true');
         navigate('/', { replace: true });
       } else {
@@ -45,10 +45,10 @@ export function Login() {
         {/* Logo Header */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 rounded-clay bg-white flex items-center justify-center shadow-clay-sm mb-4">
-            <img src="/NoBG Logo.png" alt="IleSure Logo" className="w-10 h-10 object-contain" />
+            <img src="/NoBG Logo.png" alt="iléSure Logo" className="w-10 h-10 object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-text-primary">Welcome Back</h1>
-          <p className="text-sm text-text-tertiary mt-1">Sign in to the IleSure Admin Dashboard</p>
+          <p className="text-sm text-text-tertiary mt-1">Sign in to the iléSure Admin Dashboard</p>
         </div>
 
         {/* Login Card */}
@@ -71,7 +71,7 @@ export function Login() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="admin@ilesure.com"
+                  placeholder="admin@iléSure.com"
                   className="w-full pl-10 pr-4 py-3 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all font-medium"
                 />
               </div>
@@ -105,7 +105,7 @@ export function Login() {
         </div>
 
         <p className="text-center text-xs text-text-tertiary font-medium mt-8">
-          IleSure Administrator Portal
+          iléSure Administrator Portal
         </p>
       </div>
     </div>

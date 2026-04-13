@@ -1,4 +1,4 @@
-// ── IleSure Admin — TypeScript Types ──────────────────────────────
+// ── iléSure Admin — TypeScript Types ──────────────────────────────
 
 export type UserRole = 'tenant' | 'agent' | 'landlord' | 'company_admin' | 'sub_agent';
 export type VerificationStatus = 'pending' | 'verified' | 'rejected' | 'more_info';

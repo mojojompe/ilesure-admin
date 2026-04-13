@@ -2,23 +2,23 @@ import { Bell, Search, ChevronDown, Menu } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
-  '/':             { title: 'Dashboard',          subtitle: 'Overview of platform activity' },
-  '/listings':     { title: 'Listings',           subtitle: 'Manage property listings & approvals' },
+  '/': { title: 'Dashboard', subtitle: 'Overview of platform activity' },
+  '/listings': { title: 'Listings', subtitle: 'Manage property listings & approvals' },
   '/verification': { title: 'Verification Queue', subtitle: 'Review agent & company documents' },
-  '/users':        { title: 'Users',              subtitle: 'Manage tenants, agents & landlords' },
-  '/companies':    { title: 'Companies',          subtitle: 'Manage registered real estate companies' },
-  '/waitlist':     { title: 'Waitlist Data',      subtitle: 'Student demand & corridor analytics' },
-  '/analytics':    { title: 'Analytics',          subtitle: 'Platform performance & demand intelligence' },
+  '/users': { title: 'Users', subtitle: 'Manage tenants, agents & landlords' },
+  '/companies': { title: 'Companies', subtitle: 'Manage registered real estate companies' },
+  '/waitlist': { title: 'Waitlist Data', subtitle: 'Student demand & corridor analytics' },
+  '/analytics': { title: 'Analytics', subtitle: 'Platform performance & demand intelligence' },
 };
 
 export function TopHeader({ onMenuClick }: { onMenuClick: () => void }) {
   const location = useLocation();
-  const page = pageTitles[location.pathname] || { title: 'IleSure Admin', subtitle: '' };
+  const page = pageTitles[location.pathname] || { title: 'iléSure Admin', subtitle: '' };
 
   return (
     <header className="fixed top-0 left-0 md:left-64 right-0 h-16 bg-white border-b border-clay-border shadow-clay-sm z-20 flex items-center px-4 md:px-6 gap-3 md:gap-4">
       {/* Mobile Menu Button */}
-      <button 
+      <button
         onClick={onMenuClick}
         className="md:hidden p-2 -ml-2 text-text-secondary hover:text-burnt-brown rounded-clay-sm transition-colors"
       >

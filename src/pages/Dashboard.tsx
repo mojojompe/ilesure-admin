@@ -18,11 +18,11 @@ const formatNaira = (v: number) =>
   v >= 1_000_000 ? `₦${(v / 1_000_000).toFixed(1)}M` : `₦${(v / 1000).toFixed(0)}k`;
 
 const activityIconMap: Record<string, React.ReactNode> = {
-  listing:      <Building2 className="w-4 h-4 text-burnt-brown" />,
+  listing: <Building2 className="w-4 h-4 text-burnt-brown" />,
   verification: <FileCheck className="w-4 h-4 text-mustard" />,
-  booking:      <CheckCircle className="w-4 h-4 text-status-success" />,
-  user:         <Users className="w-4 h-4 text-status-info" />,
-  waitlist:     <ClipboardList className="w-4 h-4 text-burnt-brown-light" />,
+  booking: <CheckCircle className="w-4 h-4 text-status-success" />,
+  user: <Users className="w-4 h-4 text-status-info" />,
+  waitlist: <ClipboardList className="w-4 h-4 text-burnt-brown-light" />,
 };
 const activityBgMap: Record<string, string> = {
   listing: 'bg-burnt-brown/10', verification: 'bg-mustard/10',
@@ -46,7 +46,7 @@ export function Dashboard() {
           <div>
             <p className="text-white/60 text-sm font-medium mb-1">Good evening 👋</p>
             <h2 className="text-2xl font-bold tracking-tight">Welcome back, Admin</h2>
-            <p className="text-white/60 text-sm mt-1">Here's what's happening on IleSure today.</p>
+            <p className="text-white/60 text-sm mt-1">Here's what's happening on iléSure today.</p>
           </div>
           <div className="hidden md:flex items-center gap-3">
             <div className="text-right">
@@ -225,10 +225,10 @@ export function Dashboard() {
       {/* ── Quick Stats Row ────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Waitlist Size',        value: '234',  icon: <ClipboardList className="w-4 h-4 text-mustard" />, bg: 'bg-mustard/10' },
-          { label: 'New Users This Week',  value: '48',   icon: <Users className="w-4 h-4 text-burnt-brown" />,     bg: 'bg-burnt-brown-pale' },
-          { label: 'Bookings This Month',  value: '31',   icon: <CheckCircle className="w-4 h-4 text-status-success" />, bg: 'bg-status-success/10' },
-          { label: 'Active Companies',     value: '12',   icon: <Layers className="w-4 h-4 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Waitlist Size', value: '234', icon: <ClipboardList className="w-4 h-4 text-mustard" />, bg: 'bg-mustard/10' },
+          { label: 'New Users This Week', value: '48', icon: <Users className="w-4 h-4 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Bookings This Month', value: '31', icon: <CheckCircle className="w-4 h-4 text-status-success" />, bg: 'bg-status-success/10' },
+          { label: 'Active Companies', value: '12', icon: <Layers className="w-4 h-4 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
         ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-9 h-9 rounded-clay-sm flex items-center justify-center flex-shrink-0 shadow-clay-sm ${stat.bg}`}>
