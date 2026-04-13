@@ -105,7 +105,7 @@ export function Login() {
         </div>
 
         <p className="text-center text-xs text-text-tertiary font-medium mt-8">
-          Protected System · IleSure Administrator Portal
+          IleSure Administrator Portal
         </p>
       </div>
     </div>
