@@ -25,11 +25,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
   return (
     <aside className={clsx(
-      'fixed left-0 top-0 h-full w-64 bg-sidebar-gradient shadow-sidebar z-30 flex flex-col overflow-hidden transition-transform duration-300 md:translate-x-0',
+      'fixed left-3 top-3 bottom-3 w-60 bg-sidebar-gradient shadow-sidebar-pill z-30 flex flex-col overflow-hidden transition-transform duration-300 md:translate-x-0 rounded-[28px]',
       isOpen ? 'translate-x-0' : '-translate-x-full'
     )}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
         <div className="w-10 h-10 rounded-clay-sm overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0 shadow-clay-sm">
           <img src="/NoBG Logo.png" alt="iléSure" className="w-8 h-8 object-contain" />
         </div>

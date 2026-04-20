@@ -23,7 +23,7 @@ export function Login() {
 
     // Hardcoded auth check per user request
     setTimeout(() => {
-      if (email === 'admin@iléSure.com' && password === 'TeamNova@04') {
+      if (email === 'admin@ilesure.com' && password === 'TeamNova@04') {
         localStorage.setItem('ilesure_admin_auth', 'true');
         navigate('/', { replace: true });
       } else {

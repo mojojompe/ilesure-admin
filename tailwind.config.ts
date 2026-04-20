@@ -50,6 +50,7 @@ const config: Config = {
         'clay-hover':'0 12px 40px rgba(139,69,19,0.16), 0 4px 12px rgba(139,69,19,0.10)',
         'clay-inset':'inset 0 2px 6px rgba(139,69,19,0.08)',
         'sidebar':   '4px 0 24px rgba(107,51,16,0.18)',
+        'sidebar-pill': '0 8px 40px rgba(107,51,16,0.28), 0 2px 12px rgba(107,51,16,0.18), 0 0 0 1px rgba(255,255,255,0.06)',
       },
       backgroundImage: {
         'sidebar-gradient': 'linear-gradient(180deg, #8B4513 0%, #6B3310 100%)',

@@ -16,7 +16,7 @@ export function TopHeader({ onMenuClick }: { onMenuClick: () => void }) {
   const page = pageTitles[location.pathname] || { title: 'iléSure Admin', subtitle: '' };
 
   return (
-    <header className="fixed top-0 left-0 md:left-64 right-0 h-16 bg-white border-b border-clay-border shadow-clay-sm z-20 flex items-center px-4 md:px-6 gap-3 md:gap-4">
+    <header className="fixed top-3 left-3 md:left-[276px] right-3 h-14 bg-white rounded-[9999px] shadow-sidebar-pill z-20 flex items-center px-4 md:px-5 gap-3 md:gap-4">
       {/* Mobile Menu Button */}
       <button
         onClick={onMenuClick}
