@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { adminLogin, setAdminToken } from '../api/auth';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -21,16 +22,21 @@ export function Login() {
 
     setLoading(true);
 
-    // Hardcoded auth check per user request
-    setTimeout(() => {
-      if (email === 'admin@ilesure.com' && password === 'TeamNova@04') {
+    try {
+      const response = await adminLogin({ email, password });
+
+      if (response.success && response.data?.adminToken) {
+        setAdminToken(response.data.adminToken);
         localStorage.setItem('ilesure_admin_auth', 'true');
         navigate('/', { replace: true });
       } else {
-        setError('Invalid admin credentials.');
+        setError(response.error?.message || 'Invalid admin credentials.');
         setLoading(false);
       }
-    }, 800);
+    } catch {
+      setError('Unable to connect to server. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,7 +77,7 @@ export function Login() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="admin@iléSure.com"
+                  placeholder="admin@example.com"
                   className="w-full pl-10 pr-4 py-3 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all font-medium"
                 />
               </div>

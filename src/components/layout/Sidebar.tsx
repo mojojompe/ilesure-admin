@@ -85,8 +85,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             A
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-white text-sm font-semibold truncate">iléSure Admin</div>
-            <div className="text-white/40 text-xs truncate">admin@iléSure.com</div>
+            <div className="text-white text-sm font-semibold truncate">Super Admin</div>
+            <div className="text-white/40 text-xs truncate">admin@example.com</div>
           </div>
           <button onClick={handleLogout} className="text-white/40 hover:text-status-error transition-colors duration-150" title="Logout">
             <LogOut className="w-4 h-4" />

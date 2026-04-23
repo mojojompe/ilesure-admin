@@ -70,7 +70,7 @@ export function Settings() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Email Address</label>
-                  <input type="email" defaultValue="admin@iléSure.com" className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors" disabled />
+                  <input type="email" defaultValue="admin@example.com" className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors" disabled />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Role</label>

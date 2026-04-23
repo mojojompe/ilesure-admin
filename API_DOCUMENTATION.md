@@ -44,7 +44,7 @@ Admin login to access the dashboard.
     "admin": {
       "id": "adm_001",
       "name": "Super Admin",
-      "email": "admin@iléSure.com",
+      "email": "admin@example.com",
       "role": "system_administrator",
       "avatar": "https://cdn.iléSure.com/avatars/adm_001.jpg",
       "permissions": ["all"]
@@ -89,7 +89,7 @@ Get current authenticated admin details.
   "data": {
     "id": "adm_001",
     "name": "Super Admin",
-    "email": "admin@iléSure.com",
+    "email": "admin@example.com",
     "role": "system_administrator",
     "avatar": "https://cdn.iléSure.com/avatars/adm_001.jpg",
     "lastLogin": "2025-02-15T09:30:00Z",
