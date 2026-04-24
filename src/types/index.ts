@@ -123,6 +123,149 @@ export interface WaitlistEntry {
   joinedDate: string;
 }
 
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'super_admin' | 'support' | 'moderator';
+  avatar?: string;
+  lastLogin?: string;
+  permissions: string[];
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: { code: string; message: string };
+  message?: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage?: number;
+  };
+}
+
+export interface UsersListResponse {
+  users: Array<{
+    _id: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    role: string;
+    status: 'active' | 'suspended' | 'pending';
+    verificationStatus: VerificationStatus;
+    university?: string;
+    createdAt: string;
+  }>;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}
+
+export interface ListingsListResponse {
+  listings: Array<{
+    _id: string;
+    title: string;
+    propertyType: PropertyType;
+    landlordId: { fullName: string; email: string };
+    address: string;
+    areaCluster: string;
+    city: string;
+    annualRent: number;
+    status: ListingStatus;
+    createdAt: string;
+  }>;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}
+
+export interface VerificationsListResponse {
+  verifications: Array<{
+    _id: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    role: 'agent' | 'landlord' | 'company_admin';
+    verificationStatus: VerificationStatus;
+    createdAt: string;
+  }>;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}
+
+export interface CompaniesListResponse {
+  companies: Array<{
+    _id: string;
+    name: string;
+    tradingName?: string;
+    cacNumber: string;
+    tin?: string;
+    status: VerificationStatus;
+    director?: string;
+    email?: string;
+    phone?: string;
+    officeAddress?: string;
+    createdAt: string;
+  }>;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage?: number;
+  };
+  summary?: {
+    total: number;
+    verified: number;
+    pending: number;
+    rejected: number;
+  };
+}
+
+export interface WaitlistListResponse {
+  entries: WaitlistEntry[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+  };
+  summary?: {
+    total: number;
+    waiting: number;
+    notified: number;
+    matched: number;
+  };
+}
+
+export interface ActivityListResponse {
+  activities: ActivityItem[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}
+
+export interface ActivityItem {
+  id: string;
+  type: 'listing' | 'verification' | 'booking' | 'user' | 'waitlist';
+  title: string;
+  description: string;
+  timestamp: string;
+}
+
 export interface KpiMetric {
   label: string;
   value: string | number;
@@ -132,10 +275,38 @@ export interface KpiMetric {
   color: string;
 }
 
-export interface ActivityItem {
-  id: string;
-  type: 'listing' | 'verification' | 'booking' | 'user' | 'waitlist';
-  title: string;
-  description: string;
-  timestamp: string;
+export interface DashboardResponse {
+  kpis: {
+    totalListings: number;
+    activeUsers: number;
+    pendingApprovals: number;
+    totalRevenue: number;
+  };
+  recentListings: Listing[];
+  recentActivity: ActivityItem[];
+  quickStats: {
+    waitlistSize: number;
+    newUsersThisWeek: number;
+    bookingsThisMonth: number;
+    activeCompanies: number;
+  };
+}
+
+export interface SettingsResponse {
+  notifications: {
+    newListings: boolean;
+    verificationRequests: boolean;
+    newUserRegistrations: boolean;
+    criticalAlerts: boolean;
+  };
+  platform: {
+    maintenanceMode: boolean;
+    registrationEnabled: boolean;
+    waitlistEnabled: boolean;
+  };
+  limits: {
+    maxImagesPerListing: number;
+    maxListingsPerAgent: number;
+    waitlistMaxBudget: number;
+  };
 }

@@ -1,16 +1,76 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building2, Users, Home, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
-import { mockCompanies } from '../data/mockData';
 import { Company } from '../types';
 import { clsx } from 'clsx';
+import { adminApi } from '../api/admin';
 
 export function Companies() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [detailCompany, setDetailCompany] = useState<Company | null>(null);
+  const [detailCompany, setDetailCompany] = useState<any | null>(null);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await adminApi.companies.list();
+      const companiesData = response.data?.companies || response.data || [];
+      
+      if (response.success && companiesData.length > 0) {
+        const formatted = companiesData.map((c: any) => ({
+          id: c._id || c.id,
+          name: c.name,
+          tradingName: c.tradingName,
+          cacNumber: c.cacNumber,
+          tin: c.tin,
+          status: c.status,
+          tier: c.tier,
+          director: c.director,
+          email: c.email,
+          phone: c.phone,
+          officeAddress: c.officeAddress,
+          joinDate: c.joinDate || c.createdAt ? new Date(c.joinDate || c.createdAt).toISOString().split('T')[0] : '',
+          agentsCount: c.agentsCount ?? 0,
+          listingsCount: c.listingsCount ?? 0,
+        }));
+        setCompanies(formatted);
+      }
+    } catch (error) {
+      console.error('Failed to fetch companies:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (company: any) => {
+    try {
+      await adminApi.companies.approve(company.id);
+      await fetchCompanies();
+      setDetailCompany(null);
+    } catch (error) {
+      console.error('Failed to approve company:', error);
+    }
+  };
+
+  const handleSuspend = async (company: any) => {
+    try {
+      await adminApi.companies.suspend(company.id);
+      await fetchCompanies();
+      setDetailCompany(null);
+    } catch (error) {
+      console.error('Failed to suspend company:', error);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -18,10 +78,10 @@ export function Companies() {
       {/* ── Summary Row ─────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Companies', value: mockCompanies.length, icon: <Building2 className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Verified',        value: mockCompanies.filter(c => c.status === 'verified').length,  icon: <Building2 className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
-          { label: 'Pending',         value: mockCompanies.filter(c => c.status === 'pending').length,   icon: <Building2 className="w-5 h-5 text-mustard" />,        bg: 'bg-mustard/10' },
-          { label: 'Total Agents',    value: mockCompanies.reduce((s, c) => s + c.agentsCount, 0),       icon: <Users className="w-5 h-5 text-burnt-brown-light" />,   bg: 'bg-burnt-brown-pale' },
+          { label: 'Total Companies', value: companies.length, icon: <Building2 className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Verified',        value: companies.filter((c: any) => c.status === 'verified').length,  icon: <Building2 className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
+          { label: 'Pending',         value: companies.filter((c: any) => c.status === 'pending').length,   icon: <Building2 className="w-5 h-5 text-mustard" />,        bg: 'bg-mustard/10' },
+          { label: 'Total Agents',    value: companies.reduce((s: number, c: any) => s + (c.agentsCount || 0), 0),       icon: <Users className="w-5 h-5 text-burnt-brown-light" />,   bg: 'bg-burnt-brown-pale' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -56,7 +116,28 @@ export function Companies() {
               </tr>
             </thead>
             <tbody>
-              {mockCompanies.map(company => (
+              {loading ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-12">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
+                      <span className="text-text-tertiary">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-12">
+                    <p className="text-status-error">{error}</p>
+                  </td>
+                </tr>
+              ) : companies.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-12">
+                    <p className="text-text-tertiary">No companies found</p>
+                  </td>
+                </tr>
+              ) : companies.map(company => (
                 <>
                   <tr key={company.id} className="cursor-pointer" onClick={() => setExpandedId(expandedId === company.id ? null : company.id)}>
                     <td>
@@ -145,8 +226,8 @@ export function Companies() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetailCompany(null)}>Close</Button>
-            {detailCompany?.status === 'pending' && <Button variant="success" size="sm" onClick={() => { alert('Approve mocked'); setDetailCompany(null); }}>Approve Company</Button>}
-            <Button variant="danger" size="sm" onClick={() => { alert('Suspend mocked'); setDetailCompany(null); }}>Suspend Company</Button>
+            {detailCompany?.status === 'pending' && <Button variant="success" size="sm" onClick={() => detailCompany && handleApprove(detailCompany)}>Approve Company</Button>}
+            <Button variant="danger" size="sm" onClick={() => detailCompany && handleSuspend(detailCompany)}>Suspend Company</Button>
           </>
         }
       >

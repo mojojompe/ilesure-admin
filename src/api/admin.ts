@@ -42,6 +42,8 @@ export const adminApi = {
     list: (params?: string) => adminFetch(`/admin/v1/companies${params || ''}`),
     getById: (id: string) => adminFetch(`/admin/v1/companies/${id}`),
     create: (data: any) => adminFetch(`/admin/v1/companies`, { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => adminFetch(`/admin/v1/companies/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    suspend: (id: string) => adminFetch(`/admin/v1/companies/${id}/suspend`, { method: 'PUT' }),
     approve: (id: string) => adminFetch(`/admin/v1/companies/${id}/approve`, { method: 'PUT' }),
     reject: (id: string, reason: string) => adminFetch(`/admin/v1/companies/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) }),
     getAgents: (id: string) => adminFetch(`/admin/v1/companies/${id}/agents`),
@@ -51,6 +53,7 @@ export const adminApi = {
     list: (params?: string) => adminFetch(`/admin/v1/verifications${params || ''}`),
     getById: (id: string) => adminFetch(`/admin/v1/verifications/${id}`),
     updateChecklist: (id: string, checklist: any) => adminFetch(`/admin/v1/verifications/${id}/checklist`, { method: 'PUT', body: JSON.stringify({ checklist }) }),
+    updateNotes: (id: string, notes: string) => adminFetch(`/admin/v1/verifications/${id}/notes`, { method: 'PUT', body: JSON.stringify({ notes }) }),
     approve: (id: string) => adminFetch(`/admin/v1/verifications/${id}/approve`, { method: 'PUT' }),
     reject: (id: string, reason: string) => adminFetch(`/admin/v1/verifications/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) }),
     requestInfo: (id: string, message: string) => adminFetch(`/admin/v1/verifications/${id}/request-info`, { method: 'PUT', body: JSON.stringify({ message }) }),
@@ -77,6 +80,9 @@ export const adminApi = {
   },
   settings: {
     get: () => adminFetch(`/admin/v1/settings`),
+    updateProfile: (data: any) => adminFetch(`/admin/v1/settings/profile`, { method: 'PUT', body: JSON.stringify(data) }),
+    updatePassword: (data: any) => adminFetch(`/admin/v1/settings/password`, { method: 'PUT', body: JSON.stringify(data) }),
     updateNotifications: (data: any) => adminFetch(`/admin/v1/settings/notifications`, { method: 'PUT', body: JSON.stringify(data) }),
+    updatePlatform: (data: any) => adminFetch(`/admin/v1/settings/platform`, { method: 'PUT', body: JSON.stringify(data) }),
   },
 };

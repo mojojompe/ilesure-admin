@@ -1,27 +1,93 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ClipboardList, Users, MapPin, Download, Search, MessageSquare, Phone, Mail } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { mockWaitlist, corridorDemandData } from '../data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { clsx } from 'clsx';
+import { adminApi } from '../api/admin';
 
 export function WaitlistData() {
   const [search, setSearch] = useState('');
+  const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [corridorDemand, setCorridorDemand] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filtered = mockWaitlist.filter(e =>
+  useEffect(() => {
+    fetchWaitlist();
+  }, []);
+
+  const fetchWaitlist = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [waitlistRes, analyticsRes] = await Promise.all([
+        adminApi.waitlist.list(),
+        adminApi.analytics.waitlist(),
+      ]);
+      
+      if (waitlistRes.success && waitlistRes.data?.entries?.length > 0) {
+        const formatted = waitlistRes.data.entries.map((e: any) => ({
+          id: e._id || e.id,
+          name: e.fullName || e.name,
+          email: e.email,
+          phone: e.phone,
+          university: e.university,
+          budgetMin: e.budgetMin || 0,
+          budgetMax: e.budgetMax || 0,
+          preferredCorridors: e.preferredCorridors || [],
+          moveInDate: e.moveInDate || '',
+          needsRoommate: e.needsRoommate || false,
+          genderPreference: e.genderPreference || 'any',
+          contactChannel: e.contactPreference || e.contactChannel || 'email',
+          status: e.status,
+          joinedDate: e.joinedDate || e.createdAt ? new Date(e.joinedDate || e.createdAt).toISOString().split('T')[0] : '',
+        }));
+        setWaitlist(formatted);
+      }
+      
+      if (analyticsRes.success && analyticsRes.data?.corridorDemand?.length > 0) {
+        setCorridorDemand(analyticsRes.data.corridorDemand);
+      }
+    } catch (error) {
+      console.error('Failed to fetch waitlist:', error);
+      setError('Failed to load waitlist data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await adminApi.waitlist.export();
+      if (response) {
+        const blob = new Blob([response], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'waitlist.csv';
+        a.click();
+      }
+    } catch (error) {
+      console.error('Failed to export waitlist:', error);
+    }
+  };
+
+  const filtered = waitlist.filter(e =>
     e.name.toLowerCase().includes(search.toLowerCase()) ||
-    e.university.toLowerCase().includes(search.toLowerCase()) ||
-    e.preferredCorridors.some(c => c.toLowerCase().includes(search.toLowerCase()))
+    e.university?.toLowerCase().includes(search.toLowerCase()) ||
+    e.preferredCorridors.some((c: string) => c.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const totalBudgetMin = mockWaitlist.reduce((s, e) => s + e.budgetMin, 0);
-  const avgBudget = Math.round(totalBudgetMin / mockWaitlist.length);
-  const needsRoommate = mockWaitlist.filter(e => e.needsRoommate).length;
-  const topCorridor = [...corridorDemandData].sort((a, b) => b.demand - a.demand)[0];
+  const totalBudgetMin = waitlist.reduce((s, e) => s + (e.budgetMin || 0), 0);
+  const avgBudget = waitlist.length > 0 ? Math.round(totalBudgetMin / waitlist.length) : 0;
+  const needsRoommate = waitlist.filter(e => e.needsRoommate).length;
+  const topCorridor = corridorDemand && corridorDemand.length > 0 ? corridorDemand[0] : { corridor: 'N/A', demand: 0 };
 
-  const channelIcon = { whatsapp: <MessageSquare className="w-3.5 h-3.5 text-status-success" />, call: <Phone className="w-3.5 h-3.5 text-mustard" />, email: <Mail className="w-3.5 h-3.5 text-burnt-brown" /> };
+  const channelIcon: Record<string, React.ReactNode> = { whatsapp: <MessageSquare className="w-3.5 h-3.5 text-status-success" />, call: <Phone className="w-3.5 h-3.5 text-mustard" />, email: <Mail className="w-3.5 h-3.5 text-burnt-brown" /> };
+
+  const getChannelIcon = (channel: string) => channelIcon[channel] || <Mail className="w-3.5 h-3.5 text-burnt-brown" />;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -29,7 +95,7 @@ export function WaitlistData() {
       {/* ── Summary Insights ────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total on Waitlist',   value: mockWaitlist.length,         icon: <ClipboardList className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
+          { label: 'Total on Waitlist',   value: waitlist.length,         icon: <ClipboardList className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
           { label: 'Need Roommate',        value: needsRoommate,               icon: <Users className="w-5 h-5 text-mustard" />,               bg: 'bg-mustard/10' },
           { label: 'Avg. Min Budget',      value: `₦${(avgBudget / 1000).toFixed(0)}k`, icon: <ClipboardList className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
           { label: 'Top Corridor',         value: topCorridor.corridor,        icon: <MapPin className="w-5 h-5 text-status-success" />,        bg: 'bg-status-success/10' },
@@ -55,7 +121,7 @@ export function WaitlistData() {
         </div>
         <div className="p-6">
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={corridorDemandData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <BarChart data={corridorDemand} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F2EDE8" vertical={false} />
               <XAxis dataKey="corridor" tick={{ fontSize: 11, fill: '#A07860' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#A07860' }} axisLine={false} tickLine={false} />
@@ -64,7 +130,7 @@ export function WaitlistData() {
                 cursor={{ fill: 'rgba(212,130,26,0.06)' }}
               />
               <Bar dataKey="demand" name="Demand Entries" fill="#8B4513" radius={[6, 6, 0, 0]}>
-                {corridorDemandData.map((_, index) => (
+                {corridorDemand.map((_, index) => (
                   <rect key={index} fill={index === 0 ? '#D4821A' : '#8B4513'} />
                 ))}
               </Bar>
@@ -81,7 +147,7 @@ export function WaitlistData() {
             <MapPin className="w-4 h-4 text-mustard" /> Top Requested Corridors
           </h4>
           <div className="space-y-2.5">
-            {corridorDemandData.slice(0, 4).map((d, i) => (
+            {corridorDemand.slice(0, 4).map((d, i) => (
               <div key={d.corridor} className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-pill bg-burnt-brown text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
                 <div className="flex-1">
@@ -90,7 +156,7 @@ export function WaitlistData() {
                     <span className="text-xs font-bold text-burnt-brown">{d.demand}</span>
                   </div>
                   <div className="h-1.5 bg-clay-border-light rounded-pill overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-burnt-brown to-mustard rounded-pill" style={{ width: `${(d.demand / corridorDemandData[0].demand) * 100}%` }} />
+                    <div className="h-full bg-gradient-to-r from-burnt-brown to-mustard rounded-pill" style={{ width: `${(d.demand / corridorDemand[0].demand) * 100}%` }} />
                   </div>
                 </div>
               </div>
@@ -103,16 +169,16 @@ export function WaitlistData() {
           <h4 className="font-bold text-text-primary text-sm mb-3">Budget Distribution</h4>
           <div className="space-y-2">
             {[
-              { label: '< ₦200k',     count: mockWaitlist.filter(e => e.budgetMax < 200000).length },
-              { label: '₦200–350k',   count: mockWaitlist.filter(e => e.budgetMin >= 200000 && e.budgetMax <= 350000).length },
-              { label: '₦350–500k',   count: mockWaitlist.filter(e => e.budgetMin >= 350000 && e.budgetMax <= 500000).length },
-              { label: '> ₦500k',     count: mockWaitlist.filter(e => e.budgetMin > 500000).length },
+              { label: '< ₦200k',     count: waitlist.filter(e => e.budgetMax < 200000).length },
+              { label: '₦200–350k',   count: waitlist.filter(e => e.budgetMin >= 200000 && e.budgetMax <= 350000).length },
+              { label: '₦350–500k',   count: waitlist.filter(e => e.budgetMin >= 350000 && e.budgetMax <= 500000).length },
+              { label: '> ₦500k',     count: waitlist.filter(e => e.budgetMin > 500000).length },
             ].map(({ label, count }) => (
               <div key={label} className="flex items-center justify-between">
                 <span className="text-xs text-text-secondary">{label}</span>
                 <div className="flex items-center gap-2">
                   <div className="w-16 h-1.5 bg-clay-border-light rounded-pill overflow-hidden">
-                    <div className="h-full bg-mustard rounded-pill" style={{ width: `${(count / mockWaitlist.length) * 100}%` }} />
+                    <div className="h-full bg-mustard rounded-pill" style={{ width: `${(count / waitlist.length) * 100}%` }} />
                   </div>
                   <span className="text-xs font-bold text-text-primary w-4 text-right">{count}</span>
                 </div>
@@ -126,8 +192,8 @@ export function WaitlistData() {
           <h4 className="font-bold text-text-primary text-sm mb-3">Preferred Contact</h4>
           <div className="space-y-3">
             {(['whatsapp', 'email', 'call'] as const).map(ch => {
-              const count = mockWaitlist.filter(e => e.contactChannel === ch).length;
-              const pct = Math.round((count / mockWaitlist.length) * 100);
+              const count = waitlist.filter(e => e.contactChannel === ch).length;
+              const pct = waitlist.length > 0 ? Math.round((count / waitlist.length) * 100) : 0;
               return (
                 <div key={ch} className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-clay-sm bg-clay-border-light flex items-center justify-center flex-shrink-0">
@@ -196,7 +262,7 @@ export function WaitlistData() {
                   <td><span className="text-sm text-burnt-brown font-semibold">₦{(entry.budgetMin / 1000).toFixed(0)}k–{(entry.budgetMax / 1000).toFixed(0)}k</span></td>
                   <td>
                     <div className="flex flex-wrap gap-1">
-                      {entry.preferredCorridors.map(c => (
+                      {entry.preferredCorridors.map((c: string) => (
                         <span key={c} className="text-[10px] bg-burnt-brown-pale text-burnt-brown px-2 py-0.5 rounded-pill font-semibold">{c}</span>
                       ))}
                     </div>
@@ -209,7 +275,7 @@ export function WaitlistData() {
                   </td>
                   <td>
                     <div className="flex items-center gap-1 text-xs text-text-secondary">
-                      {channelIcon[entry.contactChannel]}
+                      {getChannelIcon(entry.contactChannel)}
                       <span className="capitalize">{entry.contactChannel === 'whatsapp' ? 'WhatsApp' : entry.contactChannel}</span>
                     </div>
                   </td>
@@ -221,7 +287,7 @@ export function WaitlistData() {
           </table>
         </div>
         <div className="flex items-center justify-between px-5 py-3 border-t border-clay-border bg-off-white rounded-b-clay">
-          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {mockWaitlist.length} entries</p>
+          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {waitlist.length} entries</p>
           <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => alert('Export All to CSV mocked')}>Export All to CSV</Button>
         </div>
       </ClayCard>

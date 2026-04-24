@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Users as UsersIcon, GraduationCap, Home, Building2, UserX, UserCheck, Eye } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
-import { mockUsers } from '../data/mockData';
 import { User } from '../types';
 import { clsx } from 'clsx';
+import { adminApi } from '../api/admin';
 
 type TabKey = 'all' | 'tenant' | 'agent_landlord' | 'company';
 
@@ -27,8 +27,60 @@ export function Users() {
   const [search, setSearch] = useState('');
   const [detailUser, setDetailUser] = useState<User | null>(null);
   const [suspendConfirm, setSuspendConfirm] = useState<User | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = mockUsers.filter(u => {
+  useEffect(() => {
+    fetchUsers();
+  }, [tab]);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (tab === 'tenant') params.set('role', 'student');
+      else if (tab === 'agent_landlord') params.set('role', 'agent,landlord');
+      else if (tab === 'company') params.set('role', 'company_admin');
+
+      const response = await adminApi.users.list(`?${params.toString()}`);
+      if (response.success && response.data?.users) {
+        const formattedUsers = response.data.users.map((u: any) => ({
+          id: u._id || u.id,
+          name: u.fullName || u.name || '',
+          email: u.email,
+          phone: u.phone || '',
+          role: u.role === 'student' ? 'tenant' : u.role,
+          status: u.status,
+          verificationStatus: u.verificationStatus,
+          university: u.university || '',
+          joinDate: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '',
+          listings: u.listings ?? 0,
+          bookings: u.bookings ?? 0,
+        }));
+        setUsers(formattedUsers);
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSuspend = async (user: User) => {
+    try {
+      if (user.status === 'suspended') {
+        await adminApi.users.unsuspend(user.id);
+      } else {
+        await adminApi.users.suspend(user.id);
+      }
+      await fetchUsers();
+      setSuspendConfirm(null);
+    } catch (error) {
+      console.error('Failed to update user status:', error);
+    }
+  };
+
+  const filtered = users.filter(u => {
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase());
     const matchTab = tab === 'all' ? true
@@ -39,10 +91,10 @@ export function Users() {
   });
 
   const tabs: { key: TabKey; label: string; icon: React.ReactNode; count: number }[] = [
-    { key: 'all',           label: 'All Users',      icon: <UsersIcon className="w-3.5 h-3.5" />,     count: mockUsers.length },
-    { key: 'tenant',        label: 'Tenants',        icon: <GraduationCap className="w-3.5 h-3.5" />, count: mockUsers.filter(u => u.role === 'tenant').length },
-    { key: 'agent_landlord',label: 'Agents',         icon: <Home className="w-3.5 h-3.5" />,          count: mockUsers.filter(u => u.role === 'agent' || u.role === 'landlord').length },
-    { key: 'company',       label: 'Company Admins', icon: <Building2 className="w-3.5 h-3.5" />,     count: mockUsers.filter(u => u.role === 'company_admin').length },
+    { key: 'all',           label: 'All Users',      icon: <UsersIcon className="w-3.5 h-3.5" />,     count: users.length },
+    { key: 'tenant',        label: 'Tenants',        icon: <GraduationCap className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'tenant').length },
+    { key: 'agent_landlord',label: 'Agents',         icon: <Home className="w-3.5 h-3.5" />,          count: users.filter(u => u.role === 'agent' || u.role === 'landlord').length },
+    { key: 'company',       label: 'Company Admins', icon: <Building2 className="w-3.5 h-3.5" />,     count: users.filter(u => u.role === 'company_admin').length },
   ];
 
   return (
@@ -51,10 +103,10 @@ export function Users() {
       {/* ── Summary Cards ───────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Users',   value: mockUsers.length,                                        icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
-          { label: 'Tenants',       value: mockUsers.filter(u => u.role === 'tenant').length,       icon: <GraduationCap className="w-5 h-5 text-mustard" />,    bg: 'bg-mustard/10' },
-          { label: 'Agents',        value: mockUsers.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Suspended',     value: mockUsers.filter(u => u.status === 'suspended').length,  icon: <UserX className="w-5 h-5 text-status-error" />,       bg: 'bg-status-error/10' },
+          { label: 'Total Users',   value: users.length,                                        icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
+          { label: 'Tenants',       value: users.filter(u => u.role === 'tenant').length,       icon: <GraduationCap className="w-5 h-5 text-mustard" />,    bg: 'bg-mustard/10' },
+          { label: 'Agents',        value: users.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Suspended',     value: users.filter(u => u.status === 'suspended').length,  icon: <UserX className="w-5 h-5 text-status-error" />,       bg: 'bg-status-error/10' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -119,7 +171,22 @@ export function Users() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(user => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
+                      <span className="text-text-tertiary">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12">
+                    <p className="text-text-tertiary">No users found</p>
+                  </td>
+                </tr>
+              ) : filtered.map(user => (
                 <tr key={user.id}>
                   <td>
                     <div className="flex items-center gap-3">
@@ -178,7 +245,7 @@ export function Users() {
           </table>
         </div>
         <div className="px-5 py-3 border-t border-clay-border bg-off-white rounded-b-clay">
-          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {mockUsers.length} users</p>
+          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {users.length} users</p>
         </div>
       </ClayCard>
 
@@ -233,7 +300,7 @@ export function Users() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setSuspendConfirm(null)}>Cancel</Button>
-            <Button variant={suspendConfirm?.status === 'suspended' ? 'success' : 'danger'} size="sm" onClick={() => setSuspendConfirm(null)}>
+            <Button variant={suspendConfirm?.status === 'suspended' ? 'success' : 'danger'} size="sm" onClick={() => suspendConfirm && handleSuspend(suspendConfirm)}>
               {suspendConfirm?.status === 'suspended' ? 'Unsuspend User' : 'Suspend User'}
             </Button>
           </>
