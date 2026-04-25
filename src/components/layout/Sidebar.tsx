@@ -101,7 +101,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-clay-md p-6 max-w-sm w-full shadow-clay-lg">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-clay-lg">
             <div className="text-center mb-6">
               <div className="w-14 h-14 rounded-full bg-burnt-brown-pale flex items-center justify-center mx-auto mb-4">
                 <LogOut className="w-7 h-7 text-burnt-brown" />
