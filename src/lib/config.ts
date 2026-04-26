@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ilesure-backend.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.ilesure.com';
 
 export const API_ENDPOINTS = {
   auth: {
