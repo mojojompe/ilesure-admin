@@ -5,10 +5,15 @@ import { Listings } from './pages/Listings';
 import { VerificationQueue } from './pages/VerificationQueue';
 import { Users } from './pages/Users';
 import { Companies } from './pages/Companies';
+import { Agents } from './pages/Agents';
+import { Bookings } from './pages/Bookings';
+import { Payments } from './pages/Payments';
+import { Reports } from './pages/Reports';
 import { WaitlistData } from './pages/WaitlistData';
 import { Analytics } from './pages/Analytics';
 import { Login } from './pages/Login';
 import { Settings } from './pages/Settings';
+import { NotFound } from './pages/NotFound';
 
 // Auth Guard Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -34,11 +39,15 @@ export default function App() {
           <Route path="listings" element={<Listings />} />
           <Route path="verification" element={<VerificationQueue />} />
           <Route path="users" element={<Users />} />
+          <Route path="agents" element={<Agents />} />
           <Route path="companies" element={<Companies />} />
+          <Route path="bookings" element={<Bookings />} />
+          <Route path="payments" element={<Payments />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="waitlist" element={<WaitlistData />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

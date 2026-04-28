@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, ShieldCheck, Users, Briefcase,
   ClipboardList, BarChart3, LogOut, Settings,
+  UserCheck, Calendar, CreditCard, Flag,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -11,7 +12,11 @@ const navItems = [
   { path: '/listings', label: 'Listings', icon: Building2 },
   { path: '/verification', label: 'Verification Queue', icon: ShieldCheck },
   { path: '/users', label: 'Users', icon: Users },
+  { path: '/agents', label: 'Agents', icon: UserCheck },
   { path: '/companies', label: 'Companies', icon: Briefcase },
+  { path: '/bookings', label: 'Bookings', icon: Calendar },
+  { path: '/payments', label: 'Payments', icon: CreditCard },
+  { path: '/reports', label: 'Reports', icon: Flag },
   { path: '/waitlist', label: 'Waitlist Data', icon: ClipboardList },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
