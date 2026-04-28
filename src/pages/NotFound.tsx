@@ -1,14 +1,12 @@
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export function NotFound() {
   return (
     <div className="min-h-screen bg-off-white flex items-center justify-center px-4">
       <div className="text-center max-w-md">
-        <motion.div
+        <div
           className="mx-auto mb-8 w-64 h-64"
-          animate={{ y: [0, -16, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ animation: 'notfound-float 4s ease-in-out infinite' }}
         >
           <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="120" cy="210" rx="70" ry="10" fill="#E5D6C8" opacity="0.5" />
@@ -26,16 +24,17 @@ export function NotFound() {
             <text x="30" y="90" fontSize="22" fill="#C9962A" opacity="0.7">?</text>
             <text x="185" y="80" fontSize="18" fill="#8B4513" opacity="0.5">?</text>
           </svg>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        </div>
+        <div>
           <p className="text-8xl font-black text-burnt-brown mb-2">404</p>
           <h1 className="text-2xl font-bold text-text-primary mb-3">Page Not Found</h1>
           <p className="text-text-tertiary mb-8">This admin page doesn't exist. Let's head back to the dashboard.</p>
           <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-burnt-brown text-white rounded-pill font-semibold shadow-clay hover:bg-burnt-brown-dark transition-colors">
             ← Back to Dashboard
           </Link>
-        </motion.div>
+        </div>
       </div>
+      <style>{`@keyframes notfound-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }`}</style>
     </div>
   );
 }

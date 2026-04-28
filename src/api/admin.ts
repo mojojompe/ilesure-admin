@@ -85,4 +85,21 @@ export const adminApi = {
     updateNotifications: (data: any) => adminFetch(`/admin/v1/settings/notifications`, { method: 'PUT', body: JSON.stringify(data) }),
     updatePlatform: (data: any) => adminFetch(`/admin/v1/settings/platform`, { method: 'PUT', body: JSON.stringify(data) }),
   },
-};
+  agents: {
+    list: (params?: Record<string, any>) => adminFetch(`/admin/v1/agents${params ? '?' + new URLSearchParams(params).toString() : ''}`),
+    suspend: (id: string) => adminFetch(`/admin/v1/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'suspended' }) }),
+    activate: (id: string) => adminFetch(`/admin/v1/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'active' }) }),
+  },
+  bookings: {
+    list: (params?: Record<string, any>) => adminFetch(`/admin/v1/bookings${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
+    resolve: (id: string, action: string) => adminFetch(`/admin/v1/bookings/${id}/resolve`, { method: 'PATCH', body: JSON.stringify({ action }) }),
+  },
+  payments: {
+    list: (params?: Record<string, any>) => adminFetch(`/admin/v1/payments${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
+    markProcessed: (id: string) => adminFetch(`/admin/v1/payments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'processed' }) }),
+  },
+  reports: {
+    list: (params?: Record<string, any>) => adminFetch(`/admin/v1/reports${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
+    action: (id: string, action: string) => adminFetch(`/admin/v1/reports/${id}/action`, { method: 'PATCH', body: JSON.stringify({ action }) }),
+  },
+};
