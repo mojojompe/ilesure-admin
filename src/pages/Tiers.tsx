@@ -21,7 +21,7 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/admin/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.ilesure.com/admin/v1';
 
 interface Tier {
   _id: string;
