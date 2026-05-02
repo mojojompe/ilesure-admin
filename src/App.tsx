@@ -11,7 +11,7 @@ import { Payments } from './pages/Payments';
 import { Reports } from './pages/Reports';
 import { WaitlistData } from './pages/WaitlistData';
 import { Analytics } from './pages/Analytics';
-import { Tiers } from './pages/Tiers';
+import Tiers from './pages/Tiers';
 import { Login } from './pages/Login';
 import { Settings } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
