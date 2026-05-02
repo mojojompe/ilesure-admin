@@ -19,6 +19,7 @@ const navItems = [
   { path: '/reports', label: 'Reports', icon: Flag },
   { path: '/waitlist', label: 'Waitlist Data', icon: ClipboardList },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { path: '/tiers', label: 'Tier Management', icon: BarChart3 },
 ];
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {

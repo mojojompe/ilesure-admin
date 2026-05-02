@@ -11,6 +11,7 @@ import { Payments } from './pages/Payments';
 import { Reports } from './pages/Reports';
 import { WaitlistData } from './pages/WaitlistData';
 import { Analytics } from './pages/Analytics';
+import { Tiers } from './pages/Tiers';
 import { Login } from './pages/Login';
 import { Settings } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="waitlist" element={<WaitlistData />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="tiers" element={<Tiers />} />
           <Route path="settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Route>
