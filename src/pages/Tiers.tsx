@@ -237,7 +237,7 @@ const Tiers: React.FC = () => {
       <Card
         title={<Typography.Title level={3} style={{ margin: 0 }}>Tier Management</Typography.Title>}
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
+          <Button type="primary" style={{ backgroundColor: '#8B4513', borderRadius: '5px', color: 'white' }} icon={<PlusOutlined />} onClick={() => openModal()}>
             Add New Tier
           </Button>
         }
@@ -332,12 +332,13 @@ const Tiers: React.FC = () => {
           <Form.Item
             name="popular"
             valuePropName="checked"
-          >
+            className="w-fit "
+          >           
             <Switch checkedChildren="Popular" unCheckedChildren="Not Popular" />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block size="large">
+            <Button style={{ backgroundColor: '#8B4513' }} type="primary" htmlType="submit" block size="large">
               {editingTier ? 'Update Tier' : 'Create Tier'}
             </Button>
           </Form.Item>
