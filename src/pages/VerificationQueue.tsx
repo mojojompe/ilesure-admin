@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, XCircle, AlertCircle, Clock, ChevronRight, User, Building2 } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, AlertCircle, Clock, ChevronRight, User, Building2, Loader } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
-import { mockVerifications } from '../data/mockData';
 import { VerificationRequest } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
@@ -33,7 +32,7 @@ const companyExtra = [
 
 export function VerificationQueue() {
   const [selected, setSelected] = useState<VerificationRequest | null>(null);
-  const [verifications, setVerifications] = useState<any[]>(mockVerifications);
+  const [verifications, setVerifications] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [adminNote, setAdminNote] = useState('');
   const [activeDoc, setActiveDoc] = useState<string>('nin');

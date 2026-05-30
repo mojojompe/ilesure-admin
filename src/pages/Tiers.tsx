@@ -20,8 +20,9 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
+import API_BASE_URL from '../lib/config';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://api.ilesure.com/admin/v1';
+const API_URL = `${API_BASE_URL}/admin/v1`;
 
 interface Tier {
   _id: string;

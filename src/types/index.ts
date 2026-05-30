@@ -1,11 +1,11 @@
 // ── iléSure Admin — TypeScript Types ──────────────────────────────
 
-export type UserRole = 'tenant' | 'agent' | 'landlord' | 'company_admin' | 'sub_agent';
+export type UserRole = 'student' | 'landlord' | 'agent' | 'company' | 'company_admin' | 'sub_agent' | 'admin';
 export type VerificationStatus = 'pending' | 'verified' | 'rejected' | 'more_info';
 export type ListingStatus = 'pending_approval' | 'active' | 'needs_roommate' | 'fully_booked' | 'archived' | 'rejected';
 export type TierName = 'free' | 'basic' | 'premium' | 'enterprise';
 export type PropertyType = 'self_con' | '1_bed' | '2_bed' | '3_bed' | 'mini_flat' | 'hostel_room' | 'shared_apartment' | 'shortlet';
-export type WaitlistStatus = 'waiting' | 'notified' | 'matched';
+export type WaitlistStatus = 'waiting' | 'converted' | 'expired';
 
 export interface User {
   id: string;
@@ -107,20 +107,23 @@ export interface VerificationRequest {
 }
 
 export interface WaitlistEntry {
-  id: string;
-  name: string;
+  _id: string;
+  userId?: string;
+  fullName: string;
   email: string;
   phone: string;
-  university: string;
+  university?: string;
   budgetMin: number;
   budgetMax: number;
-  preferredCorridors: string[];
+  preferredCorridor: string;
+  distancePreference: string;
   moveInDate: string;
-  needsRoommate: boolean;
-  genderPreference: 'any' | 'male' | 'female';
-  contactChannel: 'whatsapp' | 'email' | 'call';
+  roommateNeeded: boolean;
+  contactPreference: 'whatsapp' | 'email' | 'sms';
   status: WaitlistStatus;
-  joinedDate: string;
+  createdAt: string;
+  updatedAt?: string;
+  convertedAt?: string;
 }
 
 export interface AdminUser {
@@ -244,8 +247,8 @@ export interface WaitlistListResponse {
   summary?: {
     total: number;
     waiting: number;
-    notified: number;
-    matched: number;
+    converted: number;
+    expired: number;
   };
 }
 

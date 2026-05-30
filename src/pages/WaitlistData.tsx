@@ -30,19 +30,18 @@ export function WaitlistData() {
       if (waitlistRes.success && waitlistRes.data?.entries?.length > 0) {
         const formatted = waitlistRes.data.entries.map((e: any) => ({
           id: e._id || e.id,
-          name: e.fullName || e.name,
+          fullName: e.fullName,
           email: e.email,
           phone: e.phone,
           university: e.university,
           budgetMin: e.budgetMin || 0,
           budgetMax: e.budgetMax || 0,
-          preferredCorridors: e.preferredCorridors || [],
+          preferredCorridor: e.preferredCorridor || '',
           moveInDate: e.moveInDate || '',
-          needsRoommate: e.needsRoommate || false,
-          genderPreference: e.genderPreference || 'any',
-          contactChannel: e.contactPreference || e.contactChannel || 'email',
+          roommateNeeded: e.roommateNeeded || false,
+          contactPreference: e.contactPreference || 'email',
           status: e.status,
-          joinedDate: e.joinedDate || e.createdAt ? new Date(e.joinedDate || e.createdAt).toISOString().split('T')[0] : '',
+          createdAt: e.createdAt ? new Date(e.createdAt).toISOString().split('T')[0] : '',
         }));
         setWaitlist(formatted);
       }
@@ -75,17 +74,17 @@ export function WaitlistData() {
   };
 
   const filtered = waitlist.filter(e =>
-    e.name.toLowerCase().includes(search.toLowerCase()) ||
+    e.fullName.toLowerCase().includes(search.toLowerCase()) ||
     e.university?.toLowerCase().includes(search.toLowerCase()) ||
-    e.preferredCorridors.some((c: string) => c.toLowerCase().includes(search.toLowerCase()))
+    e.preferredCorridor.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalBudgetMin = waitlist.reduce((s, e) => s + (e.budgetMin || 0), 0);
   const avgBudget = waitlist.length > 0 ? Math.round(totalBudgetMin / waitlist.length) : 0;
-  const needsRoommate = waitlist.filter(e => e.needsRoommate).length;
+  const needsRoommate = waitlist.filter(e => e.roommateNeeded).length;
   const topCorridor = corridorDemand && corridorDemand.length > 0 ? corridorDemand[0] : { corridor: 'N/A', demand: 0 };
 
-  const channelIcon: Record<string, React.ReactNode> = { whatsapp: <MessageSquare className="w-3.5 h-3.5 text-status-success" />, call: <Phone className="w-3.5 h-3.5 text-mustard" />, email: <Mail className="w-3.5 h-3.5 text-burnt-brown" /> };
+  const channelIcon: Record<string, React.ReactNode> = { whatsapp: <MessageSquare className="w-3.5 h-3.5 text-status-success" />, sms: <Phone className="w-3.5 h-3.5 text-mustard" />, email: <Mail className="w-3.5 h-3.5 text-burnt-brown" /> };
 
   const getChannelIcon = (channel: string) => channelIcon[channel] || <Mail className="w-3.5 h-3.5 text-burnt-brown" />;
 
@@ -191,8 +190,8 @@ export function WaitlistData() {
         <ClayCard padding="md">
           <h4 className="font-bold text-text-primary text-sm mb-3">Preferred Contact</h4>
           <div className="space-y-3">
-            {(['whatsapp', 'email', 'call'] as const).map(ch => {
-              const count = waitlist.filter(e => e.contactChannel === ch).length;
+            {(['whatsapp', 'email', 'sms'] as const).map(ch => {
+              const count = waitlist.filter(e => e.contactPreference === ch).length;
               const pct = waitlist.length > 0 ? Math.round((count / waitlist.length) * 100) : 0;
               return (
                 <div key={ch} className="flex items-center gap-2.5">
@@ -201,7 +200,7 @@ export function WaitlistData() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-xs font-medium text-text-primary capitalize">{ch === 'whatsapp' ? 'WhatsApp' : ch}</span>
+                      <span className="text-xs font-medium text-text-primary capitalize">{ch === 'whatsapp' ? 'WhatsApp' : ch === 'sms' ? 'SMS' : ch}</span>
                       <span className="text-xs font-bold text-burnt-brown">{pct}%</span>
                     </div>
                     <div className="h-1.5 bg-clay-border-light rounded-pill overflow-hidden">
@@ -250,10 +249,10 @@ export function WaitlistData() {
                   <td>
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-pill bg-mustard/15 flex items-center justify-center text-mustard text-xs font-bold flex-shrink-0">
-                        {entry.name.charAt(0)}
+                        {entry.fullName.charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-text-primary">{entry.name}</p>
+                        <p className="text-sm font-semibold text-text-primary">{entry.fullName}</p>
                         <p className="text-[11px] text-text-tertiary">{entry.phone}</p>
                       </div>
                     </div>
@@ -261,26 +260,22 @@ export function WaitlistData() {
                   <td><span className="text-sm text-text-secondary truncate max-w-[140px] block">{entry.university}</span></td>
                   <td><span className="text-sm text-burnt-brown font-semibold">₦{(entry.budgetMin / 1000).toFixed(0)}k–{(entry.budgetMax / 1000).toFixed(0)}k</span></td>
                   <td>
-                    <div className="flex flex-wrap gap-1">
-                      {entry.preferredCorridors.map((c: string) => (
-                        <span key={c} className="text-[10px] bg-burnt-brown-pale text-burnt-brown px-2 py-0.5 rounded-pill font-semibold">{c}</span>
-                      ))}
-                    </div>
+                    <span className="text-[10px] bg-burnt-brown-pale text-burnt-brown px-2 py-0.5 rounded-pill font-semibold">{entry.preferredCorridor}</span>
                   </td>
                   <td><span className="text-xs text-text-secondary">{entry.moveInDate}</span></td>
                   <td>
-                    <span className={clsx('text-xs font-semibold rounded-pill px-2 py-0.5', entry.needsRoommate ? 'bg-mustard/10 text-mustard' : 'bg-clay-border text-text-tertiary')}>
-                      {entry.needsRoommate ? 'Yes' : 'No'}
+                    <span className={clsx('text-xs font-semibold rounded-pill px-2 py-0.5', entry.roommateNeeded ? 'bg-mustard/10 text-mustard' : 'bg-clay-border text-text-tertiary')}>
+                      {entry.roommateNeeded ? 'Yes' : 'No'}
                     </span>
                   </td>
                   <td>
                     <div className="flex items-center gap-1 text-xs text-text-secondary">
-                      {getChannelIcon(entry.contactChannel)}
-                      <span className="capitalize">{entry.contactChannel === 'whatsapp' ? 'WhatsApp' : entry.contactChannel}</span>
+                      {getChannelIcon(entry.contactPreference)}
+                      <span className="capitalize">{entry.contactPreference === 'whatsapp' ? 'WhatsApp' : entry.contactPreference === 'sms' ? 'SMS' : entry.contactPreference}</span>
                     </div>
                   </td>
                   <td><StatusBadge status={entry.status as any} /></td>
-                  <td><span className="text-xs text-text-tertiary">{entry.joinedDate}</span></td>
+                  <td><span className="text-xs text-text-tertiary">{entry.createdAt}</span></td>
                 </tr>
               ))}
             </tbody>
