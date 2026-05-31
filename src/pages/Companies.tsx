@@ -97,7 +97,13 @@ export function Companies() {
       <ClayCard padding="none">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm">Registered Companies</h3>
-          <Button variant="primary" size="sm" onClick={() => alert('Add Company mocked')}>+ Add Company</Button>
+          <Button variant="primary" size="sm" onClick={async () => {
+            const name = prompt('Enter new company name:');
+            if (name) {
+              await adminApi.companies.create({ name });
+              fetchCompanies();
+            }
+          }}>+ Add Company</Button>
         </div>
 
         <div className="overflow-x-auto">
@@ -190,7 +196,13 @@ export function Companies() {
                       <td colSpan={9} className="px-6 py-4">
                         <div className="mb-3 flex items-center justify-between">
                           <p className="text-xs font-bold text-text-secondary uppercase tracking-wide">Sub-Agents under {company.name}</p>
-                          <Button variant="secondary" size="sm" onClick={() => alert('Invite Agent mocked')}>+ Invite Agent</Button>
+                          <Button variant="secondary" size="sm" onClick={async () => {
+                            const email = prompt(`Enter email to invite agent to ${company.name}:`);
+                            if (email) {
+                              await adminApi.companies.inviteAgent(company.id, email);
+                              alert('Agent invited successfully!');
+                            }
+                          }}>+ Invite Agent</Button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           {Array.from({ length: Math.min(company.agentsCount, 4) }, (_, i) => (

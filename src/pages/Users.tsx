@@ -256,7 +256,7 @@ export function Users() {
             <Button variant="secondary" size="sm" onClick={() => setDetailUser(null)}>Close</Button>
             {detailUser?.status !== 'suspended'
               ? <Button variant="danger" size="sm" onClick={() => { setSuspendConfirm(detailUser); setDetailUser(null); }}>Suspend User</Button>
-              : <Button variant="success" size="sm" onClick={() => alert('Unsuspend mocked')}>Unsuspend</Button>
+              : <Button variant="success" size="sm" onClick={() => { setSuspendConfirm(detailUser); setDetailUser(null); }}>Unsuspend User</Button>
             }
           </>
         }

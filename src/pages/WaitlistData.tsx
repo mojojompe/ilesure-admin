@@ -116,7 +116,7 @@ export function WaitlistData() {
             <h3 className="font-bold text-text-primary text-base">Demand by Corridor</h3>
             <p className="text-xs text-text-tertiary mt-0.5">Total waitlist entries per area cluster</p>
           </div>
-          <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => alert('Export CSV mocked')}>Export CSV</Button>
+          <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={handleExport}>Export CSV</Button>
         </div>
         <div className="p-6">
           <ResponsiveContainer width="100%" height={200}>
@@ -283,7 +283,7 @@ export function WaitlistData() {
         </div>
         <div className="flex items-center justify-between px-5 py-3 border-t border-clay-border bg-off-white rounded-b-clay">
           <p className="text-xs text-text-tertiary">Showing {filtered.length} of {waitlist.length} entries</p>
-          <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => alert('Export All to CSV mocked')}>Export All to CSV</Button>
+          <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={handleExport}>Export All to CSV</Button>
         </div>
       </ClayCard>
     </div>

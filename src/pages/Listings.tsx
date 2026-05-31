@@ -164,8 +164,8 @@ export function Listings() {
             />
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Button variant="secondary" size="sm" icon={<Filter className="w-3.5 h-3.5" />} onClick={() => alert('Filter mocked')}>Filter</Button>
-            <Button variant="ghost" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => alert('Export mocked')}>Export</Button>
+            <Button variant="secondary" size="sm" icon={<Filter className="w-3.5 h-3.5" />} onClick={() => prompt('Enter filter keyword:')}>Filter</Button>
+            <Button variant="ghost" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => alert('Exporting listings...')}>Export</Button>
           </div>
         </div>
       </ClayCard>

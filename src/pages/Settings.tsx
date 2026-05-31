@@ -9,12 +9,18 @@ export function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
   const [adminData, setAdminData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [notifications, setNotifications] = useState({
     newListings: true,
     verificationRequests: true,
     newUserRegistrations: false,
     criticalAlerts: true,
   });
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
   const [platform, setPlatform] = useState<any>({});
   const [limits, setLimits] = useState<any>({});
 
@@ -56,7 +62,7 @@ export function Settings() {
   const handleProfileSave = async () => {
     try {
       await adminApi.settings.updateProfile({ name: profileName });
-      alert('Profile saved successfully');
+      showToast('Profile saved successfully');
     } catch (error) {
       console.error('Failed to save profile:', error);
     }
@@ -97,7 +103,7 @@ export function Settings() {
   const saveSettings = async () => {
     try {
       await adminApi.settings.updateNotifications({ notifications });
-      alert('Settings saved successfully');
+      showToast('Notification preferences saved!');
     } catch (error) {
       console.error('Failed to save settings:', error);
     }
@@ -112,6 +118,15 @@ export function Settings() {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+      {/* ── Toast notification ──────────────────────────── */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-clay shadow-clay-lg text-sm font-semibold animate-fade-in ${
+          toast.type === 'success' ? 'bg-status-success text-white' : 'bg-status-error text-white'
+        }`}>
+          {toast.type === 'success' ? '✓' : '✕'} {toast.message}
+        </div>
+      )}
+
       {/* ── Header ────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-8">
         <div className="w-12 h-12 rounded-clay bg-mustard/10 flex items-center justify-center flex-shrink-0 shadow-clay-sm">
@@ -156,7 +171,14 @@ export function Settings() {
                   {profileName?.charAt(0) || 'A'}
                 </div>
                 <div>
-                  <Button variant="secondary" size="sm" onClick={() => alert('Change Avatar mocked')}>Change Avatar</Button>
+                  <input type="file" id="avatarUpload" className="hidden" accept="image/*" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // In a real app, upload to server here. For now we just mock success.
+                      alert(`Avatar ${file.name} ready for upload!`);
+                    }
+                  }} />
+                  <Button variant="secondary" size="sm" onClick={() => document.getElementById('avatarUpload')?.click()}>Change Avatar</Button>
                   <p className="text-[11px] text-text-tertiary mt-2">JPG, GIF or PNG. 1MB max.</p>
                 </div>
               </div>
@@ -347,7 +369,7 @@ export function Settings() {
               <div className="flex justify-end pt-4 border-t border-clay-border">
                 <Button variant="primary" icon={<Save className="w-4 h-4" />} onClick={() => {
                   adminApi.settings.updatePlatform({ platform, limits });
-                  alert('Platform settings saved');
+                  showToast('Platform settings saved!');
                 }}>Save Settings</Button>
               </div>
             </ClayCard>

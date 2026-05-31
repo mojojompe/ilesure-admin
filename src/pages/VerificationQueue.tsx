@@ -214,8 +214,20 @@ export function VerificationQueue() {
                   <p className="text-xs text-text-tertiary mt-1">Submitted by {selected?.applicantName || 'N/A'}</p>
                 </div>
                 <div className="flex gap-2 flex-wrap justify-center">
-                  <Button variant="primary" size="sm" onClick={() => alert('View document mocked')}>View Full Document</Button>
-                  <Button variant="secondary" size="sm" onClick={() => alert('Download document mocked')}>Download</Button>
+                  <Button variant="primary" size="sm" onClick={() => {
+                    const docUrl = (selected?.documents as any)?.[activeDoc]?.url;
+                    if (docUrl) window.open(docUrl, '_blank');
+                    else alert('No document URL available');
+                  }}>View Full Document</Button>
+                  <Button variant="secondary" size="sm" onClick={() => {
+                    const docUrl = (selected?.documents as any)?.[activeDoc]?.url;
+                    if (docUrl) {
+                      const a = document.createElement('a');
+                      a.href = docUrl;
+                      a.download = `${activeDoc}.pdf`;
+                      a.click();
+                    }
+                  }}>Download</Button>
                 </div>
                 {/* Verification badge on doc */}
                 {(selected?.documents as any)?.[activeDoc]?.verified && (
