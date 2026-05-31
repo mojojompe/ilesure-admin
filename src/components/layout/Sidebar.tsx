@@ -96,7 +96,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-white text-sm font-semibold truncate">ileSure Admin</div>
-              <div className="text-white/40 text-xs truncate">Your Sure Home Near Campus</div>
+              <div className="text-white/40 text-xs truncate">Your Sure Home Anywhere</div>
             </div>
             <button onClick={() => setShowLogoutModal(true)} className="text-white/40 hover:text-status-error transition-colors duration-150" title="Logout">
               <LogOut className="w-4 h-4" />
