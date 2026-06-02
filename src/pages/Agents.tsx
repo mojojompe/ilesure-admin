@@ -167,6 +167,12 @@ export function Agents() {
                 { label: 'Tier', value: detail.tier },
                 { label: 'KYC Status', value: detail.isVerified ? 'Verified' : 'Pending' },
                 { label: 'Joined', value: detail.joinDate || detail.createdAt?.split('T')[0] || '—' },
+                { label: 'Bank Name', value: detail.bankName || '—' },
+                { label: 'Account Name', value: detail.accountName || '—' },
+                { label: 'Account Number', value: detail.accountNumber || '—' },
+                { label: 'Subaccount', value: detail.subaccountCode ? (
+                  <span className="flex items-center gap-1 text-status-success text-xs font-semibold">Active {(detail.subaccountCode || '').slice(-6)}</span>
+                ) : '—' },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">
                   <p className="text-[10px] text-text-tertiary font-semibold uppercase tracking-wide">{label}</p>

@@ -42,6 +42,10 @@ export function Companies() {
           joinDate: c.joinDate || c.createdAt ? new Date(c.joinDate || c.createdAt).toISOString().split('T')[0] : '',
           agentsCount: c.agentsCount ?? 0,
           listingsCount: c.listingsCount ?? 0,
+          bankName: c.bankName,
+          accountName: c.accountName,
+          accountNumber: c.accountNumber,
+          subaccountCode: c.subaccountCode,
         }));
         setCompanies(formatted);
       }
@@ -270,6 +274,12 @@ export function Companies() {
                 { label: 'Total Listings', value: String(detailCompany.listingsCount) },
                 { label: 'Date Joined',    value: detailCompany.joinDate },
                 { label: 'Tier',           value: detailCompany.tier.charAt(0).toUpperCase() + detailCompany.tier.slice(1) },
+                { label: 'Bank Name',      value: detailCompany.bankName || '—' },
+                { label: 'Account Name',   value: detailCompany.accountName || '—' },
+                { label: 'Account Number', value: detailCompany.accountNumber || '—' },
+                { label: 'Subaccount',     value: detailCompany.subaccountCode ? (
+                  <span className="flex items-center gap-1 text-status-success text-xs font-semibold">Active {(detailCompany.subaccountCode || '').slice(-6)}</span>
+                ) : '—' },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">
                   <p className="text-[10px] text-text-tertiary font-semibold uppercase tracking-wide">{label}</p>
