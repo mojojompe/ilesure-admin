@@ -102,4 +102,8 @@ export const adminApi = {
     list: (params?: Record<string, any>) => adminFetch(`/admin/v1/reports${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
     action: (id: string, action: string) => adminFetch(`/admin/v1/reports/${id}/action`, { method: 'PATCH', body: JSON.stringify({ action }) }),
   },
+  notifications: {
+    sendPush: (data: { title: string; body: string; type?: string; userIds?: string[]; roles?: string[]; data?: Record<string, any> }) =>
+      adminFetch('/admin/v1/notifications/push', { method: 'POST', body: JSON.stringify(data) }),
+  },
 };
