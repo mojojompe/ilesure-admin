@@ -117,7 +117,8 @@ export function Settings() {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto relative z-10">
+
       {/* ── Toast notification ──────────────────────────── */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-clay shadow-clay-lg text-sm font-semibold animate-fade-in ${
@@ -174,8 +175,23 @@ export function Settings() {
                   <input type="file" id="avatarUpload" className="hidden" accept="image/*" onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      // In a real app, upload to server here. For now we just mock success.
-                      alert(`Avatar ${file.name} ready for upload!`);
+                      const reader = new FileReader();
+                      reader.onloadend = async () => {
+                        try {
+                          const base64Avatar = reader.result as string;
+                          const res = await adminApi.settings.updateProfile({ name: profileName, avatar: base64Avatar });
+                          if (res.success && res.data?.profile) {
+                            alert('Avatar updated successfully!');
+                            window.location.reload();
+                          } else {
+                            alert('Failed to update avatar');
+                          }
+                        } catch (err) {
+                          console.error(err);
+                          alert('Failed to update avatar');
+                        }
+                      };
+                      reader.readAsDataURL(file);
                     }
                   }} />
                   <Button variant="secondary" size="sm" onClick={() => document.getElementById('avatarUpload')?.click()}>Change Avatar</Button>
@@ -375,6 +391,9 @@ export function Settings() {
             </ClayCard>
           )}
         </div>
+      </div>
+      <div className="mt-12 text-center pb-6">
+        <p className="text-sm font-semibold text-text-tertiary">Sponsored by Waltik Labs</p>
       </div>
     </div>
   );

@@ -10,6 +10,8 @@ import { adminApi } from '../api/admin';
 
 export function Companies() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [companyAgents, setCompanyAgents] = useState<Record<string, any[]>>({});
+  const [loadingAgents, setLoadingAgents] = useState<Record<string, boolean>>({});
   const [detailCompany, setDetailCompany] = useState<any | null>(null);
   const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,31 @@ export function Companies() {
       console.error('Failed to fetch companies:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCompanyAgents = async (companyId: string) => {
+    if (companyAgents[companyId]) return; // already fetched
+    
+    setLoadingAgents(prev => ({ ...prev, [companyId]: true }));
+    try {
+      const response = await adminApi.companies.getAgents(companyId);
+      if (response.success && response.data) {
+        setCompanyAgents(prev => ({ ...prev, [companyId]: response.data.agents || response.data }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch agents for company:', error);
+    } finally {
+      setLoadingAgents(prev => ({ ...prev, [companyId]: false }));
+    }
+  };
+
+  const handleExpand = (companyId: string) => {
+    if (expandedId === companyId) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(companyId);
+      fetchCompanyAgents(companyId);
     }
   };
 
@@ -149,7 +176,7 @@ export function Companies() {
                 </tr>
               ) : companies.map(company => (
                 <>
-                  <tr key={company.id} className="cursor-pointer" onClick={() => setExpandedId(expandedId === company.id ? null : company.id)}>
+                  <tr key={company.id} className="cursor-pointer" onClick={() => handleExpand(company.id)}>
                     <td>
                       <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-clay-sm bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white font-bold text-sm shadow-clay-sm flex-shrink-0">
@@ -187,14 +214,14 @@ export function Companies() {
                         <button onClick={() => setDetailCompany(company)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors" title="View">
                           <Eye className="w-3.5 h-3.5 text-text-secondary" />
                         </button>
-                        <button onClick={() => setExpandedId(expandedId === company.id ? null : company.id)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
+                        <button onClick={() => handleExpand(company.id)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
                           {expandedId === company.id ? <ChevronUp className="w-3.5 h-3.5 text-text-secondary" /> : <ChevronDown className="w-3.5 h-3.5 text-text-secondary" />}
                         </button>
                       </div>
                     </td>
                   </tr>
 
-                  {/* Expanded: sub-agents mock list */}
+                  {/* Expanded: sub-agents list */}
                   {expandedId === company.id && (
                     <tr key={`${company.id}-exp`} className="bg-mustard-pale/40">
                       <td colSpan={9} className="px-6 py-4">
@@ -205,28 +232,39 @@ export function Companies() {
                             if (email) {
                               await adminApi.companies.inviteAgent(company.id, email);
                               alert('Agent invited successfully!');
+                              fetchCompanyAgents(company.id); // Refresh agents
                             }
                           }}>+ Invite Agent</Button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          {Array.from({ length: Math.min(company.agentsCount, 4) }, (_, i) => (
-                            <div key={i} className="bg-white rounded-clay-sm border border-clay-border shadow-clay-sm p-3 flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-pill bg-burnt-brown-pale flex items-center justify-center text-burnt-brown font-bold text-xs flex-shrink-0">
-                                {String.fromCharCode(65 + i)}
+                        
+                        {loadingAgents[company.id] ? (
+                          <div className="flex items-center gap-2 py-4">
+                            <div className="w-4 h-4 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
+                            <span className="text-sm text-text-tertiary">Loading agents...</span>
+                          </div>
+                        ) : companyAgents[company.id] && companyAgents[company.id].length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {companyAgents[company.id].slice(0, 4).map((agent: any, i: number) => (
+                              <div key={agent._id || i} className="bg-white rounded-clay-sm border border-clay-border shadow-clay-sm p-3 flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-pill bg-burnt-brown-pale flex items-center justify-center text-burnt-brown font-bold text-xs flex-shrink-0">
+                                  {(agent.fullName || agent.email || 'A').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-text-primary">{agent.fullName || 'Unknown Agent'}</p>
+                                  <p className="text-xs text-text-tertiary truncate max-w-[150px]">{agent.email}</p>
+                                </div>
+                                <StatusBadge status={agent.status || 'verified'} showIcon={false} className="ml-auto text-[10px]" />
                               </div>
-                              <div>
-                                <p className="text-sm font-semibold text-text-primary">Agent {i + 1}</p>
-                                <p className="text-xs text-text-tertiary">agent{i + 1}@{company.tradingName?.toLowerCase() || 'company'}.ng</p>
+                            ))}
+                            {companyAgents[company.id].length > 4 && (
+                              <div className="bg-clay-border-light rounded-clay-sm border border-clay-border p-3 flex items-center justify-center text-xs text-text-tertiary font-medium">
+                                +{companyAgents[company.id].length - 4} more agents
                               </div>
-                              <StatusBadge status="verified" showIcon={false} className="ml-auto text-[10px]" />
-                            </div>
-                          ))}
-                          {company.agentsCount > 4 && (
-                            <div className="bg-clay-border-light rounded-clay-sm border border-clay-border p-3 flex items-center justify-center text-xs text-text-tertiary font-medium">
-                              +{company.agentsCount - 4} more agents
-                            </div>
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-text-tertiary py-2">No agents found for this company.</p>
+                        )}
                       </td>
                     </tr>
                   )}

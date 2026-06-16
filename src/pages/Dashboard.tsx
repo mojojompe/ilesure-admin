@@ -21,11 +21,24 @@ export function Dashboard() {
   const [recentListings, setRecentListings] = useState<any[]>([]);
   const [waitlistTrend, setWaitlistTrend] = useState<any[]>([]);
   const [revenue, setRevenue] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
+    fetchActivities();
   }, []);
+
+  const fetchActivities = async () => {
+    try {
+      const res = await adminApi.activity.list('?limit=5');
+      if (res.success && res.data?.activities) {
+        setActivities(res.data.activities);
+      }
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -236,10 +249,24 @@ export function Dashboard() {
               <span className="text-xs text-text-tertiary">Live</span>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-            <AlertCircle className="w-10 h-10 text-text-tertiary mb-3" />
-            <p className="text-sm text-text-tertiary">No recent activity</p>
-          </div>
+          {activities.length > 0 ? (
+            <div className="divide-y divide-clay-border-light max-h-[300px] overflow-y-auto">
+              {activities.map((act: any) => (
+                <div key={act.id} className="px-6 py-3.5 hover:bg-mustard-pale transition-colors duration-100">
+                  <p className="text-sm text-text-primary">{act.description}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs text-text-tertiary font-medium">{act.user}</p>
+                    <p className="text-[10px] text-text-tertiary">{new Date(act.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+              <AlertCircle className="w-10 h-10 text-text-tertiary mb-3" />
+              <p className="text-sm text-text-tertiary">No recent activity</p>
+            </div>
+          )}
         </ClayCard>
       </div>
 

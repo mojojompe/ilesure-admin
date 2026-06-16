@@ -81,7 +81,7 @@ export const adminApi = {
   settings: {
     get: () => adminFetch(`/admin/v1/settings`),
     updateProfile: (data: any) => adminFetch(`/admin/v1/settings/profile`, { method: 'PUT', body: JSON.stringify(data) }),
-    updatePassword: (data: any) => adminFetch(`/admin/v1/settings/password`, { method: 'PUT', body: JSON.stringify(data) }),
+    updatePassword: (data: any) => adminFetch(`/admin/v1/auth/change-password`, { method: 'POST', body: JSON.stringify(data) }),
     updateNotifications: (data: any) => adminFetch(`/admin/v1/settings/notifications`, { method: 'PUT', body: JSON.stringify(data) }),
     updatePlatform: (data: any) => adminFetch(`/admin/v1/settings/platform`, { method: 'PUT', body: JSON.stringify(data) }),
   },
