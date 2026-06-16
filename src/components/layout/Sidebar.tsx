@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { adminApi } from '../../api/admin';
 import {
   LayoutDashboard, Building2, ShieldCheck, Users, Briefcase,
   ClipboardList, BarChart3, LogOut, Settings,
@@ -33,6 +34,33 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     localStorage.removeItem('ilesure_admin_auth');
     window.location.href = '/login';
   };
+
+  const [pendingVerifications, setPendingVerifications] = useState(0);
+  const [pendingListings, setPendingListings] = useState(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [verificationsRes, listingsRes] = await Promise.all([
+          adminApi.verifications.list('?status=pending'),
+          adminApi.listings.list('?status=pending')
+        ]);
+        if (verificationsRes.success) {
+          const total = verificationsRes.data?.pagination?.totalItems 
+            || (verificationsRes.data?.verifications || verificationsRes.verifications || []).length;
+          setPendingVerifications(total);
+        }
+        if (listingsRes.success) {
+          const total = listingsRes.data?.pagination?.totalItems 
+            || (listingsRes.data?.listings || listingsRes.listings || []).length;
+          setPendingListings(total);
+        }
+      } catch (err) {
+        console.error('Error fetching sidebar counts', err);
+      }
+    };
+    fetchCounts();
+  }, []);
 
   return (
     <>
@@ -70,11 +98,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 <Icon className={clsx('w-5 h-5 flex-shrink-0 transition-transform duration-150', isActive ? 'text-mustard-light' : 'group-hover:scale-110')} />
                 <span className="truncate">{label}</span>
                 {/* Pending indicator dots */}
-                {label === 'Verification Queue' && (
-                  <span className="ml-auto bg-mustard-light text-burnt-brown-dark text-[10px] font-bold rounded-pill px-2 py-0.5 min-w-[20px] text-center">3</span>
+                {label === 'Verification Queue' && pendingVerifications > 0 && (
+                  <span className="ml-auto bg-mustard-light text-burnt-brown-dark text-[10px] font-bold rounded-pill px-2 py-0.5 min-w-[20px] text-center">{pendingVerifications}</span>
                 )}
-                {label === 'Listings' && (
-                  <span className="ml-auto bg-white/20 text-white text-[10px] font-bold rounded-pill px-2 py-0.5 min-w-[20px] text-center">2</span>
+                {label === 'Listings' && pendingListings > 0 && (
+                  <span className="ml-auto bg-white/20 text-white text-[10px] font-bold rounded-pill px-2 py-0.5 min-w-[20px] text-center">{pendingListings}</span>
                 )}
               </NavLink>
             );
