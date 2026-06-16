@@ -132,20 +132,21 @@ export function AuditLogs() {
                 <th>Resource</th>
                 <th>Resource ID</th>
                 <th>IP</th>
+                <th>Status</th>
                 <th>Duration</th>
                 <th>Date</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="text-center py-12">
+                <tr><td colSpan={8} className="text-center py-12">
                   <div className="flex items-center justify-center gap-2">
                     <Loader className="w-5 h-5 animate-spin text-mustard" />
                     <span className="text-text-tertiary">Loading...</span>
                   </div>
                 </td></tr>
               ) : logs.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-12 text-text-tertiary">No audit logs found</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-text-tertiary">No audit logs found</td></tr>
               ) : logs.map((log: any, i: number) => (
                 <tr key={log._id || i}>
                   <td>
@@ -163,6 +164,14 @@ export function AuditLogs() {
                   <td><span className="text-xs text-text-secondary">{log.resource}</span></td>
                   <td><span className="text-xs font-mono text-text-tertiary">{(log.resourceId || '').slice(0, 12)}...</span></td>
                   <td><span className="text-xs text-text-tertiary">{log.ip || '—'}</span></td>
+                  <td>
+                    <span className={`inline-flex items-center rounded-pill px-2.5 py-0.5 text-xs font-bold ${
+                      log.statusCode >= 200 && log.statusCode < 300 ? 'bg-status-success/10 text-status-success' :
+                      log.statusCode >= 300 && log.statusCode < 400 ? 'bg-status-info/10 text-status-info' :
+                      log.statusCode >= 400 ? 'bg-status-error/10 text-status-error' :
+                      'bg-clay-border text-text-secondary'
+                    }`}>{log.statusCode || '—'}</span>
+                  </td>
                   <td><span className="text-xs text-text-tertiary">{formatDuration(log.duration)}</span></td>
                   <td><span className="text-xs text-text-tertiary">{log.createdAt ? new Date(log.createdAt).toLocaleString() : '—'}</span></td>
                 </tr>
