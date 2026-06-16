@@ -20,7 +20,7 @@ const navItems = [
   { path: '/waitlist', label: 'Waitlist Data', icon: ClipboardList },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/tiers', label: 'Tier Management', icon: BarChart3 },
-  { path: '/push-notifications', label: 'Push Notifications', icon: Bell },
+  { path: '/notifications', label: 'Notifications', icon: Bell },
   { path: '/audit-logs', label: 'Audit Logs', icon: ScrollText },
 ];
 

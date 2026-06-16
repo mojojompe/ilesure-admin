@@ -9,6 +9,7 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/companies': { title: 'Companies', subtitle: 'Manage registered real estate companies' },
   '/waitlist': { title: 'Waitlist Data', subtitle: 'Student demand & corridor analytics' },
   '/analytics': { title: 'Analytics', subtitle: 'Platform performance & demand intelligence' },
+  '/notifications': { title: 'Notifications', subtitle: 'Push notifications & email broadcasts' },
 };
 
 export function TopHeader({ onMenuClick }: { onMenuClick: () => void }) {

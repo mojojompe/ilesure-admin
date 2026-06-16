@@ -52,7 +52,7 @@ export default function App() {
           <Route path="tiers" element={<Tiers />} />
           <Route path="settings" element={<Settings />} />
           <Route path="audit-logs" element={<AuditLogs />} />
-          <Route path="push-notifications" element={<PushNotifications />} />
+          <Route path="notifications" element={<PushNotifications />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
