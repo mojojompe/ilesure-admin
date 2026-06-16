@@ -41,7 +41,7 @@ export function Agents() {
 
   const summaryStats = [
     { label: 'Total Agents', value: agents.length, icon: <UserCheck className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
-    { label: 'Verified', value: agents.filter((a: any) => a.status === 'verified').length, icon: <Shield className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
+    { label: 'Verified', value: agents.filter((a: any) => a.verificationStatus === 'verified').length, icon: <Shield className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
     { label: 'Pending Review', value: agents.filter((a: any) => a.status === 'pending').length, icon: <Shield className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
     { label: 'Total Listings', value: agents.reduce((s: number, a: any) => s + (a.listingsCount || 0), 0), icon: <Home className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
   ];

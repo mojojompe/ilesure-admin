@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Bell, Shield, Key, Save } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Settings as SettingsIcon, User, Bell, Shield, Key, Save, ScrollText, ArrowRight } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { adminApi } from '../api/admin';
 import { getAdminToken } from '../api/auth';
 
 export function Settings() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [adminData, setAdminData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -392,7 +394,25 @@ export function Settings() {
           )}
         </div>
       </div>
-      <div className="mt-12 text-center pb-6">
+      {/* ── Audit Logs ──────────────────────────────────── */}
+      <ClayCard padding="md" className="mt-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-clay bg-burnt-brown-pale flex items-center justify-center flex-shrink-0">
+              <ScrollText className="w-6 h-6 text-burnt-brown" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-text-primary">Audit Logs</h3>
+              <p className="text-sm text-text-tertiary mt-0.5">Review all actions performed across the platform</p>
+            </div>
+          </div>
+          <Button variant="primary" size="sm" icon={<ArrowRight className="w-4 h-4" />} onClick={() => navigate('/audit-logs')}>
+            View Logs
+          </Button>
+        </div>
+      </ClayCard>
+
+      <div className="mt-8 text-center pb-6">
         <p className="text-sm font-semibold text-text-tertiary">Sponsored by Waltik Labs</p>
       </div>
     </div>

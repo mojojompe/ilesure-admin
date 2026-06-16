@@ -14,6 +14,7 @@ import { Analytics } from './pages/Analytics';
 import Tiers from './pages/Tiers';
 import { Login } from './pages/Login';
 import { Settings } from './pages/Settings';
+import { AuditLogs } from './pages/AuditLogs';
 import { PushNotifications } from './pages/PushNotifications';
 import { NotFound } from './pages/NotFound';
 
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="tiers" element={<Tiers />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="audit-logs" element={<AuditLogs />} />
           <Route path="push-notifications" element={<PushNotifications />} />
           <Route path="*" element={<NotFound />} />
         </Route>

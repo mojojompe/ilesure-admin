@@ -106,4 +106,9 @@ export const adminApi = {
     sendPush: (data: { title: string; body: string; type?: string; userIds?: string[]; roles?: string[]; data?: Record<string, any> }) =>
       adminFetch('/admin/v1/notifications/push', { method: 'POST', body: JSON.stringify(data) }),
   },
+  audit: {
+    logs: (params?: Record<string, any>) => adminFetch(`/admin/v1/audit/logs${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
+    paystackTransactions: (params?: Record<string, any>) => adminFetch(`/admin/v1/audit/paystack-transactions${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
+    paystackTransactionDetail: (id: string) => adminFetch(`/admin/v1/audit/paystack-transactions/${id}`),
+  },
 };

@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, ShieldCheck, Users, Briefcase,
   ClipboardList, BarChart3, LogOut, Settings,
-  UserCheck, Calendar, CreditCard, Flag, Bell,
+  UserCheck, Calendar, CreditCard, Flag, Bell, ScrollText,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -21,6 +21,7 @@ const navItems = [
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/tiers', label: 'Tier Management', icon: BarChart3 },
   { path: '/push-notifications', label: 'Push Notifications', icon: Bell },
+  { path: '/audit-logs', label: 'Audit Logs', icon: ScrollText },
 ];
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
