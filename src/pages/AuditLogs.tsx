@@ -32,10 +32,10 @@ export function AuditLogs() {
       const res = await adminApi.audit.logs(params);
       if (res.success && res.data) {
         setLogs(Array.isArray(res.data) ? res.data : res.data.logs ?? []);
-        setTotalPages(res.data.totalPages ?? res.data.pageCount ?? 1);
-        setTotal(res.data.total ?? res.data.logs?.length ?? 0);
+        setTotalPages(res.data.pagination?.totalPages ?? res.data.pageCount ?? 1);
+        setTotal(res.data.pagination?.totalItems ?? res.data.total ?? 0);
       } else {
-        setLogs(res.data ?? []);
+        setLogs([]);
       }
     } catch {
       setLogs([]);

@@ -198,6 +198,20 @@ function PayoutsSection() {
 }
 
 /* ─── Paystack Transactions ─────────────── */
+const PAYSTACK_STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  success:    { label: 'Success',    color: 'bg-status-success/10 text-status-success' },
+  failed:     { label: 'Failed',     color: 'bg-status-error/10 text-status-error' },
+  abandoned:  { label: 'Abandoned',  color: 'bg-mustard/15 text-mustard' },
+  reversed:   { label: 'Reversed',   color: 'bg-text-tertiary/10 text-text-tertiary' },
+  processing: { label: 'Processing', color: 'bg-status-info/10 text-status-info' },
+  pending:    { label: 'Pending',    color: 'bg-mustard/15 text-mustard' },
+};
+
+function PaystackStatusBadge({ status }: { status: string }) {
+  const cfg = PAYSTACK_STATUS_LABELS[status] || { label: status, color: 'bg-clay-border text-text-secondary' };
+  return <span className={`inline-flex items-center rounded-pill px-3 py-1 text-xs font-semibold tracking-wide ${cfg.color}`}>{cfg.label}</span>;
+}
+
 function PaystackSection() {
   const [txns, setTxns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,17 +223,24 @@ function PaystackSection() {
 
   useEffect(() => { fetchTxns(); }, [page, txFilter]);
 
+  const formatDate = (t: any) => {
+    const raw = t.created_at || t.paid_at || t.createdAt || t.paidAt;
+    if (!raw) return '—';
+    const d = new Date(raw);
+    return isNaN(d.getTime()) ? String(raw).slice(0, 10) : d.toLocaleDateString();
+  };
+
   const fetchTxns = async () => {
     setLoading(true);
     try {
       const params: Record<string, any> = { page, perPage: 20 };
       if (txFilter) params.status = txFilter;
       const res = await adminApi.audit.paystackTransactions(params);
-      if (res.status) {
-        setTxns(res.data ?? []);
-        setMeta(res.meta ?? {});
+      if (res.success && res.data) {
+        setTxns(res.data.transactions ?? (Array.isArray(res.data) ? res.data : []));
+        setMeta(res.data.meta ?? res.meta ?? {});
       } else {
-        setTxns(res.data ?? []);
+        setTxns([]);
         setMeta({});
       }
     } catch {
@@ -301,9 +322,9 @@ function PaystackSection() {
                 <tr key={t.id}>
                   <td><span className="text-sm font-mono text-text-primary">{t.reference}</span></td>
                   <td><span className="text-sm text-text-secondary">{t.customer?.email || t.customer?.name || '—'}</span></td>
-                  <td><span className="font-bold text-mustard text-sm">₦{(t.amount / 100).toLocaleString()}</span></td>
-                  <td><StatusBadge status={(t.status === 'success' ? 'processed' : t.status === 'failed' ? 'failed' : 'pending') as any} /></td>
-                  <td><span className="text-xs text-text-tertiary">{t.createdAt?.split('T')[0] || t.paidAt?.split('T')[0] || '—'}</span></td>
+                  <td><span className="font-bold text-mustard text-sm">₦{((t.amount ?? 0) / 100).toLocaleString()}</span></td>
+                  <td><PaystackStatusBadge status={t.status} /></td>
+                  <td><span className="text-xs text-text-tertiary">{formatDate(t)}</span></td>
                   <td className="text-right pr-4">
                     <button onClick={() => viewDetail(t.id)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
                       <Eye className="w-3.5 h-3.5 text-text-secondary" />
@@ -315,7 +336,6 @@ function PaystackSection() {
           </table>
         </div>
 
-        {/* Pagination */}
         {meta.pageCount > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-clay-border">
             <span className="text-xs text-text-tertiary">Page {meta.page} of {meta.pageCount}</span>
@@ -346,8 +366,8 @@ function PaystackSection() {
               { label: 'Status', value: detail.status },
               { label: 'Customer', value: detail.customer?.email || detail.customer?.name || '—' },
               { label: 'Channel', value: detail.channel },
-              { label: 'Date', value: detail.paidAt?.split('T')[0] || detail.createdAt?.split('T')[0] || '—' },
-              { label: 'Fees', value: detail.fees ? `₦${(detail.fees / 100).toLocaleString()}` : '—' },
+              { label: 'Date', value: formatDate(detail) },
+              { label: 'Fees', value: detail.fees != null ? `₦${(detail.fees / 100).toLocaleString()}` : '—' },
               { label: 'Currency', value: detail.currency },
             ].map(({ label, value }) => (
               <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">
