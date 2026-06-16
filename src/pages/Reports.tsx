@@ -28,7 +28,9 @@ export function Reports() {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const res = await adminApi.reports?.list?.({ status: filter !== 'all' ? filter : undefined }) ?? { success: false, data: null };
+      const params: Record<string, any> = {};
+      if (filter !== 'all') params.status = filter;
+      const res = await adminApi.reports?.list?.(params) ?? { success: false, data: null };
       if (res.success && res.data) {
         setReports(Array.isArray(res.data) ? res.data : res.data.reports ?? []);
       }

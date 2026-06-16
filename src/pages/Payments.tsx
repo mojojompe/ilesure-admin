@@ -48,7 +48,9 @@ function PayoutsSection() {
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      const res = await adminApi.payments?.list?.({ status: filter !== 'all' ? filter : undefined }) ?? { success: false, data: null };
+      const params: Record<string, any> = {};
+      if (filter !== 'all') params.status = filter;
+      const res = await adminApi.payments?.list?.(params) ?? { success: false, data: null };
       if (res.success && res.data) {
         setPayments(Array.isArray(res.data) ? res.data : res.data.payments ?? []);
       }

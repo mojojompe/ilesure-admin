@@ -21,7 +21,9 @@ export function Bookings() {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const res = await adminApi.bookings?.list?.({ status: filter !== 'all' ? filter : undefined }) ?? { success: false, data: null };
+      const params: Record<string, any> = {};
+      if (filter !== 'all') params.status = filter;
+      const res = await adminApi.bookings?.list?.(params) ?? { success: false, data: null };
       if (res.success && res.data) {
         setBookings(Array.isArray(res.data) ? res.data : res.data.bookings ?? []);
       }
