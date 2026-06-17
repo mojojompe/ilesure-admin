@@ -153,22 +153,23 @@ export function EmailTab() {
 
           {/* Body */}
           <div>
-            <label className="block text-xs font-bold text-text-tertiary uppercase tracking-wider mb-2">Message Body (HTML) *</label>
+            <label className="block text-xs font-bold text-text-tertiary uppercase tracking-wider mb-2">Message Body *</label>
             <textarea
               value={body}
               onChange={e => setBody(e.target.value)}
-              placeholder={'<p>Hello {{name}},</p>\n<p>Your message here...</p>'}
+              placeholder={'Hello {{name}},\n\nYour message here...'}
               rows={8}
-              className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm font-mono placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all resize-none"
+              className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all resize-none"
             />
             <p className="text-[10px] text-text-tertiary mt-1">
-              HTML tags supported. Use {'{{name}}'} to personalise with each recipient&apos;s name.
+              Use {'{{name}}'} to personalise with each recipient&apos;s name. Separate paragraphs with a blank line.
             </p>
           </div>
 
           <div className="bg-burnt-brown-pale/50 rounded-clay-sm px-4 py-3 border border-burnt-brown/20">
             <p className="text-xs text-text-tertiary">
-              <strong className="text-burnt-brown">Note:</strong> Emails are sent via Brevo transactional API.
+              <strong className="text-burnt-brown">Note:</strong> Emails use the iléSure branded template.
+              Your message will be sent as a nicely formatted email with the app logo and footer.
               Each recipient receives a personalised copy with their name replacing {'{{name}}'}.
             </p>
           </div>
@@ -306,10 +307,10 @@ export function EmailTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-text-primary">{subject || 'Email Subject'}</p>
-                <div className="text-sm text-text-secondary mt-1 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: body || 'Email body...' }} />
+                <p className="text-sm text-text-secondary mt-1 whitespace-pre-wrap">{body || 'Email body...'}</p>
                 <p className="text-[10px] text-text-tertiary mt-2">
                   Recipients: {RECIPIENT_OPTIONS.find(r => r.value === recipientType)?.label || recipientType}
-                  {' · '}HTML body with personalised {'{{name}}'} replacement
+                  {' · '}Personalised with {'{{name}}'} · iléSure branded template
                 </p>
               </div>
             </div>
