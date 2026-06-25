@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 type PayFilter = 'all' | 'pending' | 'processed' | 'failed';
 
@@ -54,7 +55,8 @@ function PayoutsSection() {
       if (res.success && res.data) {
         setPayments(Array.isArray(res.data) ? res.data : res.data.payments ?? []);
       }
-    } catch {
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to fetch payments');
       setPayments([]);
     } finally {
       setLoading(false);
@@ -63,7 +65,16 @@ function PayoutsSection() {
 
   const handleMarkProcessed = async (id: string) => {
     setUpdating(true);
-    try { await adminApi.payments?.markProcessed?.(id); await fetchPayments(); setDetail(null); } catch {} finally { setUpdating(false); }
+    try {
+      await adminApi.payments?.markProcessed?.(id);
+      toast.success('Payment marked as processed');
+      await fetchPayments();
+      setDetail(null);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to mark payment as processed');
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const filtered = payments.filter(p =>
@@ -243,7 +254,8 @@ function PaystackSection() {
         setTxns([]);
         setMeta({});
       }
-    } catch {
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to fetch Paystack transactions');
       setTxns([]);
     } finally {
       setLoading(false);
@@ -255,7 +267,8 @@ function PaystackSection() {
     try {
       const res = await adminApi.audit.paystackTransactionDetail(String(id));
       setDetail(res.data ?? res);
-    } catch {
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to view Paystack transaction details');
       setDetail(null);
     } finally {
       setDetailLoading(false);

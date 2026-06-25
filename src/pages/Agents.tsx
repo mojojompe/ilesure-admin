@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 export function Agents() {
   const [agents, setAgents] = useState<any[]>([]);
@@ -21,18 +22,32 @@ export function Agents() {
       if (res.success && res.data) {
         setAgents(Array.isArray(res.data) ? res.data : res.data.agents ?? []);
       }
-    } catch {
-      // API not yet live — show empty state
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to fetch agents');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSuspend = async (agent: any) => {
-    try { await adminApi.agents?.suspend?.(agent.id); await fetchAgents(); setDetail(null); } catch {}
+    try {
+      await adminApi.agents?.suspend?.(agent.id);
+      toast.success('Agent suspended successfully');
+      await fetchAgents();
+      setDetail(null);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to suspend agent');
+    }
   };
   const handleActivate = async (agent: any) => {
-    try { await adminApi.agents?.activate?.(agent.id); await fetchAgents(); setDetail(null); } catch {}
+    try {
+      await adminApi.agents?.activate?.(agent.id);
+      toast.success('Agent activated successfully');
+      await fetchAgents();
+      setDetail(null);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to activate agent');
+    }
   };
 
   const filtered = agents.filter(a =>

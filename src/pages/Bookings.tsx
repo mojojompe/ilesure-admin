@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 type BookingStatus = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
@@ -27,7 +28,8 @@ export function Bookings() {
       if (res.success && res.data) {
         setBookings(Array.isArray(res.data) ? res.data : res.data.bookings ?? []);
       }
-    } catch {
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to fetch bookings');
       setBookings([]);
     } finally {
       setLoading(false);
@@ -36,7 +38,16 @@ export function Bookings() {
 
   const handleResolve = async (id: string, action: string) => {
     setUpdating(true);
-    try { await adminApi.bookings?.resolve?.(id, action); await fetchBookings(); setDetail(null); } catch {} finally { setUpdating(false); }
+    try {
+      await adminApi.bookings?.resolve?.(id, action);
+      toast.success('Booking updated successfully');
+      await fetchBookings();
+      setDetail(null);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to update booking');
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const filtered = bookings.filter(b =>

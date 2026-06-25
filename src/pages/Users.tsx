@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { User } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 type TabKey = 'all' | 'tenant' | 'agent_landlord' | 'company';
 
@@ -59,8 +60,9 @@ export function Users() {
         }));
         setUsers(formattedUsers);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch users:', error);
+      toast.error(error?.message || 'Failed to fetch users');
     } finally {
       setLoading(false);
     }
@@ -74,9 +76,11 @@ export function Users() {
         await adminApi.users.suspend(user.id);
       }
       await fetchUsers();
+      toast.success(user.status === 'suspended' ? 'User unsuspended successfully' : 'User suspended successfully');
       setSuspendConfirm(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update user status:', error);
+      toast.error(error?.message || 'Failed to update user status');
     }
   };
 

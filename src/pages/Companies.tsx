@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { Company } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 export function Companies() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -51,8 +52,9 @@ export function Companies() {
         }));
         setCompanies(formatted);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch companies:', error);
+      toast.error(error?.message || 'Failed to fetch companies');
     } finally {
       setLoading(false);
     }
@@ -67,8 +69,9 @@ export function Companies() {
       if (response.success && response.data) {
         setCompanyAgents(prev => ({ ...prev, [companyId]: response.data.agents || response.data }));
       }
-    } catch (error) {
-      console.error('Failed to fetch agents for company:', error);
+    } catch (error: any) {
+      console.error('Failed to fetch company agents:', error);
+      toast.error(error?.message || 'Failed to fetch agents');
     } finally {
       setLoadingAgents(prev => ({ ...prev, [companyId]: false }));
     }
@@ -86,20 +89,24 @@ export function Companies() {
   const handleApprove = async (company: any) => {
     try {
       await adminApi.companies.approve(company.id);
+      toast.success('Company approved successfully');
       await fetchCompanies();
       setDetailCompany(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to approve company:', error);
+      toast.error(error?.message || 'Failed to approve company');
     }
   };
 
   const handleSuspend = async (company: any) => {
     try {
       await adminApi.companies.suspend(company.id);
+      toast.success('Company suspended successfully');
       await fetchCompanies();
       setDetailCompany(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to suspend company:', error);
+      toast.error(error?.message || 'Failed to suspend company');
     }
   };
 
@@ -131,8 +138,13 @@ export function Companies() {
           <Button variant="primary" size="sm" onClick={async () => {
             const name = prompt('Enter new company name:');
             if (name) {
-              await adminApi.companies.create({ name });
-              fetchCompanies();
+              try {
+                await adminApi.companies.create({ name });
+                toast.success('Company created successfully');
+                fetchCompanies();
+              } catch (error: any) {
+                toast.error(error?.message || 'Failed to create company');
+              }
             }
           }}>+ Add Company</Button>
         </div>

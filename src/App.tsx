@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AdminLayout } from './layouts/AdminLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Listings } from './pages/Listings';
@@ -32,6 +33,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-right" />
       <Routes>
         {/* Public Route */}
         <Route path="/login" element={<Login />} />

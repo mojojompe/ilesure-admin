@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { Listing } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 type FilterStatus = 'all' | 'pending_approval' | 'active' | 'needs_roommate' | 'fully_booked' | 'rejected';
 
@@ -72,8 +73,9 @@ export function Listings() {
         }));
         setListings(formattedListings);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch listings:', error);
+      toast.error(error?.message || 'Failed to fetch listings');
       setError('Failed to fetch listings');
     } finally {
       setLoading(false);
@@ -102,8 +104,10 @@ export function Listings() {
           break;
       }
       await fetchListings();
+      toast.success('Action completed successfully');
       setActionModal(null);
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to perform action');
       console.error('Failed to perform action:', error);
     }
   };

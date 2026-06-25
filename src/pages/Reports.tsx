@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 type ReportFilter = 'all' | 'pending' | 'resolved' | 'actioned';
 
@@ -34,7 +35,8 @@ export function Reports() {
       if (res.success && res.data) {
         setReports(Array.isArray(res.data) ? res.data : res.data.reports ?? []);
       }
-    } catch {
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to fetch reports');
       setReports([]);
     } finally {
       setLoading(false);
@@ -43,7 +45,16 @@ export function Reports() {
 
   const handleAction = async (id: string, action: 'dismiss' | 'takedown') => {
     setUpdating(true);
-    try { await adminApi.reports?.action?.(id, action); await fetchReports(); setDetail(null); } catch {} finally { setUpdating(false); }
+    try {
+      await adminApi.reports?.action?.(id, action);
+      toast.success(`Report ${action === 'dismiss' ? 'dismissed' : 'takedown'} applied successfully`);
+      await fetchReports();
+      setDetail(null);
+    } catch (error: any) {
+      toast.error(error?.message || `Failed to ${action} report`);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const filtered = reports.filter(r =>

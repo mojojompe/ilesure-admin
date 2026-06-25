@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { VerificationRequest } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import toast from 'react-hot-toast';
 
 const docLabels: Record<string, string> = {
   nin: 'Govt. ID (NIN)', bvn: 'BVN', ownershipCert: 'Ownership Certificate',
@@ -98,8 +99,10 @@ export function VerificationQueue() {
     if (!selected) return;
     try {
       await adminApi.verifications.updateChecklist(selected.id, checklist);
-    } catch (error) {
+      toast.success('Checklist saved successfully');
+    } catch (error: any) {
       console.error('Failed to save checklist:', error);
+      toast.error(error?.message || 'Failed to save checklist');
     }
   };
 
@@ -107,8 +110,10 @@ export function VerificationQueue() {
     if (!selected) return;
     try {
       await adminApi.verifications.updateNotes(selected.id, adminNote);
-    } catch (error) {
+      toast.success('Notes saved successfully');
+    } catch (error: any) {
       console.error('Failed to save notes:', error);
+      toast.error(error?.message || 'Failed to save notes');
     }
   };
 
@@ -128,9 +133,11 @@ export function VerificationQueue() {
           break;
       }
       await fetchVerifications();
+      toast.success('Verification action completed');
       setConfirmModal(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to perform verification action:', error);
+      toast.error(error?.message || 'Failed to perform action');
     }
   };
 
