@@ -249,6 +249,7 @@ const Tiers: React.FC = () => {
           rowKey="_id"
           loading={loading}
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 800 }}
         />
       </Card>
 
