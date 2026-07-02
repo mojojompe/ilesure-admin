@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Building2, ShieldCheck, Users, Briefcase,
   ClipboardList, BarChart3, LogOut, Settings,
   UserCheck, Calendar, CreditCard, Flag, Bell, ScrollText,
+  Megaphone,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -22,6 +23,7 @@ const navItems = [
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/tiers', label: 'Tier Management', icon: BarChart3 },
   { path: '/notifications', label: 'Notifications', icon: Bell },
+  { path: '/ads', label: 'Ads Management', icon: Megaphone },
   { path: '/audit-logs', label: 'Audit Logs', icon: ScrollText },
 ];
 

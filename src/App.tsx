@@ -17,6 +17,7 @@ import { Login } from './pages/Login';
 import { Settings } from './pages/Settings';
 import { AuditLogs } from './pages/AuditLogs';
 import { PushNotifications } from './pages/PushNotifications';
+import { Ads } from './pages/Ads';
 import { NotFound } from './pages/NotFound';
 
 // Auth Guard Component
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="audit-logs" element={<AuditLogs />} />
           <Route path="notifications" element={<PushNotifications />} />
+          <Route path="ads" element={<Ads />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
