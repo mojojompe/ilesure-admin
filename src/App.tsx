@@ -7,6 +7,7 @@ import { VerificationQueue } from './pages/VerificationQueue';
 import { Users } from './pages/Users';
 import { Companies } from './pages/Companies';
 import { Agents } from './pages/Agents';
+import { AgentReviews } from './pages/AgentReviews';
 import { Bookings } from './pages/Bookings';
 import { Payments } from './pages/Payments';
 import { Reports } from './pages/Reports';
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="verification" element={<VerificationQueue />} />
           <Route path="users" element={<Users />} />
           <Route path="agents" element={<Agents />} />
+          <Route path="agent-reviews" element={<AgentReviews />} />
           <Route path="companies" element={<Companies />} />
           <Route path="bookings" element={<Bookings />} />
           <Route path="payments" element={<Payments />} />

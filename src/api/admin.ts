@@ -89,6 +89,8 @@ export const adminApi = {
     list: (params?: Record<string, any>) => adminFetch(`/admin/v1/agents${params ? '?' + new URLSearchParams(params).toString() : ''}`),
     suspend: (id: string) => adminFetch(`/admin/v1/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'suspended' }) }),
     activate: (id: string) => adminFetch(`/admin/v1/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'active' }) }),
+    getReviews: () => adminFetch(`/admin/v1/agents/reviews`),
+    updateReviewStatus: (id: string, status: string) => adminFetch(`/admin/v1/agents/reviews/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   },
   bookings: {
     list: (params?: Record<string, any>) => adminFetch(`/admin/v1/bookings${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),

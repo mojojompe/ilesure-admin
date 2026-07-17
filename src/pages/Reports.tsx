@@ -58,7 +58,7 @@ export function Reports() {
   };
 
   const filtered = reports.filter(r =>
-    `${r.listingTitle} ${r.reporterName} ${r.reason}`.toLowerCase().includes(search.toLowerCase())
+    `${r.listingTitle || r.reportedListingTitle || ''} ${r.reportedUserName || ''} ${r.reporterName || ''} ${r.reason || ''} ${r.type || ''}`.toLowerCase().includes(search.toLowerCase())
   );
 
   const tabs: ReportFilter[] = ['all', 'pending', 'resolved', 'actioned'];
@@ -108,7 +108,7 @@ export function Reports() {
           <table className="w-full clay-table">
             <thead>
               <tr>
-                <th>Listing</th>
+                <th>Target</th>
                 <th>Reporter</th>
                 <th>Reason</th>
                 <th>Date</th>
@@ -128,7 +128,13 @@ export function Reports() {
                 <tr><td colSpan={6} className="text-center py-12 text-text-tertiary">No reports found</td></tr>
               ) : filtered.map(r => (
                 <tr key={r.id || r._id}>
-                  <td><p className="font-medium text-text-primary text-sm">{r.listingTitle || '—'}</p></td>
+                  <td>
+                    <p className="font-medium text-text-primary text-sm">
+                      {r.reportedListingTitle && r.reportedListingTitle !== 'N/A' ? `Listing: ${r.reportedListingTitle}` : 
+                       r.reportedUserName && r.reportedUserName !== 'N/A' ? `Agent: ${r.reportedUserName}` : 
+                       r.listingTitle || '—'}
+                    </p>
+                  </td>
                   <td><span className="text-sm text-text-secondary">{r.reporterName || '—'}</span></td>
                   <td>
                     <span className="text-xs px-2 py-0.5 rounded-pill bg-red-50 text-red-600 font-medium">
