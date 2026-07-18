@@ -37,6 +37,8 @@ const config: Record<StatusType, { label: string; className: string; icon?: Reac
   expired:          { label: 'Expired',            className: 'bg-text-tertiary/10 text-text-tertiary',      icon: Clock },
   processed:        { label: 'Processed',          className: 'bg-status-success/10 text-status-success',    icon: CheckCircle },
   failed:           { label: 'Failed',             className: 'bg-status-error/10 text-status-error',        icon: XCircle },
+  hidden:           { label: 'Hidden',             className: 'bg-text-tertiary/10 text-text-tertiary',      icon: Minus },
+  inactive:         { label: 'Inactive',           className: 'bg-text-tertiary/10 text-text-tertiary',      icon: XCircle },
   free:             { label: 'Free',               className: 'bg-clay-border text-text-secondary',          icon: Minus },
   basic:            { label: 'Basic',              className: 'bg-status-info/10 text-status-info',          icon: Star },
   premium:          { label: 'Premium',            className: 'bg-burnt-brown/10 text-burnt-brown',          icon: Award },
