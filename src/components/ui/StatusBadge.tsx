@@ -13,7 +13,7 @@ type StatusType =
   | 'notified'
   | 'matched'
   | 'waiting'
-  | 'cancelled' | 'completed' | 'confirmed' | 'refunded' | 'expired' | 'processed' | 'failed'
+  | 'cancelled' | 'completed' | 'confirmed' | 'refunded' | 'expired' | 'processed' | 'failed'| 'hidden' | 'inactive'
   | 'free' | 'basic' | 'premium' | 'enterprise';
 
 const config: Record<StatusType, { label: string; className: string; icon?: React.ComponentType<{ className?: string }> }> = {
