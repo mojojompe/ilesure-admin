@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Check, X, Loader, Search, Eye } from 'lucide-react';
+import { Calendar, Check, X, Loader, Search, Eye, RotateCcw } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -7,7 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
 import toast from 'react-hot-toast';
 
-type BookingStatus = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
+type BookingStatus = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
 
 export function Bookings() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -54,7 +54,7 @@ export function Bookings() {
     `${b.listingTitle} ${b.tenantName} ${b.agentName}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const tabs: BookingStatus[] = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+  const tabs: BookingStatus[] = ['all', 'pending', 'confirmed', 'completed', 'cancelled', 'refunded'];
 
   const summary = [
     { label: 'Total', value: bookings.length },
@@ -165,6 +165,9 @@ export function Bookings() {
                 <Button variant="success" size="sm" loading={updating} onClick={() => handleResolve(detail.id, 'confirm')} icon={<Check className="w-3.5 h-3.5" />}>Confirm</Button>
                 <Button variant="danger" size="sm" loading={updating} onClick={() => handleResolve(detail.id, 'cancel')} icon={<X className="w-3.5 h-3.5" />}>Cancel</Button>
               </>
+            )}
+            {detail?.status === 'confirmed' && detail?.paymentStatus === 'paid' && (
+              <Button variant="danger" size="sm" loading={updating} onClick={() => handleResolve(detail.id, 'refund')} icon={<RotateCcw className="w-3.5 h-3.5" />}>Refund</Button>
             )}
           </>
         }

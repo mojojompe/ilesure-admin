@@ -8,7 +8,7 @@ import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
 import toast from 'react-hot-toast';
 
-type PayFilter = 'all' | 'pending' | 'processed' | 'failed';
+type PayFilter = 'all' | 'pending' | 'processed' | 'refunded' | 'failed';
 
 type PSuccessTab = 'payouts' | 'paystack';
 
@@ -84,7 +84,7 @@ function PayoutsSection() {
   const totalProcessed = payments.filter(p => p.status === 'processed').reduce((s, p) => s + (p.amount || 0), 0);
   const totalPending = payments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
 
-  const tabs: PayFilter[] = ['all', 'pending', 'processed', 'failed'];
+  const tabs: PayFilter[] = ['all', 'pending', 'processed', 'refunded', 'failed'];
 
   return (
     <>

@@ -13,6 +13,7 @@ type StatusType =
   | 'notified'
   | 'matched'
   | 'waiting'
+  | 'cancelled' | 'completed' | 'confirmed' | 'refunded' | 'expired' | 'processed' | 'failed'
   | 'free' | 'basic' | 'premium' | 'enterprise';
 
 const config: Record<StatusType, { label: string; className: string; icon?: React.ComponentType<{ className?: string }> }> = {
@@ -29,6 +30,13 @@ const config: Record<StatusType, { label: string; className: string; icon?: Reac
   notified:         { label: 'Notified',           className: 'bg-status-info/10 text-status-info',          icon: CheckCircle },
   matched:          { label: 'Matched',            className: 'bg-status-success/10 text-status-success',    icon: CheckCircle },
   waiting:          { label: 'Waiting',            className: 'bg-mustard/15 text-mustard',                  icon: Clock },
+  cancelled:        { label: 'Cancelled',          className: 'bg-status-error/10 text-status-error',        icon: XCircle },
+  completed:        { label: 'Completed',          className: 'bg-status-success/10 text-status-success',    icon: CheckCircle },
+  confirmed:        { label: 'Confirmed',          className: 'bg-status-info/10 text-status-info',          icon: CheckCircle },
+  refunded:         { label: 'Refunded',           className: 'bg-purple-500/10 text-purple-600',            icon: XCircle },
+  expired:          { label: 'Expired',            className: 'bg-text-tertiary/10 text-text-tertiary',      icon: Clock },
+  processed:        { label: 'Processed',          className: 'bg-status-success/10 text-status-success',    icon: CheckCircle },
+  failed:           { label: 'Failed',             className: 'bg-status-error/10 text-status-error',        icon: XCircle },
   free:             { label: 'Free',               className: 'bg-clay-border text-text-secondary',          icon: Minus },
   basic:            { label: 'Basic',              className: 'bg-status-info/10 text-status-info',          icon: Star },
   premium:          { label: 'Premium',            className: 'bg-burnt-brown/10 text-burnt-brown',          icon: Award },

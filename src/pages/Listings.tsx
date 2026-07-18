@@ -9,7 +9,7 @@ import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
 import toast from 'react-hot-toast';
 
-type FilterStatus = 'all' | 'pending_approval' | 'active' | 'needs_roommate' | 'fully_booked' | 'rejected';
+type FilterStatus = 'all' | 'pending_approval' | 'active' | 'needs_roommate' | 'fully_booked' | 'archived' | 'rejected';
 
 const propertyTypeLabel: Record<string, string> = {
   self_con: 'Self-con', '1_bed': '1-Bed Flat', '2_bed': '2-Bed Flat', '3_bed': '3-Bed Flat',
@@ -126,6 +126,7 @@ export function Listings() {
     { key: 'active', label: 'Active', count: listings.filter(l => l.status === 'active').length },
     { key: 'needs_roommate', label: 'Needs Roommate', count: listings.filter(l => l.status === 'needs_roommate').length },
     { key: 'fully_booked', label: 'Fully Booked', count: listings.filter(l => l.status === 'fully_booked').length },
+    { key: 'archived', label: 'Archived', count: listings.filter(l => l.status === 'archived').length },
     { key: 'rejected', label: 'Rejected', count: listings.filter(l => l.status === 'rejected').length },
   ];
 
