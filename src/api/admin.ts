@@ -32,7 +32,7 @@ export const adminApi = {
   listings: {
     list: (params?: string) => adminFetch(`/admin/v1/listings${params || ''}`),
     getById: (id: string) => adminFetch(`/admin/v1/listings/${id}`),
-    approve: (id: string) => adminFetch(`/admin/v1/listings/${id}/approve`, { method: 'PUT' }),
+    approve: (id: string, note?: string) => adminFetch(`/admin/v1/listings/${id}/approve`, { method: 'PUT', body: JSON.stringify({ note }) }),
     reject: (id: string, reason: string) => adminFetch(`/admin/v1/listings/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) }),
     requestChanges: (id: string, message: string) => adminFetch(`/admin/v1/listings/${id}/request-changes`, { method: 'PUT', body: JSON.stringify({ message }) }),
     archive: (id: string) => adminFetch(`/admin/v1/listings/${id}/archive`, { method: 'PUT' }),

@@ -94,7 +94,7 @@ export function Listings() {
     try {
       switch (type) {
         case 'approve':
-          await adminApi.listings.approve(listing.id);
+          await adminApi.listings.approve(listing.id, adminNote);
           break;
         case 'reject':
           await adminApi.listings.reject(listing.id, adminNote);
