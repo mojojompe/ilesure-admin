@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { clsx } from 'clsx';
 import { adminApi } from '../../api/admin';
+import { can, CAP } from '../../lib/rbac';
 
 type TargetMode = 'all' | 'roles' | 'users';
 
@@ -70,6 +71,7 @@ export function PushTab() {
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) return;
+    if (!can(CAP.NOTIFICATIONS_BROADCAST)) return; // SECURITY-FIX (AD-H3)
     setSending(true);
     setResult(null);
     try {
@@ -96,7 +98,11 @@ export function PushTab() {
     }
   };
 
-  const canSend = title.trim().length > 0 && body.trim().length > 0
+  // SECURITY-FIX (AD-H3): broadcasting push notifications is a privileged action;
+  // require the notifications.broadcast capability (defense-in-depth; backend authoritative).
+  const canBroadcast = can(CAP.NOTIFICATIONS_BROADCAST);
+
+  const canSend = canBroadcast && title.trim().length > 0 && body.trim().length > 0
     && (targetMode !== 'roles' || selectedRoles.length > 0)
     && (targetMode !== 'users' || selectedUsers.length > 0);
 
@@ -290,6 +296,7 @@ export function PushTab() {
               size="sm"
               icon={<Send className="w-4 h-4" />}
               loading={sending}
+              disabled={!canSend}
               onClick={async () => { await handleSend(); setShowPreview(false); }}
             >
               Send Now

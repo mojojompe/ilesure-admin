@@ -6,6 +6,7 @@ import { Modal } from '../../components/ui/Modal';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { clsx } from 'clsx';
 import { adminApi } from '../../api/admin';
+import { can, CAP } from '../../lib/rbac';
 
 type RecipientType = 'all' | 'students' | 'landlords' | 'agents_companies' | 'waitlist';
 
@@ -62,7 +63,10 @@ export function EmailTab() {
     fetchHistory(historyPage);
   }, [historyPage]);
 
-  const canSend = subject.trim().length > 0 && body.trim().length > 0;
+  // SECURITY-FIX (AD-H3): email broadcast is a privileged action; require the
+  // notifications.broadcast capability (defense-in-depth; backend authoritative).
+  const canBroadcast = can(CAP.NOTIFICATIONS_BROADCAST);
+  const canSend = canBroadcast && subject.trim().length > 0 && body.trim().length > 0;
 
   const handleSend = async () => {
     if (!canSend) return;

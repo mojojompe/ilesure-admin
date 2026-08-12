@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { adminApi } from '../../api/admin';
+import { removeAdminToken } from '../../api/auth';
 import {
   LayoutDashboard, Building2, ShieldCheck, Users, Briefcase,
   ClipboardList, BarChart3, LogOut, Settings,
@@ -34,6 +35,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
   const handleLogout = () => {
     setShowLogoutModal(false);
+    // SECURITY-FIX (AD-C2): Actually clear the JWT on logout. Previously only the
+    // `ilesure_admin_auth` flag was removed, leaving a valid Bearer token in
+    // localStorage that the next person on a shared machine would silently reuse.
+    // Clear the token AND the flag, then leave.
+    removeAdminToken();
     localStorage.removeItem('ilesure_admin_auth');
     window.location.href = '/login';
   };

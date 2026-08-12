@@ -7,6 +7,8 @@ import { Modal } from '../components/ui/Modal';
 import { VerificationRequest } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import { safeUrl } from '../lib/safeUrl';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 const docLabels: Record<string, string> = {
@@ -39,6 +41,8 @@ export function VerificationQueue() {
   const [activeDoc, setActiveDoc] = useState<string>('nin');
   const [confirmModal, setConfirmModal] = useState<'approve' | 'reject' | 'info' | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const canReview = can(CAP.VERIFICATIONS_REVIEW);
 
   useEffect(() => {
     fetchVerifications();
@@ -222,17 +226,22 @@ export function VerificationQueue() {
                 </div>
                 <div className="flex gap-2 flex-wrap justify-center">
                   <Button variant="primary" size="sm" onClick={() => {
-                    const docUrl = (selected?.documents as any)?.[activeDoc]?.url;
-                    if (docUrl) window.open(docUrl, '_blank');
-                    else alert('No document URL available');
+                    // SECURITY-FIX (AD-L2): only open verified http(s) document URLs; reject
+                    // javascript:/data: schemes that could execute if a stored URL is poisoned.
+                    const docUrl = safeUrl((selected?.documents as any)?.[activeDoc]?.url);
+                    if (docUrl) window.open(docUrl, '_blank', 'noopener,noreferrer');
+                    else alert('No valid document URL available');
                   }}>View Full Document</Button>
                   <Button variant="secondary" size="sm" onClick={() => {
-                    const docUrl = (selected?.documents as any)?.[activeDoc]?.url;
+                    // SECURITY-FIX (AD-L2): sanitize the URL before assigning it to an anchor href.
+                    const docUrl = safeUrl((selected?.documents as any)?.[activeDoc]?.url);
                     if (docUrl) {
                       const a = document.createElement('a');
                       a.href = docUrl;
                       a.download = `${activeDoc}.pdf`;
                       a.click();
+                    } else {
+                      alert('No valid document URL available');
                     }
                   }}>Download</Button>
                 </div>
@@ -330,17 +339,22 @@ export function VerificationQueue() {
           </ClayCard>
 
           {/* Action Buttons */}
-          <div className="space-y-2">
-            <Button variant="success" className="w-full" icon={<CheckCircle className="w-4 h-4" />} onClick={() => setConfirmModal('approve')}>
-              Approve Verification
-            </Button>
-            <Button variant="mustard" className="w-full" icon={<AlertCircle className="w-4 h-4" />} onClick={() => setConfirmModal('info')}>
-              Request More Information
-            </Button>
-            <Button variant="danger" className="w-full" icon={<XCircle className="w-4 h-4" />} onClick={() => setConfirmModal('reject')}>
-              Reject Application
-            </Button>
-          </div>
+          {/* SECURITY-FIX (AD-H3): approve/reject/request-info are privileged review
+              actions — hidden for roles without verifications.review (defense-in-depth;
+              backend is authoritative). */}
+          {canReview && (
+            <div className="space-y-2">
+              <Button variant="success" className="w-full" icon={<CheckCircle className="w-4 h-4" />} onClick={() => setConfirmModal('approve')}>
+                Approve Verification
+              </Button>
+              <Button variant="mustard" className="w-full" icon={<AlertCircle className="w-4 h-4" />} onClick={() => setConfirmModal('info')}>
+                Request More Information
+              </Button>
+              <Button variant="danger" className="w-full" icon={<XCircle className="w-4 h-4" />} onClick={() => setConfirmModal('reject')}>
+                Reject Application
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

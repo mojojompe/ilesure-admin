@@ -1,5 +1,5 @@
 import API_BASE_URL from '../lib/config';
-import { getAdminToken } from './auth';
+import { getAdminToken, clearAdminSession } from './auth';
 
 function getHeaders(): HeadersInit {
   const token = getAdminToken();
@@ -10,6 +10,31 @@ function getHeaders(): HeadersInit {
   return headers;
 }
 
+// SECURITY-FIX (AD-H2): On an auth failure, clear the session and bounce to /login.
+// Shared by adminFetch and adminFetchRaw. Guards against a redirect loop when we are
+// already on the login screen.
+function handleAuthFailure(): void {
+  clearAdminSession();
+  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    window.location.href = '/login';
+  }
+}
+
+async function extractErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const data = await response.json();
+    return data?.error?.message || data?.message || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// SECURITY-FIX (AD-H2): adminFetch previously called response.json() unconditionally
+// and never inspected response.status/.ok, so an expired/invalid session (401/403)
+// was swallowed and the UI stayed "authenticated" forever, and API errors were
+// silently parsed as if successful. Now: 401/403 clears the session and redirects to
+// login; other non-OK responses throw with a surfaced message; only OK responses are
+// parsed as JSON.
 async function adminFetch(url: string, options: RequestInit = {}): Promise<any> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
@@ -18,7 +43,43 @@ async function adminFetch(url: string, options: RequestInit = {}): Promise<any> 
       ...options.headers,
     },
   });
+
+  if (response.status === 401 || response.status === 403) {
+    handleAuthFailure();
+    throw new Error(
+      await extractErrorMessage(response, 'Your session has expired. Please sign in again.'),
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(await extractErrorMessage(response, `Request failed (${response.status})`));
+  }
+
   return response.json();
+}
+
+// SECURITY-FIX (AD-H2 / AD-M2): Raw variant that returns the Response untouched (for
+// non-JSON payloads such as CSV export). Applies the same 401/403 session handling as
+// adminFetch, so callers get consistent auth behaviour without the json() coercion.
+export async function adminFetchRaw(url: string, options: RequestInit = {}): Promise<Response> {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
+    headers: {
+      ...getHeaders(),
+      ...options.headers,
+    },
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    handleAuthFailure();
+    throw new Error('Your session has expired. Please sign in again.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status})`);
+  }
+
+  return response;
 }
 
 export const adminApi = {

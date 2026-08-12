@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 export function Agents() {
@@ -12,6 +13,8 @@ export function Agents() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
+
+  const canSuspend = can(CAP.AGENTS_SUSPEND);
 
   useEffect(() => { fetchAgents(); }, []);
 
@@ -154,9 +157,10 @@ export function Agents() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
-            {detail?.status === 'active'
+            {/* SECURITY-FIX (AD-H3): suspend/activate hidden without agents.suspend. */}
+            {canSuspend && (detail?.status === 'active'
               ? <Button variant="danger" size="sm" onClick={() => detail && handleSuspend(detail)} icon={<Ban className="w-3.5 h-3.5" />}>Suspend Agent</Button>
-              : <Button variant="success" size="sm" onClick={() => detail && handleActivate(detail)}>Activate Agent</Button>}
+              : <Button variant="success" size="sm" onClick={() => detail && handleActivate(detail)}>Activate Agent</Button>)}
           </>
         }
       >

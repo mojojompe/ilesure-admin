@@ -5,7 +5,31 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { clsx } from 'clsx';
-import { adminApi } from '../api/admin';
+import { adminApi, adminFetchRaw } from '../api/admin';
+import toast from 'react-hot-toast';
+
+// SECURITY-FIX (AD-M2): Build a proper CSV string from an array of row objects.
+// Escapes quotes/commas/newlines per RFC 4180 so values containing PII (names,
+// emails, phones) don't corrupt the file.
+function rowsToCsv(rows: any[]): string {
+  if (!Array.isArray(rows) || rows.length === 0) return '';
+  const headers = Array.from(
+    rows.reduce((set: Set<string>, r) => {
+      Object.keys(r || {}).forEach((k) => set.add(k));
+      return set;
+    }, new Set<string>()),
+  );
+  const escape = (v: any) => {
+    if (v === null || v === undefined) return '';
+    const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const lines = [headers.join(',')];
+  for (const row of rows) {
+    lines.push(headers.map((h) => escape(row?.[h])).join(','));
+  }
+  return lines.join('\r\n');
+}
 
 export function WaitlistData() {
   const [search, setSearch] = useState('');
@@ -58,18 +82,41 @@ export function WaitlistData() {
   };
 
   const handleExport = async () => {
+    // SECURITY-FIX (AD-M2): The previous version ran the export through the JSON-forcing
+    // adminFetch and wrapped the resulting object in a Blob, so the download was a file
+    // literally containing "[object Object]", and any error was swallowed. Now we fetch
+    // the raw response: if the server returns CSV we stream it through; if it returns
+    // JSON rows we build a proper RFC 4180 CSV client-side. Errors are surfaced.
     try {
-      const response = await adminApi.waitlist.export();
-      if (response) {
-        const blob = new Blob([response], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'waitlist.csv';
-        a.click();
+      const response = await adminFetchRaw('/admin/v1/waitlist/export');
+      const contentType = response.headers.get('content-type') || '';
+
+      let csv: string;
+      if (contentType.includes('application/json')) {
+        const json = await response.json();
+        const rows = Array.isArray(json)
+          ? json
+          : json?.data?.entries || json?.entries || json?.data || [];
+        csv = rowsToCsv(rows);
+      } else {
+        csv = await response.text();
       }
-    } catch (error) {
+
+      if (!csv || !csv.trim()) {
+        toast.error('No waitlist data available to export');
+        return;
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'waitlist.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
       console.error('Failed to export waitlist:', error);
+      toast.error(error?.message || 'Failed to export waitlist data');
     }
   };
 

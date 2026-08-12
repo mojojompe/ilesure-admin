@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 type ReportFilter = 'all' | 'pending' | 'resolved' | 'actioned';
@@ -23,6 +24,8 @@ export function Reports() {
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
+
+  const canAction = can(CAP.REPORTS_ACTION);
 
   useEffect(() => { fetchReports(); }, [filter]);
 
@@ -163,7 +166,8 @@ export function Reports() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
-            {detail?.status === 'pending' && (
+            {/* SECURITY-FIX (AD-H3): dismiss / take-down are moderation actions — hidden without reports.action. */}
+            {detail?.status === 'pending' && canAction && (
               <>
                 <Button variant="danger" size="sm" loading={updating} onClick={() => handleAction(detail.id, 'dismiss')} icon={<X className="w-3.5 h-3.5" />}>Dismiss</Button>
                 <Button variant="danger" size="sm" loading={updating} onClick={() => handleAction(detail.id, 'takedown')} icon={<Trash2 className="w-3.5 h-3.5" />}>Take Down Listing</Button>

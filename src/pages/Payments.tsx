@@ -5,7 +5,9 @@ import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
+import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 type PayFilter = 'all' | 'pending' | 'processed' | 'refunded' | 'failed';
@@ -63,6 +65,8 @@ function PayoutsSection() {
     }
   };
 
+  const canProcess = can(CAP.PAYMENTS_PROCESS);
+
   const handleMarkProcessed = async (id: string) => {
     setUpdating(true);
     try {
@@ -75,6 +79,20 @@ function PayoutsSection() {
     } finally {
       setUpdating(false);
     }
+  };
+
+  // SECURITY-FIX (AD-M1): Marking a payout as processed is an irreversible money
+  // action; require an explicit confirmation before firing it (consistent with the
+  // Users suspend confirm pattern).
+  const confirmMarkProcessed = (payment: any) => {
+    AntModal.confirm({
+      title: 'Mark payment as processed?',
+      content: `This will mark the ₦${(payment.amount || 0).toLocaleString()} payout to ${payment.agentName || payment.companyName || 'this recipient'} as processed. This action cannot be undone.`,
+      okText: 'Mark Processed',
+      okButtonProps: { style: { backgroundColor: '#16a34a', borderColor: '#16a34a' } },
+      cancelText: 'Cancel',
+      onOk: () => handleMarkProcessed(payment.id),
+    });
   };
 
   const filtered = payments.filter(p =>
@@ -178,8 +196,8 @@ function PayoutsSection() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
-            {detail?.status === 'pending' && (
-              <Button variant="success" size="sm" loading={updating} onClick={() => handleMarkProcessed(detail.id)} icon={<CheckCircle className="w-3.5 h-3.5" />}>
+            {detail?.status === 'pending' && canProcess && (
+              <Button variant="success" size="sm" loading={updating} onClick={() => confirmMarkProcessed(detail)} icon={<CheckCircle className="w-3.5 h-3.5" />}>
                 Mark as Processed
               </Button>
             )}

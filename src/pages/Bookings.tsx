@@ -4,7 +4,9 @@ import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
+import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 type BookingStatus = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
@@ -36,6 +38,8 @@ export function Bookings() {
     }
   };
 
+  const canResolve = can(CAP.BOOKINGS_RESOLVE);
+
   const handleResolve = async (id: string, action: string) => {
     setUpdating(true);
     try {
@@ -48,6 +52,26 @@ export function Bookings() {
     } finally {
       setUpdating(false);
     }
+  };
+
+  // SECURITY-FIX (AD-M1): Resolving a booking (confirm / cancel / refund) is a
+  // dispute/money-affecting action; require an explicit confirmation before firing.
+  const ACTION_COPY: Record<string, { title: string; body: string; ok: string; danger: boolean }> = {
+    confirm: { title: 'Confirm this booking?', body: 'The tenant and agent will be notified that the booking is confirmed.', ok: 'Confirm Booking', danger: false },
+    cancel: { title: 'Cancel this booking?', body: 'This will cancel the booking. This action cannot be undone.', ok: 'Cancel Booking', danger: true },
+    refund: { title: 'Refund this booking?', body: 'This will initiate a refund of the paid amount to the tenant. This action cannot be undone.', ok: 'Issue Refund', danger: true },
+  };
+
+  const confirmResolve = (id: string, action: string) => {
+    const copy = ACTION_COPY[action] || { title: 'Proceed with this action?', body: '', ok: 'Confirm', danger: true };
+    AntModal.confirm({
+      title: copy.title,
+      content: copy.body,
+      okText: copy.ok,
+      okButtonProps: copy.danger ? { danger: true } : undefined,
+      cancelText: 'Back',
+      onOk: () => handleResolve(id, action),
+    });
   };
 
   const filtered = bookings.filter(b =>
@@ -160,14 +184,14 @@ export function Bookings() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
-            {detail?.status === 'pending' && (
+            {detail?.status === 'pending' && canResolve && (
               <>
-                <Button variant="success" size="sm" loading={updating} onClick={() => handleResolve(detail.id, 'confirm')} icon={<Check className="w-3.5 h-3.5" />}>Confirm</Button>
-                <Button variant="danger" size="sm" loading={updating} onClick={() => handleResolve(detail.id, 'cancel')} icon={<X className="w-3.5 h-3.5" />}>Cancel</Button>
+                <Button variant="success" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'confirm')} icon={<Check className="w-3.5 h-3.5" />}>Confirm</Button>
+                <Button variant="danger" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'cancel')} icon={<X className="w-3.5 h-3.5" />}>Cancel</Button>
               </>
             )}
-            {detail?.status === 'confirmed' && detail?.paymentStatus === 'paid' && (
-              <Button variant="danger" size="sm" loading={updating} onClick={() => handleResolve(detail.id, 'refund')} icon={<RotateCcw className="w-3.5 h-3.5" />}>Refund</Button>
+            {detail?.status === 'confirmed' && detail?.paymentStatus === 'paid' && canResolve && (
+              <Button variant="danger" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'refund')} icon={<RotateCcw className="w-3.5 h-3.5" />}>Refund</Button>
             )}
           </>
         }
