@@ -182,6 +182,8 @@ export function Agents() {
                 { label: 'Tier', value: detail.tier },
                 { label: 'KYC Status', value: detail.isVerified ? 'Verified' : 'Pending' },
                 { label: 'Joined', value: detail.joinDate || detail.createdAt?.split('T')[0] || '—' },
+                { label: 'Reward Points', value: String(detail.rewardPoints ?? 0) },
+                { label: 'Extra Slots', value: String(detail.purchasedSlots ?? 0) },
                 { label: 'Bank Name', value: detail.bankName || '—' },
                 { label: 'Account Name', value: detail.accountName || '—' },
                 { label: 'Account Number', value: detail.accountNumber || '—' },
