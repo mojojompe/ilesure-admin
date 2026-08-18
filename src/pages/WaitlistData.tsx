@@ -34,6 +34,7 @@ function rowsToCsv(rows: any[]): string {
 export function WaitlistData() {
   const [search, setSearch] = useState('');
   const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
   const [corridorDemand, setCorridorDemand] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,11 +47,14 @@ export function WaitlistData() {
     setLoading(true);
     setError(null);
     try {
+      // FIX: the list endpoint defaults to limit=20, so the page only ever received the
+      // first 20 rows. This page has no pagination UI — it filters client-side and shows
+      // everything it holds — so request the full set instead of a single default page.
       const [waitlistRes, analyticsRes] = await Promise.all([
-        adminApi.waitlist.list(),
+        adminApi.waitlist.list('?limit=1000'),
         adminApi.analytics.waitlist(),
       ]);
-      
+
       if (waitlistRes.success && waitlistRes.data?.entries?.length > 0) {
         const formatted = waitlistRes.data.entries.map((e: any) => ({
           id: e._id || e.id,
@@ -68,8 +72,16 @@ export function WaitlistData() {
           createdAt: e.createdAt ? new Date(e.createdAt).toISOString().split('T')[0] : '',
         }));
         setWaitlist(formatted);
+        // FIX: the "Total on Waitlist" tile previously showed waitlist.length, i.e. the size
+        // of the page just fetched (always 20), not the real count. The server already
+        // reports the true total — use it, and only fall back to what we hold.
+        setTotal(
+          waitlistRes.data.summary?.total
+          ?? waitlistRes.data.pagination?.totalItems
+          ?? formatted.length
+        );
       }
-      
+
       if (analyticsRes.success && analyticsRes.data?.corridorDemand?.length > 0) {
         setCorridorDemand(analyticsRes.data.corridorDemand);
       }
@@ -141,7 +153,7 @@ export function WaitlistData() {
       {/* ── Summary Insights ────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total on Waitlist',   value: waitlist.length,         icon: <ClipboardList className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
+          { label: 'Total on Waitlist',   value: total,                   icon: <ClipboardList className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
           { label: 'Need Roommate',        value: needsRoommate,               icon: <Users className="w-5 h-5 text-mustard" />,               bg: 'bg-mustard/10' },
           { label: 'Avg. Min Budget',      value: `₦${(avgBudget / 1000).toFixed(0)}k`, icon: <ClipboardList className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
           { label: 'Top Corridor',         value: topCorridor.corridor,        icon: <MapPin className="w-5 h-5 text-status-success" />,        bg: 'bg-status-success/10' },
