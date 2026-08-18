@@ -3,6 +3,8 @@ import { adminApi } from '../api/admin';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { Plus, Trash2, Link, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
+import { safeUrl } from '../lib/safeUrl';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 export function Ads() {
@@ -11,6 +13,8 @@ export function Ads() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newAd, setNewAd] = useState({ imageUrl: '', link: '' });
+
+  const canManage = can(CAP.ADS_MANAGE);
 
   const fetchAds = async () => {
     try {
@@ -104,10 +108,13 @@ export function Ads() {
           <h1 className="text-2xl font-bold text-text-primary">Ads Management</h1>
           <p className="text-sm text-text-secondary mt-1">Manage carousel ads for the home screens</p>
         </div>
-        <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Add New Ad
-        </Button>
+        {/* SECURITY-FIX (AD-H3): creating ads is a privileged action — hidden for roles without ads.manage. */}
+        {canManage && (
+          <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Add New Ad
+          </Button>
+        )}
       </div>
 
       <ClayCard className="p-0 overflow-hidden">
@@ -146,21 +153,28 @@ export function Ads() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-text-secondary">
-                      {ad.link ? (
-                        <a href={ad.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-mustard hover:underline">
-                          <Link className="w-4 h-4" />
-                          {ad.link.length > 30 ? ad.link.substring(0, 30) + '...' : ad.link}
-                        </a>
-                      ) : (
-                        <span className="text-text-tertiary">No link provided</span>
-                      )}
+                      {/* SECURITY-FIX (AD-L2): only render a clickable link for safe http(s) URLs;
+                          a stored javascript:/data: URL is shown as inert text, never as an href. */}
+                      {(() => {
+                        const href = safeUrl(ad.link);
+                        if (href) {
+                          return (
+                            <a href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-mustard hover:underline">
+                              <Link className="w-4 h-4" />
+                              {ad.link.length > 30 ? ad.link.substring(0, 30) + '...' : ad.link}
+                            </a>
+                          );
+                        }
+                        return <span className="text-text-tertiary">{ad.link ? 'Invalid link' : 'No link provided'}</span>;
+                      })()}
                     </td>
                     <td className="px-6 py-4">
-                      <button 
+                      <button
                         onClick={() => handleToggleStatus(ad)}
+                        disabled={!canManage}
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-pill text-xs font-bold transition-colors ${
                           ad.isActive ? 'bg-status-success/10 text-status-success' : 'bg-status-error/10 text-status-error'
-                        }`}
+                        } ${canManage ? '' : 'opacity-60 cursor-not-allowed'}`}
                       >
                         {ad.isActive ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                         {ad.isActive ? 'Active' : 'Inactive'}
@@ -170,13 +184,18 @@ export function Ads() {
                       {new Date(ad.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleDeleteAd(ad._id)}
-                        className="p-2 text-text-tertiary hover:text-status-error hover:bg-status-error/10 rounded-pill transition-colors"
-                        title="Delete Ad"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {/* SECURITY-FIX (AD-H3): deleting an ad is destructive — hidden without ads.manage. */}
+                      {canManage ? (
+                        <button
+                          onClick={() => handleDeleteAd(ad._id)}
+                          className="p-2 text-text-tertiary hover:text-status-error hover:bg-status-error/10 rounded-pill transition-colors"
+                          title="Delete Ad"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <span className="text-text-tertiary">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}

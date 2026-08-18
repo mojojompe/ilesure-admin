@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { Company } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 export function Companies() {
@@ -17,6 +18,9 @@ export function Companies() {
   const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const canApprove = can(CAP.COMPANIES_APPROVE);
+  const canSuspend = can(CAP.COMPANIES_SUSPEND);
 
   useEffect(() => {
     fetchCompanies();
@@ -292,8 +296,9 @@ export function Companies() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetailCompany(null)}>Close</Button>
-            {detailCompany?.status === 'pending' && <Button variant="success" size="sm" onClick={() => detailCompany && handleApprove(detailCompany)}>Approve Company</Button>}
-            <Button variant="danger" size="sm" onClick={() => detailCompany && handleSuspend(detailCompany)}>Suspend Company</Button>
+            {/* SECURITY-FIX (AD-H3): approve/suspend gated on company capabilities. */}
+            {detailCompany?.status === 'pending' && canApprove && <Button variant="success" size="sm" onClick={() => detailCompany && handleApprove(detailCompany)}>Approve Company</Button>}
+            {canSuspend && <Button variant="danger" size="sm" onClick={() => detailCompany && handleSuspend(detailCompany)}>Suspend Company</Button>}
           </>
         }
       >

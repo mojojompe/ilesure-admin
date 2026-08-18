@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { User } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 type TabKey = 'all' | 'tenant' | 'agent_landlord' | 'company';
@@ -30,6 +31,8 @@ export function Users() {
   const [suspendConfirm, setSuspendConfirm] = useState<User | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const canSuspend = can(CAP.USERS_SUSPEND);
 
   useEffect(() => {
     fetchUsers();
@@ -227,20 +230,23 @@ export function Users() {
                       >
                         <Eye className="w-3.5 h-3.5 text-text-secondary" />
                       </button>
-                      <button
-                        onClick={() => setSuspendConfirm(user)}
-                        className={clsx(
-                          'w-7 h-7 flex items-center justify-center rounded-clay-sm transition-colors',
-                          user.status === 'suspended'
-                            ? 'bg-status-success/10 hover:bg-status-success/20 text-status-success'
-                            : 'bg-status-error/10 hover:bg-status-error/20 text-status-error',
-                        )}
-                        title={user.status === 'suspended' ? 'Unsuspend' : 'Suspend'}
-                      >
-                        {user.status === 'suspended'
-                          ? <UserCheck className="w-3.5 h-3.5" />
-                          : <UserX className="w-3.5 h-3.5" />}
-                      </button>
+                      {/* SECURITY-FIX (AD-H3): suspend/unsuspend hidden without users.suspend. */}
+                      {canSuspend && (
+                        <button
+                          onClick={() => setSuspendConfirm(user)}
+                          className={clsx(
+                            'w-7 h-7 flex items-center justify-center rounded-clay-sm transition-colors',
+                            user.status === 'suspended'
+                              ? 'bg-status-success/10 hover:bg-status-success/20 text-status-success'
+                              : 'bg-status-error/10 hover:bg-status-error/20 text-status-error',
+                          )}
+                          title={user.status === 'suspended' ? 'Unsuspend' : 'Suspend'}
+                        >
+                          {user.status === 'suspended'
+                            ? <UserCheck className="w-3.5 h-3.5" />
+                            : <UserX className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -258,10 +264,10 @@ export function Users() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetailUser(null)}>Close</Button>
-            {detailUser?.status !== 'suspended'
+            {canSuspend && (detailUser?.status !== 'suspended'
               ? <Button variant="danger" size="sm" onClick={() => { setSuspendConfirm(detailUser); setDetailUser(null); }}>Suspend User</Button>
               : <Button variant="success" size="sm" onClick={() => { setSuspendConfirm(detailUser); setDetailUser(null); }}>Unsuspend User</Button>
-            }
+            )}
           </>
         }
       >

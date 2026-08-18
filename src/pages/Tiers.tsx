@@ -21,8 +21,39 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import API_BASE_URL from '../lib/config';
+import { getAdminToken, clearAdminSession } from '../api/auth';
+import { can, CAP } from '../lib/rbac';
 
 const API_URL = `${API_BASE_URL}/admin/v1`;
+
+// SECURITY-FIX (AD-L1 / AD-H2): Tiers previously used the default axios client with a
+// manually-attached token and NO 401 handling, drifting from the shared adminApi
+// client. Route every tier call through a dedicated axios instance that (a) attaches
+// the admin JWT via a request interceptor and (b) on 401/403 clears the session and
+// redirects to /login — matching adminFetch's session lifecycle.
+const tiersApi = axios.create({ baseURL: API_URL });
+
+tiersApi.interceptors.request.use((config) => {
+  const token = getAdminToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+tiersApi.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    const status = error?.response?.status;
+    if (status === 401 || status === 403) {
+      clearAdminSession();
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  },
+);
 
 interface Tier {
   _id: string;
@@ -49,13 +80,12 @@ const Tiers: React.FC = () => {
   const [form] = Form.useForm();
 
   // Fetch tiers
+  const canManage = can(CAP.TIERS_MANAGE);
+
   const fetchTiers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('ilesure_admin_token');
-      const response = await axios.get(`${API_URL}/tiers`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await tiersApi.get(`/tiers`);
       setTiers(response.data.data.tiers || []);
     } catch (error) {
       message.error('Failed to fetch tiers');
@@ -72,7 +102,6 @@ const Tiers: React.FC = () => {
   // Create or Update tier
   const handleSave = async (values: any) => {
     try {
-      const token = localStorage.getItem('ilesure_admin_token');
       const tierData = {
         id: values.id,
         name: values.name,
@@ -89,14 +118,10 @@ const Tiers: React.FC = () => {
       };
 
       if (editingTier) {
-        await axios.put(`${API_URL}/tiers/${editingTier.id}`, tierData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await tiersApi.put(`/tiers/${editingTier.id}`, tierData);
         message.success('Tier updated successfully');
       } else {
-        await axios.post(`${API_URL}/tiers`, tierData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await tiersApi.post(`/tiers`, tierData);
         message.success('Tier created successfully');
       }
 
@@ -111,10 +136,7 @@ const Tiers: React.FC = () => {
   // Delete tier
   const handleDelete = async (id: string) => {
     try {
-      const token = localStorage.getItem('ilesure_admin_token');
-      await axios.delete(`${API_URL}/tiers/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await tiersApi.delete(`/tiers/${id}`);
       message.success('Tier deleted successfully');
       fetchTiers();
     } catch (error: any) {
@@ -125,10 +147,7 @@ const Tiers: React.FC = () => {
   // Toggle active status
   const handleToggleStatus = async (id: string) => {
     try {
-      const token = localStorage.getItem('ilesure_admin_token');
-      await axios.patch(`${API_URL}/tiers/${id}/toggle`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await tiersApi.patch(`/tiers/${id}/toggle`, {});
       message.success('Tier status updated');
       fetchTiers();
     } catch (error: any) {
@@ -201,35 +220,42 @@ const Tiers: React.FC = () => {
           checkedChildren="Active"
           unCheckedChildren="Inactive"
           onChange={() => handleToggleStatus(record.id)}
+          disabled={!canManage}
         />
       ),
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: (_: any, record: Tier) => (
-        <span>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => openModal(record)}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Delete this tier?"
-            description="This action cannot be undone. Make sure no companies are using this tier."
-            onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            cancelText="Cancel"
-            okButtonProps={{ danger: true }}
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
+      // SECURITY-FIX (AD-H3): Tier create/edit/delete/toggle are destructive; hide
+      // them from roles that lack tiers.manage (defense-in-depth — backend is
+      // authoritative).
+      render: (_: any, record: Tier) =>
+        canManage ? (
+          <span>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => openModal(record)}
+            >
+              Edit
             </Button>
-          </Popconfirm>
-        </span>
-      ),
+            <Popconfirm
+              title="Delete this tier?"
+              description="This action cannot be undone. Make sure no companies are using this tier."
+              onConfirm={() => handleDelete(record.id)}
+              okText="Delete"
+              cancelText="Cancel"
+              okButtonProps={{ danger: true }}
+            >
+              <Button type="link" danger icon={<DeleteOutlined />}>
+                Delete
+              </Button>
+            </Popconfirm>
+          </span>
+        ) : (
+          <span style={{ color: '#aaa' }}>—</span>
+        ),
     },
   ];
 
@@ -238,9 +264,11 @@ const Tiers: React.FC = () => {
       <Card
         title={<Typography.Title level={3} style={{ margin: 0 }}>Tier Management</Typography.Title>}
         extra={
-          <Button type="primary" style={{ backgroundColor: '#8B4513', borderRadius: '5px', color: 'white' }} icon={<PlusOutlined />} onClick={() => openModal()}>
-            Add New Tier
-          </Button>
+          canManage ? (
+            <Button type="primary" style={{ backgroundColor: '#8B4513', borderRadius: '5px', color: 'white' }} icon={<PlusOutlined />} onClick={() => openModal()}>
+              Add New Tier
+            </Button>
+          ) : null
         }
       >
         <Table

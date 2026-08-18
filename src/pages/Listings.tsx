@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal';
 import { Listing } from '../types';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
+import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 type FilterStatus = 'all' | 'pending_approval' | 'active' | 'needs_roommate' | 'fully_booked' | 'archived' | 'rejected';
@@ -25,6 +26,8 @@ export function Listings() {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const canModerate = can(CAP.LISTINGS_MODERATE);
 
   useEffect(() => {
     fetchListings();
@@ -252,7 +255,8 @@ export function Listings() {
                     <td><span className="text-xs text-text-tertiary">{listing.submittedDate}</span></td>
                     <td className="text-right pr-4">
                       <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
-                        {listing.status === 'pending_approval' && (
+                        {/* SECURITY-FIX (AD-H3): approve/changes/reject hidden without listings.moderate. */}
+                        {listing.status === 'pending_approval' && canModerate && (
                           <>
                             <button onClick={() => handleAction('approve', listing)} className="btn-success btn-sm rounded-pill text-xs px-3 py-1 font-semibold bg-status-success text-white hover:opacity-90 transition-opacity active:scale-95">Approve</button>
                             <button onClick={() => handleAction('changes', listing)} className="btn-mustard btn-sm rounded-pill text-xs px-3 py-1 font-semibold bg-gradient-to-br from-mustard-light to-mustard text-white hover:opacity-90 transition-opacity active:scale-95">Changes</button>
@@ -297,7 +301,7 @@ export function Listings() {
                             </div>
                           ))}
                         </div>
-                        {listing.status === 'pending_approval' && (
+                        {listing.status === 'pending_approval' && canModerate && (
                           <div className="flex gap-3 mt-4">
                             <Button variant="success" size="sm" onClick={() => handleAction('approve', listing)}>Approve Listing</Button>
                             <Button variant="mustard" size="sm" onClick={() => handleAction('changes', listing)}>Request Changes</Button>

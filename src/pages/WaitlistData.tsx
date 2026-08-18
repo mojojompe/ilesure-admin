@@ -5,11 +5,36 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { clsx } from 'clsx';
-import { adminApi } from '../api/admin';
+import { adminApi, adminFetchRaw } from '../api/admin';
+import toast from 'react-hot-toast';
+
+// SECURITY-FIX (AD-M2): Build a proper CSV string from an array of row objects.
+// Escapes quotes/commas/newlines per RFC 4180 so values containing PII (names,
+// emails, phones) don't corrupt the file.
+function rowsToCsv(rows: any[]): string {
+  if (!Array.isArray(rows) || rows.length === 0) return '';
+  const headers = Array.from(
+    rows.reduce((set: Set<string>, r) => {
+      Object.keys(r || {}).forEach((k) => set.add(k));
+      return set;
+    }, new Set<string>()),
+  );
+  const escape = (v: any) => {
+    if (v === null || v === undefined) return '';
+    const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const lines = [headers.join(',')];
+  for (const row of rows) {
+    lines.push(headers.map((h) => escape(row?.[h])).join(','));
+  }
+  return lines.join('\r\n');
+}
 
 export function WaitlistData() {
   const [search, setSearch] = useState('');
   const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
   const [corridorDemand, setCorridorDemand] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,11 +47,14 @@ export function WaitlistData() {
     setLoading(true);
     setError(null);
     try {
+      // FIX: the list endpoint defaults to limit=20, so the page only ever received the
+      // first 20 rows. This page has no pagination UI — it filters client-side and shows
+      // everything it holds — so request the full set instead of a single default page.
       const [waitlistRes, analyticsRes] = await Promise.all([
-        adminApi.waitlist.list(),
+        adminApi.waitlist.list('?limit=1000'),
         adminApi.analytics.waitlist(),
       ]);
-      
+
       if (waitlistRes.success && waitlistRes.data?.entries?.length > 0) {
         const formatted = waitlistRes.data.entries.map((e: any) => ({
           id: e._id || e.id,
@@ -44,8 +72,16 @@ export function WaitlistData() {
           createdAt: e.createdAt ? new Date(e.createdAt).toISOString().split('T')[0] : '',
         }));
         setWaitlist(formatted);
+        // FIX: the "Total on Waitlist" tile previously showed waitlist.length, i.e. the size
+        // of the page just fetched (always 20), not the real count. The server already
+        // reports the true total — use it, and only fall back to what we hold.
+        setTotal(
+          waitlistRes.data.summary?.total
+          ?? waitlistRes.data.pagination?.totalItems
+          ?? formatted.length
+        );
       }
-      
+
       if (analyticsRes.success && analyticsRes.data?.corridorDemand?.length > 0) {
         setCorridorDemand(analyticsRes.data.corridorDemand);
       }
@@ -58,18 +94,41 @@ export function WaitlistData() {
   };
 
   const handleExport = async () => {
+    // SECURITY-FIX (AD-M2): The previous version ran the export through the JSON-forcing
+    // adminFetch and wrapped the resulting object in a Blob, so the download was a file
+    // literally containing "[object Object]", and any error was swallowed. Now we fetch
+    // the raw response: if the server returns CSV we stream it through; if it returns
+    // JSON rows we build a proper RFC 4180 CSV client-side. Errors are surfaced.
     try {
-      const response = await adminApi.waitlist.export();
-      if (response) {
-        const blob = new Blob([response], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'waitlist.csv';
-        a.click();
+      const response = await adminFetchRaw('/admin/v1/waitlist/export');
+      const contentType = response.headers.get('content-type') || '';
+
+      let csv: string;
+      if (contentType.includes('application/json')) {
+        const json = await response.json();
+        const rows = Array.isArray(json)
+          ? json
+          : json?.data?.entries || json?.entries || json?.data || [];
+        csv = rowsToCsv(rows);
+      } else {
+        csv = await response.text();
       }
-    } catch (error) {
+
+      if (!csv || !csv.trim()) {
+        toast.error('No waitlist data available to export');
+        return;
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'waitlist.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
       console.error('Failed to export waitlist:', error);
+      toast.error(error?.message || 'Failed to export waitlist data');
     }
   };
 
@@ -94,7 +153,7 @@ export function WaitlistData() {
       {/* ── Summary Insights ────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total on Waitlist',   value: waitlist.length,         icon: <ClipboardList className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
+          { label: 'Total on Waitlist',   value: total,                   icon: <ClipboardList className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
           { label: 'Need Roommate',        value: needsRoommate,               icon: <Users className="w-5 h-5 text-mustard" />,               bg: 'bg-mustard/10' },
           { label: 'Avg. Min Budget',      value: `₦${(avgBudget / 1000).toFixed(0)}k`, icon: <ClipboardList className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
           { label: 'Top Corridor',         value: topCorridor.corridor,        icon: <MapPin className="w-5 h-5 text-status-success" />,        bg: 'bg-status-success/10' },

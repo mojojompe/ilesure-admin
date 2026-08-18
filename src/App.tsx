@@ -20,10 +20,15 @@ import { AuditLogs } from './pages/AuditLogs';
 import { PushNotifications } from './pages/PushNotifications';
 import { Ads } from './pages/Ads';
 import { NotFound } from './pages/NotFound';
+import { isAdminAuthenticated } from './api/auth';
 
 // Auth Guard Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuth = localStorage.getItem('ilesure_admin_auth') === 'true';
+  // SECURITY-FIX (AD-C1): Gate on a valid, non-expired admin JWT instead of the
+  // spoofable `ilesure_admin_auth` boolean flag (anyone could set that flag in
+  // DevTools to load the entire admin UI). The flag may still be set at login for
+  // UI convenience, but it is NO LONGER the authorization gate.
+  const isAuth = isAdminAuthenticated();
   const location = useLocation();
 
   if (!isAuth) {
