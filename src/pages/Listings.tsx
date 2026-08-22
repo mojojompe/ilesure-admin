@@ -14,7 +14,8 @@ type FilterStatus = 'all' | 'pending_approval' | 'active' | 'needs_roommate' | '
 
 const propertyTypeLabel: Record<string, string> = {
   self_con: 'Self-con', '1_bed': '1-Bed Flat', '2_bed': '2-Bed Flat', '3_bed': '3-Bed Flat',
-  mini_flat: 'Mini Flat', hostel_room: 'Hostel Room', shared_apartment: 'Shared Apt', shortlet: 'Shortlet',
+  mini_flat: 'Mini Flat', studio: 'Studio', penthouse: 'Penthouse',
+  hostel_room: 'Hostel Room', shared_apartment: 'Shared Apt', shortlet: 'Shortlet',
 };
 
 export function Listings() {
