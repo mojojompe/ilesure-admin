@@ -60,6 +60,10 @@ interface Tier {
   id: string;
   name: string;
   price: number;
+  /** Price for one month, in naira. */
+  priceMonthly?: number;
+  /** Price for one year, in naira — set explicitly, not derived from the monthly price. */
+  priceYearly?: number;
   priceDisplay: string;
   billingCycle: string;
   features: {
@@ -105,8 +109,12 @@ const Tiers: React.FC = () => {
       const tierData = {
         id: values.id,
         name: values.name,
-        price: parseFloat(values.price),
-        priceDisplay: `₦${values.price}`,
+        price: parseFloat(values.priceMonthly),
+        priceMonthly: parseFloat(values.priceMonthly),
+        priceYearly: values.priceYearly === undefined || values.priceYearly === ''
+          ? undefined
+          : parseFloat(values.priceYearly),
+        priceDisplay: `₦${values.priceMonthly}`,
         billingCycle: values.billingCycle || 'yearly',
         features: {
           maxListings: values.maxListings,
@@ -162,7 +170,8 @@ const Tiers: React.FC = () => {
       form.setFieldsValue({
         id: tier.id,
         name: tier.name,
-        price: tier.price,
+        priceMonthly: tier.priceMonthly ?? tier.price,
+        priceYearly: tier.priceYearly,
         billingCycle: tier.billingCycle,
         maxListings: tier.features.maxListings,
         analytics: tier.features.analytics,
@@ -196,10 +205,18 @@ const Tiers: React.FC = () => {
       ),
     },
     {
-      title: 'Price',
-      dataIndex: 'priceDisplay',
-      key: 'price',
-      render: (text: string) => <strong>{text}</strong>,
+      title: 'Monthly',
+      key: 'priceMonthly',
+      render: (_: unknown, tier: Tier) => <strong>₦{(tier.priceMonthly ?? tier.price ?? 0).toLocaleString()}</strong>,
+    },
+    {
+      title: 'Yearly',
+      key: 'priceYearly',
+      render: (_: unknown, tier: Tier) => (
+        tier.priceYearly === undefined || tier.priceYearly === null
+          ? <span style={{ color: '#999' }}>not set</span>
+          : <strong>₦{tier.priceYearly.toLocaleString()}</strong>
+      ),
     },
     {
       title: 'Billing',
@@ -313,11 +330,19 @@ const Tiers: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label="Price (₦)"
-            name="price"
-            rules={[{ required: true, message: 'Please enter price!' }]}
+            label="Monthly price (₦)"
+            name="priceMonthly"
+            rules={[{ required: true, message: 'Please enter the monthly price!' }]}
           >
             <Input type="number" placeholder="e.g., 10000" />
+          </Form.Item>
+
+          <Form.Item
+            label="Yearly price (₦)"
+            name="priceYearly"
+            extra="Charged when a subscriber picks yearly billing. Set it to whatever the plan should cost for a year — it is no longer derived from the monthly price. Leave blank to offer monthly only."
+          >
+            <Input type="number" placeholder="e.g., 96000" />
           </Form.Item>
 
           <Form.Item
