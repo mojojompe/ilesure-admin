@@ -46,17 +46,39 @@ export function VerificationQueue() {
   // "They will be notified with the reason below."
   const [actionReason, setActionReason] = useState('');
   const [loading, setLoading] = useState(false);
+  // QA-ADM-020: the queue called the API with no params, so it showed the backend's first
+  // page of 20 with no way to reach the rest, no status filter (already-verified users sat
+  // in a strip headed "Pending Verifications"), and no search.
+  const [statusFilter, setStatusFilter] = useState<string>('pending');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const canReview = can(CAP.VERIFICATIONS_REVIEW);
 
   useEffect(() => {
     fetchVerifications();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, page]);
+
+  // Debounce the search box so typing does not fire a request per keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setPage(1);
+      fetchVerifications();
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const fetchVerifications = async () => {
     setLoading(true);
     try {
-      const response = await adminApi.verifications.list();
+      const params = new URLSearchParams({ page: String(page), limit: '20' });
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (search.trim()) params.set('search', search.trim());
+      const response = await adminApi.verifications.list(`?${params.toString()}`);
       if (response.success && response.data?.verifications) {
         const formatted = response.data.verifications.map((v: any) => ({
           id: v._id || v.id,
@@ -79,6 +101,9 @@ export function VerificationQueue() {
           adminNotes: v.adminNotes || '',
         }));
         setVerifications(formatted);
+        const pg = response.data.pagination;
+        setTotalItems(pg?.totalItems ?? formatted.length);
+        setTotalPages(pg?.totalPages ?? 1);
         if (formatted.length > 0 && !selected) {
           handleSelect(formatted[0], formatted[0].checklist, formatted[0].adminNotes);
         }
@@ -173,9 +198,35 @@ export function VerificationQueue() {
 
       {/* ── Queue List (top strip) ───────────────────────── */}
       <ClayCard padding="none">
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-clay-border">
+        {/* BUGFIX (QA-ADM-020): the heading counted the rendered page, not the queue, so it
+            read "Pending Verifications (20)" while the API reported 22 total — and the list
+            was never filtered to pending at all. */}
+        <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-clay-border">
           <Clock className="w-4 h-4 text-mustard" />
-          <h3 className="font-bold text-text-primary text-sm">Pending Verifications ({verifications.length})</h3>
+          <h3 className="font-bold text-text-primary text-sm">
+            {statusFilter === 'all' ? 'All Verifications' : `${statusFilter.charAt(0).toUpperCase()}${statusFilter.slice(1)} Verifications`} ({totalItems})
+          </h3>
+          <div className="ml-auto flex items-center gap-2">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name or email"
+              aria-label="Search verifications by name or email"
+              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white w-52"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
+              aria-label="Filter verifications by status"
+              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white"
+            >
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+              <option value="rejected">Rejected</option>
+              <option value="all">All</option>
+            </select>
+          </div>
         </div>
         <div className="flex overflow-x-auto divide-x divide-clay-border-light">
           {verifications.map((req) => (
@@ -199,7 +250,33 @@ export function VerificationQueue() {
               <ChevronRight className={clsx('w-4 h-4 text-text-tertiary ml-auto flex-shrink-0 transition-transform', selected?.id === req.id && 'text-burnt-brown')} />
             </button>
           ))}
+          {!loading && verifications.length === 0 && (
+            <p className="px-5 py-6 text-xs text-text-tertiary">No applicants match this filter.</p>
+          )}
         </div>
+        {/* BUGFIX (QA-ADM-020): there was no pagination control, so applicants past the
+            API's first page of 20 could not be reached from the console at all. */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-5 py-2.5 border-t border-clay-border">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="text-xs text-text-tertiary">Page {page} of {totalPages}</span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </ClayCard>
 
       {/* ── Split Panel ─────────────────────────────────── */}
@@ -321,15 +398,29 @@ export function VerificationQueue() {
                     checklist[key] ? 'bg-status-success/8' : 'bg-clay-border-light hover:bg-clay-border',
                   )}
                 >
-                  <div
-                    className={clsx(
-                      'w-5 h-5 rounded-[6px] border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150',
-                      checklist[key] ? 'bg-status-success border-status-success' : 'bg-white border-clay-border',
-                    )}
-                    onClick={() => setChecklist(prev => ({ ...prev, [key]: !prev[key] }))}
-                  >
-                    {checklist[key] && <CheckCircle className="w-3.5 h-3.5 text-white" />}
-                  </div>
+                  {/* BUGFIX (QA-ADM-019): the click handler sat on the inner 20x20px <div>,
+                      so clicking the label text did nothing, and there was no real input —
+                      the rows could not be focused, tabbed to, or operated by a screen
+                      reader. A visually-hidden checkbox inside the <label> restores both
+                      the full-row hit area and keyboard/AT operability, with the styled
+                      square kept as the visual. */}
+                  <span className="relative flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={!!checklist[key]}
+                      onChange={() => setChecklist(prev => ({ ...prev, [key]: !prev[key] }))}
+                      className="absolute inset-0 w-5 h-5 opacity-0 cursor-pointer"
+                    />
+                    <span
+                      aria-hidden="true"
+                      className={clsx(
+                        'w-5 h-5 rounded-[6px] border-2 flex items-center justify-center transition-all duration-150',
+                        checklist[key] ? 'bg-status-success border-status-success' : 'bg-white border-clay-border',
+                      )}
+                    >
+                      {checklist[key] && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                    </span>
+                  </span>
                   <span className={clsx('text-xs font-medium flex-1', checklist[key] ? 'text-status-success line-through decoration-status-success/40' : 'text-text-secondary')}>
                     {label}
                   </span>

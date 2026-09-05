@@ -3,6 +3,7 @@ import { Calendar, Check, X, Loader, Search, Eye, RotateCcw } from 'lucide-react
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { formatDate } from '../utils/format';
 import { Modal } from '../components/ui/Modal';
 import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
@@ -161,7 +162,7 @@ export function Bookings() {
                   </td>
                   <td><span className="text-sm text-text-secondary">{b.agentName || '—'}</span></td>
                   <td><span className="font-bold text-mustard text-sm">₦{(b.price || 0).toLocaleString()}</span></td>
-                  <td><span className="text-sm text-text-secondary">{b.moveInDate}</span></td>
+                  <td><span className="text-sm text-text-secondary">{formatDate(b.moveInDate)}</span></td>
                   <td><StatusBadge status={b.status as any} /></td>
                   <td><StatusBadge status={(b.paymentStatus || 'pending') as any} /></td>
                   <td className="text-right pr-4">
@@ -205,7 +206,7 @@ export function Bookings() {
                 { label: 'Phone', value: detail.tenantPhone || detail.userPhone || '—' },
                 { label: 'Agent', value: detail.agentName || '—' },
                 { label: 'Price', value: `₦${(detail.price || 0).toLocaleString()}` },
-                { label: 'Move-in Date', value: detail.moveInDate || '—' },
+                { label: 'Move-in Date', value: formatDate(detail.moveInDate) },
                 { label: 'Payment', value: detail.paymentStatus || 'pending' },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">

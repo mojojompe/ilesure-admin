@@ -6,6 +6,54 @@ import { Button } from '../components/ui/Button';
 import { adminApi } from '../api/admin';
 import { getAdminToken } from '../api/auth';
 
+/**
+ * BUGFIX (QA-ADM-033): one accessible switch with a single visual polarity — knob to the
+ * right always means "on" — replacing three hand-rolled buttons with contradictory
+ * semantics and no accessible name.
+ */
+function PlatformToggle({
+  label,
+  checked,
+  onChange,
+  description,
+  onIsWarning = false,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+  description?: string;
+  onIsWarning?: boolean;
+}) {
+  const track = checked
+    ? onIsWarning
+      ? 'bg-status-error'
+      : 'bg-status-success'
+    : 'bg-clay-border';
+  return (
+    <div className="flex items-start justify-between gap-4 py-2 border-b border-clay-border-light">
+      <div className="min-w-0">
+        <span className="text-sm text-text-secondary">{label}</span>
+        {description && <p className="text-xs text-text-tertiary mt-0.5">{description}</p>}
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span className="text-xs font-semibold text-text-tertiary w-7 text-right">{checked ? 'On' : 'Off'}</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={checked}
+          aria-label={label}
+          onClick={() => onChange(!checked)}
+          className={`w-12 h-6 rounded-full transition-colors ${track}`}
+        >
+          <div
+            className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${checked ? 'translate-x-6' : 'translate-x-0.5'}`}
+          />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function Settings() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
@@ -320,33 +368,33 @@ export function Settings() {
                 <div className="space-y-4">
                   <h4 className="text-sm font-bold text-text-primary">Platform Status</h4>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between py-2 border-b border-clay-border-light">
-                      <span className="text-sm text-text-secondary">Maintenance Mode</span>
-                      <button 
-                        onClick={() => setPlatform({ ...platform, maintenanceMode: !platform?.maintenanceMode })}
-                        className={`w-12 h-6 rounded-full transition-colors ${platform?.maintenanceMode ? 'bg-status-error' : 'bg-status-success/30'}`}
-                      >
-                        <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${platform?.maintenanceMode ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-clay-border-light">
-                      <span className="text-sm text-text-secondary">User Registration</span>
-                      <button 
-                        onClick={() => setPlatform({ ...platform, registrationEnabled: !platform?.registrationEnabled })}
-                        className={`w-12 h-6 rounded-full transition-colors ${!platform?.registrationEnabled ? 'bg-status-error' : 'bg-status-success/30'}`}
-                      >
-                        <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${!platform?.registrationEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-clay-border-light">
-                      <span className="text-sm text-text-secondary">Waitlist</span>
-                      <button 
-                        onClick={() => setPlatform({ ...platform, waitlistEnabled: !platform?.waitlistEnabled })}
-                        className={`w-12 h-6 rounded-full transition-colors ${!platform?.waitlistEnabled ? 'bg-status-error' : 'bg-status-success/30'}`}
-                      >
-                        <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${!platform?.waitlistEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                      </button>
-                    </div>
+                    {/* BUGFIX (QA-ADM-033): all three switches rendered identically
+                        regardless of their value, and two of the three were driven from the
+                        NEGATED boolean — so "knob right, red" meant ENABLED on one row and
+                        DISABLED on the next two. They were also bare <button>s with no
+                        role, no aria-checked, no accessible name and no state text, so
+                        neither a sighted admin nor a screen reader could tell them apart.
+                        One component now drives all three from the real value: knob right
+                        always means "on", and the state is written out in words. */}
+                    <PlatformToggle
+                      label="Maintenance Mode"
+                      checked={!!platform?.maintenanceMode}
+                      onChange={(v) => setPlatform({ ...platform, maintenanceMode: v })}
+                      onIsWarning
+                      description="Refuses public API traffic. The admin console stays reachable."
+                    />
+                    <PlatformToggle
+                      label="User Registration"
+                      checked={platform?.registrationEnabled !== false}
+                      onChange={(v) => setPlatform({ ...platform, registrationEnabled: v })}
+                      description="When off, new signups are refused."
+                    />
+                    <PlatformToggle
+                      label="Waitlist"
+                      checked={platform?.waitlistEnabled !== false}
+                      onChange={(v) => setPlatform({ ...platform, waitlistEnabled: v })}
+                      description="When off, users cannot join the waitlist."
+                    />
                   </div>
                 </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Search, Filter, Download, ChevronDown, ChevronUp, Eye, Home, MapPin, User } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
@@ -27,18 +27,29 @@ export function Listings() {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // BUGFIX (QA-ADM-039): the pager was the literal array [1, 2, 3] — three inert buttons
+  // that never changed the request, printed under "Showing 5 of 5 listings". Meanwhile the
+  // API caps a page at 20, so with more than 20 listings the extras were unreachable.
+  const [page, setPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const canModerate = can(CAP.LISTINGS_MODERATE);
 
   useEffect(() => {
     fetchListings();
-  }, [statusFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, page]);
+
+  // A filter change re-queries from the first page; staying on page 3 of a 1-page result
+  // would otherwise show an empty table.
+  useEffect(() => { setPage(1); }, [statusFilter]);
 
   const fetchListings = async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ page: String(page), limit: '20' });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       
       const response = await adminApi.listings.list(`?${params.toString()}`);
@@ -76,6 +87,9 @@ export function Listings() {
           canBeShared: l.canBeShared || false,
         }));
         setListings(formattedListings);
+        const pg = response.data?.pagination;
+        setTotalItems(pg?.totalItems ?? formattedListings.length);
+        setTotalPages(pg?.totalPages ?? 1);
       }
     } catch (error: any) {
       console.error('Failed to fetch listings:', error);
@@ -218,9 +232,10 @@ export function Listings() {
                   </td>
                 </tr>
               ) : filtered.map((listing) => (
-                <>
+                /* BUGFIX (QA-ADM-042): the fragment was the list child, so React saw an
+                   unkeyed array — the key on the inner <tr> does not count. */
+                <Fragment key={listing.id}>
                   <tr
-                    key={listing.id}
                     className="cursor-pointer"
                     onClick={() => setExpandedId(expandedId === listing.id ? null : listing.id)}
                   >
@@ -312,7 +327,7 @@ export function Listings() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
 
               {filtered.length === 0 && (
@@ -331,14 +346,24 @@ export function Listings() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between px-5 py-3.5 border-t border-clay-border bg-off-white rounded-b-clay">
-          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {listings.length} listings</p>
-          <div className="flex gap-1">
-            {[1, 2, 3].map(p => (
-              <button key={p} className={clsx('w-7 h-7 rounded-clay-sm text-xs font-semibold transition-colors',
-                p === 1 ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'
-              )}>{p}</button>
-            ))}
-          </div>
+          <p className="text-xs text-text-tertiary">
+            Showing {filtered.length} of {totalItems} listing{totalItems === 1 ? '' : 's'}
+            {totalPages > 1 && ` · page ${page} of ${totalPages}`}
+          </p>
+          {totalPages > 1 && (
+            <div className="flex gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                <button
+                  key={n}
+                  onClick={() => setPage(n)}
+                  aria-current={n === page ? 'page' : undefined}
+                  className={clsx('w-7 h-7 rounded-clay-sm text-xs font-semibold transition-colors',
+                    n === page ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'
+                  )}
+                >{n}</button>
+              ))}
+            </div>
+          )}
         </div>
       </ClayCard>
 

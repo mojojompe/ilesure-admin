@@ -4,6 +4,7 @@ import { CreditCard, CheckCircle, Clock, Loader, Search, Eye } from 'lucide-reac
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { formatDateTime } from '../utils/format';
 import { Modal } from '../components/ui/Modal';
 import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
@@ -179,7 +180,7 @@ function PayoutsSection() {
                   </td>
                   <td><span className="text-sm text-text-secondary">{p.description || 'Subscription'}</span></td>
                   <td><span className="font-bold text-mustard text-sm">₦{(p.amount || 0).toLocaleString()}</span></td>
-                  <td><span className="text-xs text-text-tertiary">{p.date || p.createdAt?.split('T')[0] || '—'}</span></td>
+                  <td><span className="text-xs text-text-tertiary">{formatDateTime(p.date || p.createdAt)}</span></td>
                   <td><StatusBadge status={(p.status || 'pending') as any} /></td>
                   <td className="text-right pr-4">
                     <button onClick={() => setDetail(p)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
@@ -215,7 +216,7 @@ function PayoutsSection() {
               { label: 'Agent / Company', value: detail.agentName || detail.companyName || '—' },
               { label: 'Amount', value: `₦${(detail.amount || 0).toLocaleString()}` },
               { label: 'Description', value: detail.description || 'Subscription' },
-              { label: 'Date', value: detail.date || detail.createdAt?.split('T')[0] || '—' },
+              { label: 'Date', value: formatDateTime(detail.date || detail.createdAt) },
               { label: 'Status', value: detail.status || 'pending' },
               { label: 'Reference', value: detail.reference || '—' },
             ].map(({ label, value }) => (

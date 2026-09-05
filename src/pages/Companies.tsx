@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Building2, Users, Home, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
@@ -191,8 +191,10 @@ export function Companies() {
                   </td>
                 </tr>
               ) : companies.map(company => (
-                <>
-                  <tr key={company.id} className="cursor-pointer" onClick={() => handleExpand(company.id)}>
+                /* BUGFIX (QA-ADM-042): keyed fragment — the key on the inner <tr> is not
+                   the key React needs; the fragment is the child of the mapped array. */
+                <Fragment key={company.id}>
+                  <tr className="cursor-pointer" onClick={() => handleExpand(company.id)}>
                     <td>
                       <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-clay-sm bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white font-bold text-sm shadow-clay-sm flex-shrink-0">
@@ -284,7 +286,7 @@ export function Companies() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
