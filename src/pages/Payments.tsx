@@ -42,21 +42,31 @@ export function Payments() {
 function PayoutsSection() {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [payPage, setPayPage] = useState(1);
+  const [payPagination, setPayPagination] = useState<any>(null);
+  const [payTotals, setPayTotals] = useState<any>(null);
   const [filter, setFilter] = useState<PayFilter>('all');
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => { fetchPayments(); }, [filter]);
+  useEffect(() => { fetchPayments(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, payPage]);
+  // A filter change restarts at page 1; staying on page 3 of a 1-page result shows nothing.
+  useEffect(() => { setPayPage(1); }, [filter]);
 
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      const params: Record<string, any> = {};
+      // BUGFIX (QA-ADM2-027): this asked for no page and no limit, so it rendered the API's
+      // first 20 rows with no pager — the rest were unreachable — and computed the money
+      // tiles from those 20, understating them silently.
+      const params: Record<string, any> = { page: payPage, limit: 20 };
       if (filter !== 'all') params.status = filter;
       const res = await adminApi.payments?.list?.(params) ?? { success: false, data: null };
       if (res.success && res.data) {
         setPayments(Array.isArray(res.data) ? res.data : res.data.payments ?? []);
+        setPayPagination(res.data?.pagination ?? null);
+        setPayTotals(res.data?.totals ?? null);
       }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch payments');
@@ -144,10 +154,16 @@ function PayoutsSection() {
   // BUGFIX (QA-ADM-035): this filtered on 'processed', which the backend never stores —
   // it normalises 'processed' to 'completed' on the way in. The tile therefore read
   // "PROCESSED ₦0" while hundreds of thousands of naira of completed payments existed.
-  const totalProcessed = payments
-    .filter(p => p.status === 'completed' || p.status === 'processed')
-    .reduce((s, p) => s + (p.amount || 0), 0);
-  const totalPending = payments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+  // BUGFIX (QA-ADM2-027): these summed the CURRENT PAGE. They now come from the server's
+  // aggregate over the whole filtered set; the page-derived figures remain only as a
+  // fallback for an API that does not send totals, and are labelled as such below.
+  const totalProcessed = payTotals
+    ? payTotals.completed
+    : payments.filter(p => p.status === 'completed' || p.status === 'processed').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalPending = payTotals
+    ? payTotals.pending
+    : payments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalRecords = payTotals ? payTotals.records : payments.length;
 
   const tabs: PayFilter[] = ['all', 'pending', 'processed', 'refunded', 'failed'];
 
@@ -156,7 +172,7 @@ function PayoutsSection() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-clay border border-clay-border shadow-clay p-5">
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Total Payout Records</p>
-          <p className="text-3xl font-bold text-text-primary">{payments.length}</p>
+          <p className="text-3xl font-bold text-text-primary">{totalRecords}</p>
         </div>
         <div className="bg-white rounded-clay border border-clay-border shadow-clay p-5">
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Pending Payouts</p>
@@ -233,6 +249,29 @@ function PayoutsSection() {
             </tbody>
           </table>
         </div>
+        {/* BUGFIX (QA-ADM2-027): there was no pager at all, so every payment past the
+            first 20 was unreachable from the console. */}
+        {payPagination && payPagination.totalPages > 1 && (
+          <div className="flex items-center justify-between px-5 py-3 border-t border-clay-border">
+            <span className="text-xs text-text-tertiary">
+              Showing {payments.length} of {payPagination.totalItems} &middot; page {payPagination.currentPage} of {payPagination.totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPayPage((n) => Math.max(1, n - 1))}
+                disabled={payPagination.currentPage <= 1}
+                className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+              >Previous</button>
+              <button
+                type="button"
+                onClick={() => setPayPage((n) => Math.min(payPagination.totalPages, n + 1))}
+                disabled={payPagination.currentPage >= payPagination.totalPages}
+                className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+              >Next</button>
+            </div>
+          </div>
+        )}
       </ClayCard>
 
       <Modal
