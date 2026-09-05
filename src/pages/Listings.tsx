@@ -18,6 +18,29 @@ const propertyTypeLabel: Record<string, string> = {
   hostel_room: 'Hostel Room', shared_apartment: 'Shared Apt', shortlet: 'Shortlet',
 };
 
+/**
+ * BUGFIX: renders what a listing actually costs.
+ *
+ * The table divided annualRent by 1000 unconditionally. A shortlet carries rentAnnual 0 with
+ * its real prices in shortletRates[], so every shortlet in the console read "₦0k" — which
+ * looks like a free property rather than one priced per night.
+ */
+function formatListingRent(listing: any, long = false): string {
+  const rates: Array<{ price?: number; label?: string }> = listing?.shortletRates || [];
+  const prices = rates.map(r => Number(r.price)).filter(p => Number.isFinite(p) && p > 0);
+
+  if (prices.length > 0) {
+    const lo = Math.min(...prices);
+    const hi = Math.max(...prices);
+    const fmt = (n: number) => (long ? `₦${n.toLocaleString()}` : `₦${(n / 1000).toFixed(0)}k`);
+    return lo === hi ? `${fmt(lo)} /stay` : `${fmt(lo)}–${fmt(hi)} /stay`;
+  }
+
+  const annual = Number(listing?.annualRent);
+  if (!Number.isFinite(annual) || annual <= 0) return '—';
+  return long ? `₦${annual.toLocaleString()} /yr` : `₦${(annual / 1000).toFixed(0)}k`;
+}
+
 export function Listings() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
@@ -69,6 +92,7 @@ export function Listings() {
           city: l.city || '',
           landmark: l.landmark,
           annualRent: l.annualRent || 0,
+          shortletRates: l.shortletRates || [],
           cautionFee: l.cautionFee || 0,
           agencyFee: l.agencyFee || 0,
           totalMoveinCost: l.totalMoveinCost || 0,
@@ -260,7 +284,10 @@ export function Listings() {
                       </div>
                     </td>
                     <td><span className="text-sm text-text-secondary">{propertyTypeLabel[listing.propertyType]}</span></td>
-                    <td><span className="font-bold text-burnt-brown">₦{(listing.annualRent / 1000).toFixed(0)}k</span></td>
+                    {/* BUGFIX: a shortlet stores rentAnnual 0 and keeps its real prices in
+                        shortletRates[], so every shortlet rendered as "₦0k" — indistinguishable
+                        from free. Show the actual rate range instead. */}
+                    <td><span className="font-bold text-burnt-brown">{formatListingRent(listing)}</span></td>
                     <td>
                       <div className="flex items-center gap-1 text-sm text-text-secondary">
                         <MapPin className="w-3 h-3 text-text-tertiary flex-shrink-0" />
@@ -298,7 +325,7 @@ export function Listings() {
                       <td colSpan={8} className="px-6 py-5">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {[
-                            { label: 'Annual Rent', value: `₦${listing.annualRent.toLocaleString()}` },
+                            { label: 'Rent', value: formatListingRent(listing, true) },
                             { label: 'Caution Fee', value: `₦${listing.cautionFee.toLocaleString()}` },
                             { label: 'Agency Fee', value: `₦${listing.agencyFee.toLocaleString()}` },
                             { label: 'Total Move-in Cost', value: `₦${listing.totalMoveinCost.toLocaleString()}` },
