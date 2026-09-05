@@ -82,11 +82,52 @@ function PayoutsSection() {
     }
   };
 
+  // BUGFIX (QA-ADM-036): the Payments screen offered a "Refunded" filter tab and no way
+  // to reach that state — the ACTIONS column held a single view icon and the detail modal
+  // offered only Close and Mark as Processed. The server-side refund is real (it verifies
+  // with Paystack and calls the refund API through refundService), it simply had no
+  // control. Refunding money is irreversible, so it asks first, exactly like Mark as
+  // Processed.
+  const handleRefund = async (id: string) => {
+    setUpdating(true);
+    try {
+      await adminApi.payments?.refund?.(id);
+      toast.success('Refund submitted to Paystack');
+      await fetchPayments();
+      setDetail(null);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to refund payment');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const confirmRefund = (payment: any) => {
+    // QA-ADM-037: close the detail modal first. antd's Modal.confirm portal and this app's
+    // own Modal component compete for the stacking context, so the confirmation rendered
+    // washed-out and interleaved with the still-open record behind it — barely legible for
+    // a dialog whose entire job is to be read before money moves.
+    setDetail(null);
+    AntModal.confirm({
+      title: 'Refund this payment?',
+      content: `This will refund ₦${(payment.amount || 0).toLocaleString()} to ${payment.agentName || payment.companyName || 'the payer'} through Paystack. This cannot be undone.`,
+      okText: 'Refund',
+      okButtonProps: { danger: true },
+      cancelText: 'Cancel',
+      zIndex: 2000,
+      onOk: () => handleRefund(payment.id),
+    });
+  };
+
   // SECURITY-FIX (AD-M1): Marking a payout as processed is an irreversible money
   // action; require an explicit confirmation before firing it (consistent with the
   // Users suspend confirm pattern).
   const confirmMarkProcessed = (payment: any) => {
+    // BUGFIX (QA-ADM-037): see confirmRefund — the confirm was drawn behind/through the
+    // open detail modal.
+    setDetail(null);
     AntModal.confirm({
+      zIndex: 2000,
       title: 'Mark payment as processed?',
       content: `This will mark the ₦${(payment.amount || 0).toLocaleString()} payout to ${payment.agentName || payment.companyName || 'this recipient'} as processed. This action cannot be undone.`,
       okText: 'Mark Processed',
@@ -205,6 +246,12 @@ function PayoutsSection() {
             {detail?.status === 'pending' && canProcess && (
               <Button variant="success" size="sm" loading={updating} onClick={() => confirmMarkProcessed(detail)} icon={<CheckCircle className="w-3.5 h-3.5" />}>
                 Mark as Processed
+              </Button>
+            )}
+            {/* BUGFIX (QA-ADM-036): only a payment we actually collected can be refunded. */}
+            {(detail?.status === 'completed' || detail?.status === 'processed') && canProcess && (
+              <Button variant="danger" size="sm" loading={updating} onClick={() => confirmRefund(detail)}>
+                Refund
               </Button>
             )}
           </>
