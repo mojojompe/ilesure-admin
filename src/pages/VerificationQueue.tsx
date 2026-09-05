@@ -40,6 +40,11 @@ export function VerificationQueue() {
   const [adminNote, setAdminNote] = useState('');
   const [activeDoc, setActiveDoc] = useState<string>('nin');
   const [confirmModal, setConfirmModal] = useState<'approve' | 'reject' | 'info' | null>(null);
+  // BUGFIX (QA-ADM-015): the confirm modal's textarea was an unbound, uncontrolled field.
+  // The admin typed a rejection reason, and the code sent the unrelated `adminNote`
+  // state instead — so `rejectionReason` was stored as "" while the modal promised
+  // "They will be notified with the reason below."
+  const [actionReason, setActionReason] = useState('');
   const [loading, setLoading] = useState(false);
 
   const canReview = can(CAP.VERIFICATIONS_REVIEW);
@@ -123,6 +128,12 @@ export function VerificationQueue() {
 
   const confirmVerificationAction = async () => {
     if (!selected || !confirmModal) return;
+
+    // The applicant is shown this text — refuse to submit an empty one.
+    if (confirmModal !== 'approve' && !actionReason.trim()) {
+      toast.error('Please enter a reason — the applicant is shown it.');
+      return;
+    }
     
     try {
       switch (confirmModal) {
@@ -130,15 +141,16 @@ export function VerificationQueue() {
           await adminApi.verifications.approve(selected.id);
           break;
         case 'reject':
-          await adminApi.verifications.reject(selected.id, adminNote);
+          await adminApi.verifications.reject(selected.id, actionReason.trim());
           break;
         case 'info':
-          await adminApi.verifications.requestInfo(selected.id, adminNote);
+          await adminApi.verifications.requestInfo(selected.id, actionReason.trim());
           break;
       }
       await fetchVerifications();
       toast.success('Verification action completed');
       setConfirmModal(null);
+      setActionReason('');
     } catch (error: any) {
       console.error('Failed to perform verification action:', error);
       toast.error(error?.message || 'Failed to perform action');
@@ -324,6 +336,15 @@ export function VerificationQueue() {
                 </label>
               ))}
             </div>
+            {/* BUGFIX (QA-ADM-018): handleSaveChecklist existed but was referenced by
+                nothing — there was no save control at all, so ticks never persisted. */}
+            <button
+              type="button"
+              onClick={handleSaveChecklist}
+              className="mt-4 w-full rounded-clay-sm bg-clay-border-light py-2 text-xs font-semibold text-text-primary hover:bg-clay-border"
+            >
+              Save checklist
+            </button>
           </ClayCard>
 
           {/* Admin Notes */}
@@ -336,6 +357,14 @@ export function VerificationQueue() {
               placeholder="Add notes about this verification..."
               className="w-full clay-input resize-none text-sm"
             />
+            {/* BUGFIX (QA-ADM-018): same as the checklist — handleSaveNotes was dead code. */}
+            <button
+              type="button"
+              onClick={handleSaveNotes}
+              className="mt-3 w-full rounded-clay-sm bg-clay-border-light py-2 text-xs font-semibold text-text-primary hover:bg-clay-border"
+            >
+              Save notes
+            </button>
           </ClayCard>
 
           {/* Action Buttons */}
@@ -387,7 +416,13 @@ export function VerificationQueue() {
           {confirmModal === 'info' && selected && `Requesting additional information from ${selected.applicantName}. Specify what's needed:`}
         </p>
         {confirmModal !== 'approve' && (
-          <textarea rows={3} placeholder="Reason / instructions..." className="w-full clay-input resize-none text-sm mt-3" />
+          <textarea
+            rows={3}
+            value={actionReason}
+            onChange={e => setActionReason(e.target.value)}
+            placeholder="Reason / instructions..."
+            className="w-full clay-input resize-none text-sm mt-3"
+          />
         )}
       </Modal>
     </div>

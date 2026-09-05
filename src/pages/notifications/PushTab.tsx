@@ -282,6 +282,21 @@ export function PushTab() {
         </div>
       </ClayCard>
 
+      {/* BUGFIX (QA-ADM-028): the Push tab had NO send control at all. The only
+          "Send Now" button lived inside the preview modal below, and nothing ever
+          called setShowPreview(true) — so a notification could not be sent from the
+          console even though the endpoint worked. Mirrors EmailTab's trigger. */}
+      <div className="flex justify-end">
+        <Button
+          variant="mustard"
+          icon={<Send className="w-4 h-4" />}
+          onClick={() => setShowPreview(true)}
+          disabled={!canSend}
+        >
+          Preview & Send
+        </Button>
+      </div>
+
       {/* Preview & Send Modal */}
       <Modal
         open={showPreview}

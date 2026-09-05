@@ -33,6 +33,12 @@ export function Users() {
   const [loading, setLoading] = useState(true);
 
   const canSuspend = can(CAP.USERS_SUSPEND);
+  // BUGFIX (QA-ADM-022): the page requested the API's default first page and then
+  // reported `users.length` as "Total Users" — so with 25 accounts it showed
+  // "Total Users 20 / Showing 20 of 20", and searching for a user who happened to be
+  // on page 2 returned "No users found". Track the server's own total, and ask for a
+  // page large enough to hold the whole list the page filters client-side.
+  const [totalUsers, setTotalUsers] = useState(0);
 
   useEffect(() => {
     fetchUsers();
@@ -46,6 +52,7 @@ export function Users() {
       else if (tab === 'agent_landlord') params.set('role', 'agent,landlord');
       else if (tab === 'company') params.set('role', 'company_admin');
 
+      params.set('limit', '200');
       const response = await adminApi.users.list(`?${params.toString()}`);
       if (response.success && response.data?.users) {
         const formattedUsers = response.data.users.map((u: any) => ({
@@ -62,6 +69,7 @@ export function Users() {
           bookings: u.bookings ?? 0,
         }));
         setUsers(formattedUsers);
+        setTotalUsers(response.data?.pagination?.totalItems ?? formattedUsers.length);
       }
     } catch (error: any) {
       console.error('Failed to fetch users:', error);
@@ -110,7 +118,7 @@ export function Users() {
       {/* ── Summary Cards ───────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Users',   value: users.length,                                        icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
+          { label: 'Total Users',   value: totalUsers,                                        icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
           { label: 'Tenants',       value: users.filter(u => u.role === 'tenant').length,       icon: <GraduationCap className="w-5 h-5 text-mustard" />,    bg: 'bg-mustard/10' },
           { label: 'Agents',        value: users.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
           { label: 'Suspended',     value: users.filter(u => u.status === 'suspended').length,  icon: <UserX className="w-5 h-5 text-status-error" />,       bg: 'bg-status-error/10' },
@@ -255,7 +263,7 @@ export function Users() {
           </table>
         </div>
         <div className="px-5 py-3 border-t border-clay-border bg-off-white rounded-b-clay">
-          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {users.length} users</p>
+          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {totalUsers} users</p>
         </div>
       </ClayCard>
 
