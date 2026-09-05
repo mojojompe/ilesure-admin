@@ -99,7 +99,12 @@ function PayoutsSection() {
     `${p.agentName} ${p.description}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalProcessed = payments.filter(p => p.status === 'processed').reduce((s, p) => s + (p.amount || 0), 0);
+  // BUGFIX (QA-ADM-035): this filtered on 'processed', which the backend never stores —
+  // it normalises 'processed' to 'completed' on the way in. The tile therefore read
+  // "PROCESSED ₦0" while hundreds of thousands of naira of completed payments existed.
+  const totalProcessed = payments
+    .filter(p => p.status === 'completed' || p.status === 'processed')
+    .reduce((s, p) => s + (p.amount || 0), 0);
   const totalPending = payments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
 
   const tabs: PayFilter[] = ['all', 'pending', 'processed', 'refunded', 'failed'];

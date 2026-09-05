@@ -164,9 +164,19 @@ const Tiers: React.FC = () => {
   };
 
   // Open modal for create/edit
+  // BUGFIX (QA-ADM-034): setFieldsValue ran while the modal was still unmounted, so the
+  // form instance it targets did not exist yet and every field rendered blank —
+  // including Billing Cycle, which then fell back to the schema default 'yearly'
+  // regardless of the tier's real value. Populate AFTER the modal has mounted.
   const openModal = (tier?: Tier) => {
-    if (tier) {
-      setEditingTier(tier);
+    setEditingTier(tier ?? null);
+    setModalVisible(true);
+    if (!tier) {
+      // resetFields is also a no-op before mount; defer it the same way.
+      setTimeout(() => form.resetFields(), 0);
+      return;
+    }
+    setTimeout(() => {
       form.setFieldsValue({
         id: tier.id,
         name: tier.name,
@@ -179,11 +189,7 @@ const Tiers: React.FC = () => {
         visibility: tier.features.visibility,
         popular: tier.popular,
       });
-    } else {
-      setEditingTier(null);
-      form.resetFields();
-    }
-    setModalVisible(true);
+    }, 0);
   };
 
   const columns = [
