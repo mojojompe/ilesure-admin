@@ -58,6 +58,7 @@ export function VerificationQueue() {
   const canReview = can(CAP.VERIFICATIONS_REVIEW);
 
   useEffect(() => {
+    setSelected(null);
     fetchVerifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, page]);
@@ -65,6 +66,7 @@ export function VerificationQueue() {
   // Debounce the search box so typing does not fire a request per keystroke.
   useEffect(() => {
     const t = setTimeout(() => {
+      setSelected(null);
       setPage(1);
       fetchVerifications();
     }, 350);
@@ -104,8 +106,13 @@ export function VerificationQueue() {
         const pg = response.data.pagination;
         setTotalItems(pg?.totalItems ?? formatted.length);
         setTotalPages(pg?.totalPages ?? 1);
-        if (formatted.length > 0 && !selected) {
-          handleSelect(formatted[0], formatted[0].checklist, formatted[0].adminNotes);
+        if (formatted.length > 0) {
+          setSelected((prev: any) => {
+            const match = prev ? formatted.find((f: any) => f.id === prev.id) : null;
+            return match || formatted[0];
+          });
+        } else {
+          setSelected(null);
         }
       }
     } catch (error) {

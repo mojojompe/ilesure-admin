@@ -41,7 +41,11 @@ export function Analytics() {
         setCorridorDemand(waitlistRes.data.corridorDemand || []);
       }
       if (listingsRes.success && listingsRes.data?.priceDistribution?.length > 0) {
-        setPriceDist(listingsRes.data.priceDistribution);
+        const mapped = listingsRes.data.priceDistribution.map((p: any) => ({
+          range: p.range || p.band || p.label || '',
+          count: p.count || 0,
+        }));
+        setPriceDist(mapped);
       }
       if (bookingsRes.success && bookingsRes.data?.trend?.length > 0) {
         setBookings(bookingsRes.data.trend);
@@ -195,11 +199,11 @@ export function Analytics() {
           {corridorDemand.length > 0 ? (
             <div className="space-y-2">
               {corridorDemand.slice(0, 6).map((entry: any, i: number) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="text-xs text-text-secondary">{entry.corridor}</span>
-                  <div className="flex items-center gap-2">
+                <div key={i} className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-text-secondary max-w-xs truncate" title={entry.corridor}>{entry.corridor}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <div className="w-24 h-2 bg-mustard/20 rounded-full overflow-hidden">
-                      <div className="h-full bg-mustard rounded-full" style={{ width: `${(entry.demand / corridorDemand[0].demand) * 100}%` }} />
+                      <div className="h-full bg-mustard rounded-full" style={{ width: `${(entry.demand / (corridorDemand[0]?.demand || 1)) * 100}%` }} />
                     </div>
                     <span className="text-xs font-bold text-text-primary w-6 text-right">{entry.demand}</span>
                   </div>

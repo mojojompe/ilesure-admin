@@ -14,13 +14,14 @@ type TabKey = 'all' | 'tenant' | 'agent_landlord' | 'company';
 
 const roleLabel: Record<string, string> = {
   tenant: 'Tenant', agent: 'Agent', landlord: 'Landlord',
-  company_admin: 'Company Admin', sub_agent: 'Sub-Agent',
+  company_admin: 'Company Admin', company: 'Company Admin', sub_agent: 'Sub-Agent',
 };
 const roleIcon: Record<string, React.ReactNode> = {
   tenant: <GraduationCap className="w-3.5 h-3.5" />,
   agent: <Home className="w-3.5 h-3.5" />,
   landlord: <Home className="w-3.5 h-3.5" />,
   company_admin: <Building2 className="w-3.5 h-3.5" />,
+  company: <Building2 className="w-3.5 h-3.5" />,
   sub_agent: <Home className="w-3.5 h-3.5" />,
 };
 
@@ -50,7 +51,7 @@ export function Users() {
       const params = new URLSearchParams();
       if (tab === 'tenant') params.set('role', 'student');
       else if (tab === 'agent_landlord') params.set('role', 'agent,landlord');
-      else if (tab === 'company') params.set('role', 'company_admin');
+      else if (tab === 'company') params.set('role', 'company,company_admin');
 
       params.set('limit', '200');
       const response = await adminApi.users.list(`?${params.toString()}`);
@@ -60,7 +61,7 @@ export function Users() {
           name: u.fullName || u.name || '',
           email: u.email,
           phone: u.phone || '',
-          role: u.role === 'student' ? 'tenant' : u.role,
+          role: u.role === 'student' ? 'tenant' : (u.role === 'company' ? 'company_admin' : u.role),
           status: u.status,
           verificationStatus: u.verificationStatus,
           university: u.university || '',
