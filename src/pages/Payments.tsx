@@ -46,13 +46,16 @@ function PayoutsSection() {
   const [payPagination, setPayPagination] = useState<any>(null);
   const [payTotals, setPayTotals] = useState<any>(null);
   const [filter, setFilter] = useState<PayFilter>('all');
+  // QA-API-292: narrows the list to payments an integrity gate flagged.
+  const [flaggedOnly, setFlaggedOnly] = useState(false);
+  const [flaggedCount, setFlaggedCount] = useState(0);
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => { fetchPayments(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, payPage]);
+  useEffect(() => { fetchPayments(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, flaggedOnly, payPage]);
   // A filter change restarts at page 1; staying on page 3 of a 1-page result shows nothing.
-  useEffect(() => { setPayPage(1); }, [filter]);
+  useEffect(() => { setPayPage(1); }, [filter, flaggedOnly]);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -62,11 +65,13 @@ function PayoutsSection() {
       // tiles from those 20, understating them silently.
       const params: Record<string, any> = { page: payPage, limit: 20 };
       if (filter !== 'all') params.status = filter;
+      if (flaggedOnly) params.flagged = 'true';
       const res = await adminApi.payments?.list?.(params) ?? { success: false, data: null };
       if (res.success && res.data) {
         setPayments(Array.isArray(res.data) ? res.data : res.data.payments ?? []);
         setPayPagination(res.data?.pagination ?? null);
         setPayTotals(res.data?.totals ?? null);
+        setFlaggedCount(res.data?.flaggedForReview ?? 0);
       }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch payments');
@@ -169,7 +174,7 @@ function PayoutsSection() {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-clay border border-clay-border shadow-clay p-5">
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Total Payout Records</p>
           <p className="text-3xl font-bold text-text-primary">{totalRecords}</p>
@@ -182,6 +187,20 @@ function PayoutsSection() {
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Processed</p>
           <p className="text-3xl font-bold text-status-success">₦{totalProcessed.toLocaleString()}</p>
         </div>
+        {/* BUGFIX (QA-API-292): the API has always returned this count and the console threw
+            it away, so an operator could be told three payments needed review with no way to
+            see which. The tile is the filter — clicking it narrows the table to those rows. */}
+        <button
+          type="button"
+          onClick={() => setFlaggedOnly(v => !v)}
+          aria-pressed={flaggedOnly}
+          title={flaggedOnly ? 'Show all payments' : 'Show only payments flagged for review'}
+          className={`text-left bg-white rounded-clay border shadow-clay p-5 transition-all hover:border-status-error ${flaggedOnly ? 'border-status-error ring-2 ring-status-error/30' : 'border-clay-border'}`}
+        >
+          <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Flagged for Review</p>
+          <p className={`text-3xl font-bold ${flaggedCount > 0 ? 'text-status-error' : 'text-text-primary'}`}>{flaggedCount}</p>
+          <p className="text-[11px] text-text-tertiary mt-1">{flaggedOnly ? 'Showing flagged only — click to clear' : 'Click to filter'}</p>
+        </button>
       </div>
 
       <ClayCard padding="none">
