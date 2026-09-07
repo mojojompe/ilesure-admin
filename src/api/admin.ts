@@ -180,6 +180,7 @@ export const adminApi = {
     single: (data: { subject: string; body: string; userId: string }) =>
       adminFetch('/admin/v1/emails/single', { method: 'POST', body: JSON.stringify(data) }),
     history: (params?: string) => adminFetch(`/admin/v1/emails/history${params || ''}`),
+    detail: (id: string) => adminFetch(`/admin/v1/emails/history/${id}`),
   },
   audit: {
     logs: (params?: Record<string, any>) => adminFetch(`/admin/v1/audit/logs${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
