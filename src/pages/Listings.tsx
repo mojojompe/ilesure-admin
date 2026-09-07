@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
-import { Search, Filter, Download, ChevronDown, ChevronUp, Eye, Home, MapPin, User } from 'lucide-react';
+import { Search, Filter, Download, ChevronDown, ChevronUp, Eye, Home, MapPin, User, Image as ImageIcon } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -47,6 +47,7 @@ export function Listings() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [actionModal, setActionModal] = useState<{ type: 'approve' | 'reject' | 'changes'; listing: Listing } | null>(null);
   const [adminNote, setAdminNote] = useState('');
+  const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -265,8 +266,18 @@ export function Listings() {
                   >
                     <td>
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-clay-sm bg-burnt-brown-pale flex items-center justify-center flex-shrink-0">
-                          <Home className="w-4 h-4 text-burnt-brown" />
+                        <div className="w-10 h-10 rounded-clay-sm bg-burnt-brown-pale flex items-center justify-center flex-shrink-0 overflow-hidden border border-clay-border relative">
+                          <Home className="w-5 h-5 text-burnt-brown absolute inset-0 m-auto" />
+                          {listing.images && listing.images.length > 0 && listing.images[0] ? (
+                            <img
+                              src={listing.images[0]}
+                              alt={listing.title}
+                              className="w-full h-full object-cover relative z-10"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          ) : null}
                         </div>
                         <div>
                           <p className="font-semibold text-text-primary text-sm leading-tight max-w-[180px] truncate">{listing.title}</p>
@@ -344,6 +355,66 @@ export function Listings() {
                             </div>
                           ))}
                         </div>
+
+                        {/* Property Photos Gallery */}
+                        <div className="mt-4 pt-4 border-t border-clay-border">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <ImageIcon className="w-4 h-4 text-burnt-brown" />
+                              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wide">
+                                Property Photos ({listing.images?.length || 0})
+                              </h4>
+                            </div>
+                            {listing.images && listing.images.length > 0 && (
+                              <span className="text-[11px] text-text-tertiary">
+                                Click any photo to view full size
+                              </span>
+                            )}
+                          </div>
+
+                          {listing.images && listing.images.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                              {listing.images.map((imgUrl: string, idx: number) => (
+                                <div
+                                  key={idx}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewImage({
+                                      url: imgUrl,
+                                      title: `${listing.title} — Photo ${idx + 1}`,
+                                    });
+                                  }}
+                                  className="group relative h-24 rounded-clay-sm overflow-hidden border border-clay-border cursor-pointer shadow-sm hover:shadow-md transition-all bg-clay-border-light"
+                                >
+                                  <img
+                                    src={imgUrl}
+                                    alt={`${listing.title} ${idx + 1}`}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                    onError={(e) => {
+                                      (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/400x300?text=Photo+Unavailable';
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <Eye className="w-4 h-4 text-white" />
+                                  </div>
+                                  {idx === 0 && (
+                                    <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-semibold backdrop-blur-xs">
+                                      Cover
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-6 bg-white/70 rounded-clay-sm border border-dashed border-clay-border text-center">
+                              <ImageIcon className="w-6 h-6 text-text-tertiary mx-auto mb-1.5 opacity-40" />
+                              <p className="text-xs text-text-tertiary font-medium">
+                                No property photos uploaded for this listing
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
                         {listing.status === 'pending_approval' && canModerate && (
                           <div className="flex gap-3 mt-4">
                             <Button variant="success" size="sm" onClick={() => handleAction('approve', listing)}>Approve Listing</Button>
@@ -430,6 +501,29 @@ export function Listings() {
           className="w-full clay-input resize-none text-sm"
         />
       </Modal>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <Modal
+          open={Boolean(previewImage)}
+          onClose={() => setPreviewImage(null)}
+          title={previewImage.title}
+          size="lg"
+          footer={
+            <Button variant="secondary" size="sm" onClick={() => setPreviewImage(null)}>
+              Close
+            </Button>
+          }
+        >
+          <div className="flex flex-col items-center">
+            <img
+              src={previewImage.url}
+              alt={previewImage.title}
+              className="w-full max-h-[70vh] object-contain rounded-clay-sm border border-clay-border bg-black/5"
+            />
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

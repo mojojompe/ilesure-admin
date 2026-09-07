@@ -100,16 +100,28 @@ export function EmailTab() {
         body: body.trim(),
         recipientType,
       });
-      setResult({
-        success: res.success,
-        message: res.success
-          ? `Sent to ${res.data?.recipientCount || 0} recipient(s)`
-          : res.error?.message || 'Failed to send',
-      });
-      if (res.success) {
+      const sentCount = res.data?.sent ?? 0;
+      const failedCount = res.data?.failed ?? 0;
+      if (res.success && sentCount > 0) {
+        setResult({
+          success: true,
+          message: failedCount > 0
+            ? `Sent to ${sentCount} recipient(s), but ${failedCount} failed.`
+            : `Successfully sent to ${sentCount} recipient(s)`,
+        });
         setSubject('');
         setBody('');
         setRecipientType('all');
+        setHistoryPage(1);
+        fetchHistory(1);
+      } else {
+        const fallbackMsg = failedCount > 0
+          ? `All ${failedCount} recipient deliveries failed.`
+          : 'Failed to send broadcast email';
+        setResult({
+          success: false,
+          message: res.error?.message || fallbackMsg,
+        });
         setHistoryPage(1);
         fetchHistory(1);
       }
