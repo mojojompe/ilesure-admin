@@ -40,18 +40,47 @@ export function VerificationQueue() {
   const [adminNote, setAdminNote] = useState('');
   const [activeDoc, setActiveDoc] = useState<string>('nin');
   const [confirmModal, setConfirmModal] = useState<'approve' | 'reject' | 'info' | null>(null);
+  // BUGFIX (QA-ADM-015): the confirm modal's textarea was an unbound, uncontrolled field.
+  // The admin typed a rejection reason, and the code sent the unrelated `adminNote`
+  // state instead — so `rejectionReason` was stored as "" while the modal promised
+  // "They will be notified with the reason below."
+  const [actionReason, setActionReason] = useState('');
   const [loading, setLoading] = useState(false);
+  // QA-ADM-020: the queue called the API with no params, so it showed the backend's first
+  // page of 20 with no way to reach the rest, no status filter (already-verified users sat
+  // in a strip headed "Pending Verifications"), and no search.
+  const [statusFilter, setStatusFilter] = useState<string>('pending');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const canReview = can(CAP.VERIFICATIONS_REVIEW);
 
   useEffect(() => {
+    setSelected(null);
     fetchVerifications();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, page]);
+
+  // Debounce the search box so typing does not fire a request per keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSelected(null);
+      setPage(1);
+      fetchVerifications();
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const fetchVerifications = async () => {
     setLoading(true);
     try {
-      const response = await adminApi.verifications.list();
+      const params = new URLSearchParams({ page: String(page), limit: '20' });
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (search.trim()) params.set('search', search.trim());
+      const response = await adminApi.verifications.list(`?${params.toString()}`);
       if (response.success && response.data?.verifications) {
         const formatted = response.data.verifications.map((v: any) => ({
           id: v._id || v.id,
@@ -74,8 +103,16 @@ export function VerificationQueue() {
           adminNotes: v.adminNotes || '',
         }));
         setVerifications(formatted);
-        if (formatted.length > 0 && !selected) {
-          handleSelect(formatted[0], formatted[0].checklist, formatted[0].adminNotes);
+        const pg = response.data.pagination;
+        setTotalItems(pg?.totalItems ?? formatted.length);
+        setTotalPages(pg?.totalPages ?? 1);
+        if (formatted.length > 0) {
+          setSelected((prev: any) => {
+            const match = prev ? formatted.find((f: any) => f.id === prev.id) : null;
+            return match || formatted[0];
+          });
+        } else {
+          setSelected(null);
         }
       }
     } catch (error) {
@@ -123,6 +160,12 @@ export function VerificationQueue() {
 
   const confirmVerificationAction = async () => {
     if (!selected || !confirmModal) return;
+
+    // The applicant is shown this text — refuse to submit an empty one.
+    if (confirmModal !== 'approve' && !actionReason.trim()) {
+      toast.error('Please enter a reason — the applicant is shown it.');
+      return;
+    }
     
     try {
       switch (confirmModal) {
@@ -130,15 +173,16 @@ export function VerificationQueue() {
           await adminApi.verifications.approve(selected.id);
           break;
         case 'reject':
-          await adminApi.verifications.reject(selected.id, adminNote);
+          await adminApi.verifications.reject(selected.id, actionReason.trim());
           break;
         case 'info':
-          await adminApi.verifications.requestInfo(selected.id, adminNote);
+          await adminApi.verifications.requestInfo(selected.id, actionReason.trim());
           break;
       }
       await fetchVerifications();
       toast.success('Verification action completed');
       setConfirmModal(null);
+      setActionReason('');
     } catch (error: any) {
       console.error('Failed to perform verification action:', error);
       toast.error(error?.message || 'Failed to perform action');
@@ -161,9 +205,35 @@ export function VerificationQueue() {
 
       {/* ── Queue List (top strip) ───────────────────────── */}
       <ClayCard padding="none">
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-clay-border">
+        {/* BUGFIX (QA-ADM-020): the heading counted the rendered page, not the queue, so it
+            read "Pending Verifications (20)" while the API reported 22 total — and the list
+            was never filtered to pending at all. */}
+        <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-clay-border">
           <Clock className="w-4 h-4 text-mustard" />
-          <h3 className="font-bold text-text-primary text-sm">Pending Verifications ({verifications.length})</h3>
+          <h3 className="font-bold text-text-primary text-sm">
+            {statusFilter === 'all' ? 'All Verifications' : `${statusFilter.charAt(0).toUpperCase()}${statusFilter.slice(1)} Verifications`} ({totalItems})
+          </h3>
+          <div className="ml-auto flex items-center gap-2">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name or email"
+              aria-label="Search verifications by name or email"
+              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white w-52"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
+              aria-label="Filter verifications by status"
+              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white"
+            >
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+              <option value="rejected">Rejected</option>
+              <option value="all">All</option>
+            </select>
+          </div>
         </div>
         <div className="flex overflow-x-auto divide-x divide-clay-border-light">
           {verifications.map((req) => (
@@ -187,7 +257,33 @@ export function VerificationQueue() {
               <ChevronRight className={clsx('w-4 h-4 text-text-tertiary ml-auto flex-shrink-0 transition-transform', selected?.id === req.id && 'text-burnt-brown')} />
             </button>
           ))}
+          {!loading && verifications.length === 0 && (
+            <p className="px-5 py-6 text-xs text-text-tertiary">No applicants match this filter.</p>
+          )}
         </div>
+        {/* BUGFIX (QA-ADM-020): there was no pagination control, so applicants past the
+            API's first page of 20 could not be reached from the console at all. */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-5 py-2.5 border-t border-clay-border">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="text-xs text-text-tertiary">Page {page} of {totalPages}</span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </ClayCard>
 
       {/* ── Split Panel ─────────────────────────────────── */}
@@ -309,21 +405,44 @@ export function VerificationQueue() {
                     checklist[key] ? 'bg-status-success/8' : 'bg-clay-border-light hover:bg-clay-border',
                   )}
                 >
-                  <div
-                    className={clsx(
-                      'w-5 h-5 rounded-[6px] border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150',
-                      checklist[key] ? 'bg-status-success border-status-success' : 'bg-white border-clay-border',
-                    )}
-                    onClick={() => setChecklist(prev => ({ ...prev, [key]: !prev[key] }))}
-                  >
-                    {checklist[key] && <CheckCircle className="w-3.5 h-3.5 text-white" />}
-                  </div>
+                  {/* BUGFIX (QA-ADM-019): the click handler sat on the inner 20x20px <div>,
+                      so clicking the label text did nothing, and there was no real input —
+                      the rows could not be focused, tabbed to, or operated by a screen
+                      reader. A visually-hidden checkbox inside the <label> restores both
+                      the full-row hit area and keyboard/AT operability, with the styled
+                      square kept as the visual. */}
+                  <span className="relative flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={!!checklist[key]}
+                      onChange={() => setChecklist(prev => ({ ...prev, [key]: !prev[key] }))}
+                      className="absolute inset-0 w-5 h-5 opacity-0 cursor-pointer"
+                    />
+                    <span
+                      aria-hidden="true"
+                      className={clsx(
+                        'w-5 h-5 rounded-[6px] border-2 flex items-center justify-center transition-all duration-150',
+                        checklist[key] ? 'bg-status-success border-status-success' : 'bg-white border-clay-border',
+                      )}
+                    >
+                      {checklist[key] && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                    </span>
+                  </span>
                   <span className={clsx('text-xs font-medium flex-1', checklist[key] ? 'text-status-success line-through decoration-status-success/40' : 'text-text-secondary')}>
                     {label}
                   </span>
                 </label>
               ))}
             </div>
+            {/* BUGFIX (QA-ADM-018): handleSaveChecklist existed but was referenced by
+                nothing — there was no save control at all, so ticks never persisted. */}
+            <button
+              type="button"
+              onClick={handleSaveChecklist}
+              className="mt-4 w-full rounded-clay-sm bg-clay-border-light py-2 text-xs font-semibold text-text-primary hover:bg-clay-border"
+            >
+              Save checklist
+            </button>
           </ClayCard>
 
           {/* Admin Notes */}
@@ -336,6 +455,14 @@ export function VerificationQueue() {
               placeholder="Add notes about this verification..."
               className="w-full clay-input resize-none text-sm"
             />
+            {/* BUGFIX (QA-ADM-018): same as the checklist — handleSaveNotes was dead code. */}
+            <button
+              type="button"
+              onClick={handleSaveNotes}
+              className="mt-3 w-full rounded-clay-sm bg-clay-border-light py-2 text-xs font-semibold text-text-primary hover:bg-clay-border"
+            >
+              Save notes
+            </button>
           </ClayCard>
 
           {/* Action Buttons */}
@@ -387,7 +514,13 @@ export function VerificationQueue() {
           {confirmModal === 'info' && selected && `Requesting additional information from ${selected.applicantName}. Specify what's needed:`}
         </p>
         {confirmModal !== 'approve' && (
-          <textarea rows={3} placeholder="Reason / instructions..." className="w-full clay-input resize-none text-sm mt-3" />
+          <textarea
+            rows={3}
+            value={actionReason}
+            onChange={e => setActionReason(e.target.value)}
+            placeholder="Reason / instructions..."
+            className="w-full clay-input resize-none text-sm mt-3"
+          />
         )}
       </Modal>
     </div>

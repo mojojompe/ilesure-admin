@@ -3,6 +3,7 @@ import { Calendar, Check, X, Loader, Search, Eye, RotateCcw } from 'lucide-react
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { formatDate } from '../utils/format';
 import { Modal } from '../components/ui/Modal';
 import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
@@ -135,7 +136,8 @@ export function Bookings() {
                 <th>Listing</th>
                 <th>Tenant</th>
                 <th>Agent</th>
-                <th>Price</th>
+                <th>Rent</th>
+                <th>Charged</th>
                 <th>Move-in</th>
                 <th>Status</th>
                 <th>Payment</th>
@@ -144,14 +146,14 @@ export function Bookings() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} className="text-center py-12">
+                <tr><td colSpan={9} className="text-center py-12">
                   <div className="flex items-center justify-center gap-2">
                     <Loader className="w-5 h-5 animate-spin text-mustard" />
                     <span className="text-text-tertiary">Loading...</span>
                   </div>
                 </td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-12 text-text-tertiary">No bookings found</td></tr>
+                <tr><td colSpan={9} className="text-center py-12 text-text-tertiary">No bookings found</td></tr>
               ) : filtered.map(b => (
                 <tr key={b.id || b._id}>
                   <td><p className="font-medium text-text-primary text-sm">{b.listingTitle || b.listing?.title}</p></td>
@@ -161,7 +163,32 @@ export function Bookings() {
                   </td>
                   <td><span className="text-sm text-text-secondary">{b.agentName || '—'}</span></td>
                   <td><span className="font-bold text-mustard text-sm">₦{(b.price || 0).toLocaleString()}</span></td>
-                  <td><span className="text-sm text-text-secondary">{b.moveInDate}</span></td>
+                  {/* QA-API-329: what the tenant was actually billed — rent plus the platform
+                      fee and any caution/agency charges — so this tab reconciles with Payments
+                      instead of quietly showing a different number. */}
+                  <td>
+                    {b.amountPaid == null ? (
+                      <span className="text-xs text-text-tertiary">—</span>
+                    ) : (
+                      <div className="flex flex-col">
+                        <span className="font-bold text-text-primary text-sm">₦{Number(b.amountPaid).toLocaleString()}</span>
+                        {b.platformFee != null && (
+                          <span className="text-[11px] text-text-tertiary">
+                            fee ₦{Number(b.platformFee).toLocaleString()}
+                          </span>
+                        )}
+                        {b.awaitingManualPayout && (
+                          <span
+                            title="Settled entirely to the platform — the payee had no subaccount, so this is owed to them manually."
+                            className="mt-0.5 inline-flex w-fit items-center rounded-pill bg-status-error/10 text-status-error px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                          >
+                            manual payout
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                  <td><span className="text-sm text-text-secondary">{formatDate(b.moveInDate)}</span></td>
                   <td><StatusBadge status={b.status as any} /></td>
                   <td><StatusBadge status={(b.paymentStatus || 'pending') as any} /></td>
                   <td className="text-right pr-4">
@@ -204,8 +231,10 @@ export function Bookings() {
                 { label: 'Tenant', value: detail.tenantName || detail.userName },
                 { label: 'Phone', value: detail.tenantPhone || detail.userPhone || '—' },
                 { label: 'Agent', value: detail.agentName || '—' },
-                { label: 'Price', value: `₦${(detail.price || 0).toLocaleString()}` },
-                { label: 'Move-in Date', value: detail.moveInDate || '—' },
+                { label: 'Rent / Price', value: `₦${(detail.price || 0).toLocaleString()}` },
+                { label: 'Total Charged', value: detail.amountPaid != null ? `₦${Number(detail.amountPaid).toLocaleString()}` : '—' },
+                { label: 'Platform Fee', value: detail.platformFee != null ? `₦${Number(detail.platformFee).toLocaleString()}` : '—' },
+                { label: 'Move-in Date', value: formatDate(detail.moveInDate) },
                 { label: 'Payment', value: detail.paymentStatus || 'pending' },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">

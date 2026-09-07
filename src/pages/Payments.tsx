@@ -4,6 +4,7 @@ import { CreditCard, CheckCircle, Clock, Loader, Search, Eye } from 'lucide-reac
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { formatDateTime } from '../utils/format';
 import { Modal } from '../components/ui/Modal';
 import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
@@ -41,21 +42,36 @@ export function Payments() {
 function PayoutsSection() {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [payPage, setPayPage] = useState(1);
+  const [payPagination, setPayPagination] = useState<any>(null);
+  const [payTotals, setPayTotals] = useState<any>(null);
   const [filter, setFilter] = useState<PayFilter>('all');
+  // QA-API-292: narrows the list to payments an integrity gate flagged.
+  const [flaggedOnly, setFlaggedOnly] = useState(false);
+  const [flaggedCount, setFlaggedCount] = useState(0);
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => { fetchPayments(); }, [filter]);
+  useEffect(() => { fetchPayments(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, flaggedOnly, payPage]);
+  // A filter change restarts at page 1; staying on page 3 of a 1-page result shows nothing.
+  useEffect(() => { setPayPage(1); }, [filter, flaggedOnly]);
 
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      const params: Record<string, any> = {};
+      // BUGFIX (QA-ADM2-027): this asked for no page and no limit, so it rendered the API's
+      // first 20 rows with no pager — the rest were unreachable — and computed the money
+      // tiles from those 20, understating them silently.
+      const params: Record<string, any> = { page: payPage, limit: 20 };
       if (filter !== 'all') params.status = filter;
+      if (flaggedOnly) params.flagged = 'true';
       const res = await adminApi.payments?.list?.(params) ?? { success: false, data: null };
       if (res.success && res.data) {
         setPayments(Array.isArray(res.data) ? res.data : res.data.payments ?? []);
+        setPayPagination(res.data?.pagination ?? null);
+        setPayTotals(res.data?.totals ?? null);
+        setFlaggedCount(res.data?.flaggedForReview ?? 0);
       }
     } catch (error: any) {
       toast.error(error?.message || 'Failed to fetch payments');
@@ -81,11 +97,52 @@ function PayoutsSection() {
     }
   };
 
+  // BUGFIX (QA-ADM-036): the Payments screen offered a "Refunded" filter tab and no way
+  // to reach that state — the ACTIONS column held a single view icon and the detail modal
+  // offered only Close and Mark as Processed. The server-side refund is real (it verifies
+  // with Paystack and calls the refund API through refundService), it simply had no
+  // control. Refunding money is irreversible, so it asks first, exactly like Mark as
+  // Processed.
+  const handleRefund = async (id: string) => {
+    setUpdating(true);
+    try {
+      await adminApi.payments?.refund?.(id);
+      toast.success('Refund submitted to Paystack');
+      await fetchPayments();
+      setDetail(null);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to refund payment');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const confirmRefund = (payment: any) => {
+    // QA-ADM-037: close the detail modal first. antd's Modal.confirm portal and this app's
+    // own Modal component compete for the stacking context, so the confirmation rendered
+    // washed-out and interleaved with the still-open record behind it — barely legible for
+    // a dialog whose entire job is to be read before money moves.
+    setDetail(null);
+    AntModal.confirm({
+      title: 'Refund this payment?',
+      content: `This will refund ₦${(payment.amount || 0).toLocaleString()} to ${payment.agentName || payment.companyName || 'the payer'} through Paystack. This cannot be undone.`,
+      okText: 'Refund',
+      okButtonProps: { danger: true },
+      cancelText: 'Cancel',
+      zIndex: 2000,
+      onOk: () => handleRefund(payment.id),
+    });
+  };
+
   // SECURITY-FIX (AD-M1): Marking a payout as processed is an irreversible money
   // action; require an explicit confirmation before firing it (consistent with the
   // Users suspend confirm pattern).
   const confirmMarkProcessed = (payment: any) => {
+    // BUGFIX (QA-ADM-037): see confirmRefund — the confirm was drawn behind/through the
+    // open detail modal.
+    setDetail(null);
     AntModal.confirm({
+      zIndex: 2000,
       title: 'Mark payment as processed?',
       content: `This will mark the ₦${(payment.amount || 0).toLocaleString()} payout to ${payment.agentName || payment.companyName || 'this recipient'} as processed. This action cannot be undone.`,
       okText: 'Mark Processed',
@@ -99,17 +156,28 @@ function PayoutsSection() {
     `${p.agentName} ${p.description}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalProcessed = payments.filter(p => p.status === 'processed').reduce((s, p) => s + (p.amount || 0), 0);
-  const totalPending = payments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+  // BUGFIX (QA-ADM-035): this filtered on 'processed', which the backend never stores —
+  // it normalises 'processed' to 'completed' on the way in. The tile therefore read
+  // "PROCESSED ₦0" while hundreds of thousands of naira of completed payments existed.
+  // BUGFIX (QA-ADM2-027): these summed the CURRENT PAGE. They now come from the server's
+  // aggregate over the whole filtered set; the page-derived figures remain only as a
+  // fallback for an API that does not send totals, and are labelled as such below.
+  const totalProcessed = payTotals
+    ? payTotals.completed
+    : payments.filter(p => p.status === 'completed' || p.status === 'processed').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalPending = payTotals
+    ? payTotals.pending
+    : payments.filter(p => p.status === 'pending').reduce((s, p) => s + (p.amount || 0), 0);
+  const totalRecords = payTotals ? payTotals.records : payments.length;
 
   const tabs: PayFilter[] = ['all', 'pending', 'processed', 'refunded', 'failed'];
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-clay border border-clay-border shadow-clay p-5">
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Total Payout Records</p>
-          <p className="text-3xl font-bold text-text-primary">{payments.length}</p>
+          <p className="text-3xl font-bold text-text-primary">{totalRecords}</p>
         </div>
         <div className="bg-white rounded-clay border border-clay-border shadow-clay p-5">
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Pending Payouts</p>
@@ -119,6 +187,20 @@ function PayoutsSection() {
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Processed</p>
           <p className="text-3xl font-bold text-status-success">₦{totalProcessed.toLocaleString()}</p>
         </div>
+        {/* BUGFIX (QA-API-292): the API has always returned this count and the console threw
+            it away, so an operator could be told three payments needed review with no way to
+            see which. The tile is the filter — clicking it narrows the table to those rows. */}
+        <button
+          type="button"
+          onClick={() => setFlaggedOnly(v => !v)}
+          aria-pressed={flaggedOnly}
+          title={flaggedOnly ? 'Show all payments' : 'Show only payments flagged for review'}
+          className={`text-left bg-white rounded-clay border shadow-clay p-5 transition-all hover:border-status-error ${flaggedOnly ? 'border-status-error ring-2 ring-status-error/30' : 'border-clay-border'}`}
+        >
+          <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Flagged for Review</p>
+          <p className={`text-3xl font-bold ${flaggedCount > 0 ? 'text-status-error' : 'text-text-primary'}`}>{flaggedCount}</p>
+          <p className="text-[11px] text-text-tertiary mt-1">{flaggedOnly ? 'Showing flagged only — click to clear' : 'Click to filter'}</p>
+        </button>
       </div>
 
       <ClayCard padding="none">
@@ -174,7 +256,20 @@ function PayoutsSection() {
                   </td>
                   <td><span className="text-sm text-text-secondary">{p.description || 'Subscription'}</span></td>
                   <td><span className="font-bold text-mustard text-sm">₦{(p.amount || 0).toLocaleString()}</span></td>
-                  <td><span className="text-xs text-text-tertiary">{p.date || p.createdAt?.split('T')[0] || '—'}</span></td>
+                  <td>
+                    <span className="text-xs text-text-tertiary">{formatDateTime(p.date || p.createdAt)}</span>
+                    {/* BUGFIX (QA-SCV): the fulfilment path flags a payment whose amount or
+                        currency did not match what the server expected, and nothing ever showed
+                        it. An integrity gate that trips silently is not a control. */}
+                    {p.reviewFlag && (
+                      <span
+                        title={p.reviewDetail || 'Flagged for review'}
+                        className="ml-2 inline-flex items-center rounded-pill bg-status-error/10 text-status-error px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                      >
+                        {String(p.reviewFlag).replace(/_/g, ' ')}
+                      </span>
+                    )}
+                  </td>
                   <td><StatusBadge status={(p.status || 'pending') as any} /></td>
                   <td className="text-right pr-4">
                     <button onClick={() => setDetail(p)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
@@ -186,6 +281,29 @@ function PayoutsSection() {
             </tbody>
           </table>
         </div>
+        {/* BUGFIX (QA-ADM2-027): there was no pager at all, so every payment past the
+            first 20 was unreachable from the console. */}
+        {payPagination && payPagination.totalPages > 1 && (
+          <div className="flex items-center justify-between px-5 py-3 border-t border-clay-border">
+            <span className="text-xs text-text-tertiary">
+              Showing {payments.length} of {payPagination.totalItems} &middot; page {payPagination.currentPage} of {payPagination.totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPayPage((n) => Math.max(1, n - 1))}
+                disabled={payPagination.currentPage <= 1}
+                className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+              >Previous</button>
+              <button
+                type="button"
+                onClick={() => setPayPage((n) => Math.min(payPagination.totalPages, n + 1))}
+                disabled={payPagination.currentPage >= payPagination.totalPages}
+                className="text-xs font-semibold px-3 py-1.5 rounded-clay-sm border border-clay-border disabled:opacity-40"
+              >Next</button>
+            </div>
+          </div>
+        )}
       </ClayCard>
 
       <Modal
@@ -201,6 +319,12 @@ function PayoutsSection() {
                 Mark as Processed
               </Button>
             )}
+            {/* BUGFIX (QA-ADM-036): only a payment we actually collected can be refunded. */}
+            {(detail?.status === 'completed' || detail?.status === 'processed') && canProcess && (
+              <Button variant="danger" size="sm" loading={updating} onClick={() => confirmRefund(detail)}>
+                Refund
+              </Button>
+            )}
           </>
         }
       >
@@ -210,7 +334,7 @@ function PayoutsSection() {
               { label: 'Agent / Company', value: detail.agentName || detail.companyName || '—' },
               { label: 'Amount', value: `₦${(detail.amount || 0).toLocaleString()}` },
               { label: 'Description', value: detail.description || 'Subscription' },
-              { label: 'Date', value: detail.date || detail.createdAt?.split('T')[0] || '—' },
+              { label: 'Date', value: formatDateTime(detail.date || detail.createdAt) },
               { label: 'Status', value: detail.status || 'pending' },
               { label: 'Reference', value: detail.reference || '—' },
             ].map(({ label, value }) => (

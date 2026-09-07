@@ -16,6 +16,17 @@ import { adminApi } from '../api/admin';
 const formatNaira = (v: number) =>
   v >= 1_000_000 ? `₦${(v / 1_000_000).toFixed(1)}M` : `₦${(v / 1000).toFixed(0)}k`;
 
+/**
+ * BUGFIX (QA-ADM-012): render an annual rent that may legitimately be 0 (shortlets carry
+ * their prices in shortletRates[]) or absent from the payload. The old expression used `||`,
+ * so a rent of 0 fell through to a field the API does not send and printed "NaNk/yr".
+ */
+function formatAnnualRent(value: number | undefined | null): string {
+  const n = Number(value);
+  if (value === undefined || value === null || Number.isNaN(n) || n === 0) return '—';
+  return `₦${(n / 1000).toFixed(0)}k/yr`;
+}
+
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [recentListings, setRecentListings] = useState<any[]>([]);
@@ -103,7 +114,7 @@ export function Dashboard() {
           value={kpis?.activeUsers ?? 0}
           trend={kpis?.trends?.users ?? 0}
           trendDirection={kpis?.trends?.users >= 0 ? 'up' : 'down'}
-          subtitle="Students & Agents"
+          subtitle="All roles, status active"
           iconBg="bg-mustard/10"
           icon={<Users className="w-6 h-6 text-mustard" />}
         />
@@ -226,7 +237,11 @@ export function Dashboard() {
                     <p className="text-xs text-text-tertiary truncate">{listing.areaCluster} · {listing.agentName}</p>
                   </div>
                   <div className="text-sm font-bold text-burnt-brown whitespace-nowrap hidden md:block">
-                    ₦{((listing.annualRent || listing.rentAnnual) / 1000).toFixed(0)}k/yr
+                    {/* BUGFIX (QA-ADM-012): `||` treated a legitimate annualRent of 0 as absent
+                        and fell through to rentAnnual, which this payload does not carry —
+                        undefined / 1000 rendered as "₦NaNk/yr". Shortlets legitimately have no
+                        annual rent, so show a dash rather than "₦0k/yr". */}
+                    {formatAnnualRent(listing.annualRent ?? listing.rentAnnual)}
                   </div>
                   <StatusBadge status={listing.status as any} showIcon={false} />
                 </div>

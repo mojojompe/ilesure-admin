@@ -14,6 +14,10 @@ type StatusType =
   | 'matched'
   | 'waiting'
   | 'cancelled' | 'completed' | 'confirmed' | 'refunded' | 'expired' | 'processed' | 'failed'| 'hidden' | 'inactive'
+  // BUGFIX (QA-ADM-039 / QA-ADM-040): these are real values the API returns and they had
+  // no entry here, so Listings showed a raw unstyled "archived" beside styled badges, and
+  // Payments/Bookings did the same for "abandoned", "disputed" and "unpaid".
+  | 'archived' | 'abandoned' | 'disputed' | 'unpaid' | 'paid' | 'draft'
   | 'free' | 'basic' | 'premium' | 'enterprise';
 
 const config: Record<StatusType, { label: string; className: string; icon?: React.ComponentType<{ className?: string }> }> = {
@@ -43,7 +47,26 @@ const config: Record<StatusType, { label: string; className: string; icon?: Reac
   basic:            { label: 'Basic',              className: 'bg-status-info/10 text-status-info',          icon: Star },
   premium:          { label: 'Premium',            className: 'bg-burnt-brown/10 text-burnt-brown',          icon: Award },
   enterprise:       { label: 'Enterprise',         className: 'bg-mustard/15 text-mustard-light',            icon: Crown },
+  archived:         { label: 'Archived',           className: 'bg-text-tertiary/10 text-text-tertiary',      icon: Minus },
+  abandoned:        { label: 'Abandoned',          className: 'bg-text-tertiary/10 text-text-tertiary',      icon: Minus },
+  disputed:         { label: 'Disputed',           className: 'bg-status-error/10 text-status-error',        icon: AlertCircle },
+  unpaid:           { label: 'Unpaid',             className: 'bg-mustard/15 text-mustard',                  icon: Clock },
+  paid:             { label: 'Paid',               className: 'bg-status-success/10 text-status-success',    icon: CheckCircle },
+  draft:            { label: 'Draft',              className: 'bg-clay-border text-text-secondary',          icon: Minus },
 };
+
+/**
+ * BUGFIX (QA-ADM-039 / QA-ADM-040): the fallback rendered the raw API value verbatim —
+ * a bare lowercase "archived" sitting next to styled badges. A value we have not enumerated
+ * should still look like a badge and read like a label, so it is title-cased here. Adding
+ * the value to `config` above remains the right fix; this only stops the next unmapped
+ * status from looking broken.
+ */
+function humanise(raw: string): string {
+  return String(raw)
+    .replace(/[_-]+/g, ' ')
+    .replace(/\w/g, (c) => c.toUpperCase());
+}
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -52,7 +75,11 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, showIcon = true, className }: StatusBadgeProps) {
-  const { label, className: baseClass, icon: Icon } = config[status] || { label: status, className: 'bg-clay-border text-text-secondary' };
+  const { label, className: baseClass, icon: Icon } = config[status] || {
+    label: humanise(status),
+    className: 'bg-clay-border text-text-secondary',
+    icon: undefined,
+  };
   return (
     <span className={clsx('inline-flex items-center gap-1 rounded-pill px-3 py-1 text-xs font-semibold tracking-wide whitespace-nowrap', baseClass, className)}>
       {showIcon && Icon && <Icon className="w-3 h-3" />}

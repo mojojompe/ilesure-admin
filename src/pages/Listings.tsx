@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Search, Filter, Download, ChevronDown, ChevronUp, Eye, Home, MapPin, User } from 'lucide-react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
@@ -18,6 +18,29 @@ const propertyTypeLabel: Record<string, string> = {
   hostel_room: 'Hostel Room', shared_apartment: 'Shared Apt', shortlet: 'Shortlet',
 };
 
+/**
+ * BUGFIX: renders what a listing actually costs.
+ *
+ * The table divided annualRent by 1000 unconditionally. A shortlet carries rentAnnual 0 with
+ * its real prices in shortletRates[], so every shortlet in the console read "₦0k" — which
+ * looks like a free property rather than one priced per night.
+ */
+function formatListingRent(listing: any, long = false): string {
+  const rates: Array<{ price?: number; label?: string }> = listing?.shortletRates || [];
+  const prices = rates.map(r => Number(r.price)).filter(p => Number.isFinite(p) && p > 0);
+
+  if (prices.length > 0) {
+    const lo = Math.min(...prices);
+    const hi = Math.max(...prices);
+    const fmt = (n: number) => (long ? `₦${n.toLocaleString()}` : `₦${(n / 1000).toFixed(0)}k`);
+    return lo === hi ? `${fmt(lo)} /stay` : `${fmt(lo)}–${fmt(hi)} /stay`;
+  }
+
+  const annual = Number(listing?.annualRent);
+  if (!Number.isFinite(annual) || annual <= 0) return '—';
+  return long ? `₦${annual.toLocaleString()} /yr` : `₦${(annual / 1000).toFixed(0)}k`;
+}
+
 export function Listings() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
@@ -27,18 +50,29 @@ export function Listings() {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // BUGFIX (QA-ADM-039): the pager was the literal array [1, 2, 3] — three inert buttons
+  // that never changed the request, printed under "Showing 5 of 5 listings". Meanwhile the
+  // API caps a page at 20, so with more than 20 listings the extras were unreachable.
+  const [page, setPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const canModerate = can(CAP.LISTINGS_MODERATE);
 
   useEffect(() => {
     fetchListings();
-  }, [statusFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, page]);
+
+  // A filter change re-queries from the first page; staying on page 3 of a 1-page result
+  // would otherwise show an empty table.
+  useEffect(() => { setPage(1); }, [statusFilter]);
 
   const fetchListings = async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ page: String(page), limit: '20' });
       if (statusFilter !== 'all') params.set('status', statusFilter);
       
       const response = await adminApi.listings.list(`?${params.toString()}`);
@@ -58,6 +92,7 @@ export function Listings() {
           city: l.city || '',
           landmark: l.landmark,
           annualRent: l.annualRent || 0,
+          shortletRates: l.shortletRates || [],
           cautionFee: l.cautionFee || 0,
           agencyFee: l.agencyFee || 0,
           totalMoveinCost: l.totalMoveinCost || 0,
@@ -76,6 +111,9 @@ export function Listings() {
           canBeShared: l.canBeShared || false,
         }));
         setListings(formattedListings);
+        const pg = response.data?.pagination;
+        setTotalItems(pg?.totalItems ?? formattedListings.length);
+        setTotalPages(pg?.totalPages ?? 1);
       }
     } catch (error: any) {
       console.error('Failed to fetch listings:', error);
@@ -218,9 +256,10 @@ export function Listings() {
                   </td>
                 </tr>
               ) : filtered.map((listing) => (
-                <>
+                /* BUGFIX (QA-ADM-042): the fragment was the list child, so React saw an
+                   unkeyed array — the key on the inner <tr> does not count. */
+                <Fragment key={listing.id}>
                   <tr
-                    key={listing.id}
                     className="cursor-pointer"
                     onClick={() => setExpandedId(expandedId === listing.id ? null : listing.id)}
                   >
@@ -245,7 +284,10 @@ export function Listings() {
                       </div>
                     </td>
                     <td><span className="text-sm text-text-secondary">{propertyTypeLabel[listing.propertyType]}</span></td>
-                    <td><span className="font-bold text-burnt-brown">₦{(listing.annualRent / 1000).toFixed(0)}k</span></td>
+                    {/* BUGFIX: a shortlet stores rentAnnual 0 and keeps its real prices in
+                        shortletRates[], so every shortlet rendered as "₦0k" — indistinguishable
+                        from free. Show the actual rate range instead. */}
+                    <td><span className="font-bold text-burnt-brown">{formatListingRent(listing)}</span></td>
                     <td>
                       <div className="flex items-center gap-1 text-sm text-text-secondary">
                         <MapPin className="w-3 h-3 text-text-tertiary flex-shrink-0" />
@@ -283,7 +325,7 @@ export function Listings() {
                       <td colSpan={8} className="px-6 py-5">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {[
-                            { label: 'Annual Rent', value: `₦${listing.annualRent.toLocaleString()}` },
+                            { label: 'Rent', value: formatListingRent(listing, true) },
                             { label: 'Caution Fee', value: `₦${listing.cautionFee.toLocaleString()}` },
                             { label: 'Agency Fee', value: `₦${listing.agencyFee.toLocaleString()}` },
                             { label: 'Total Move-in Cost', value: `₦${listing.totalMoveinCost.toLocaleString()}` },
@@ -312,7 +354,7 @@ export function Listings() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
 
               {filtered.length === 0 && (
@@ -331,14 +373,24 @@ export function Listings() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between px-5 py-3.5 border-t border-clay-border bg-off-white rounded-b-clay">
-          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {listings.length} listings</p>
-          <div className="flex gap-1">
-            {[1, 2, 3].map(p => (
-              <button key={p} className={clsx('w-7 h-7 rounded-clay-sm text-xs font-semibold transition-colors',
-                p === 1 ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'
-              )}>{p}</button>
-            ))}
-          </div>
+          <p className="text-xs text-text-tertiary">
+            Showing {filtered.length} of {totalItems} listing{totalItems === 1 ? '' : 's'}
+            {totalPages > 1 && ` · page ${page} of ${totalPages}`}
+          </p>
+          {totalPages > 1 && (
+            <div className="flex gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                <button
+                  key={n}
+                  onClick={() => setPage(n)}
+                  aria-current={n === page ? 'page' : undefined}
+                  className={clsx('w-7 h-7 rounded-clay-sm text-xs font-semibold transition-colors',
+                    n === page ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'
+                  )}
+                >{n}</button>
+              ))}
+            </div>
+          )}
         </div>
       </ClayCard>
 
