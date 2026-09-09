@@ -19,6 +19,7 @@ import { Settings } from './pages/Settings';
 import { AuditLogs } from './pages/AuditLogs';
 import { PushNotifications } from './pages/PushNotifications';
 import { Ads } from './pages/Ads';
+import { UpgradeRequests } from './pages/UpgradeRequests';
 import { NotFound } from './pages/NotFound';
 import { isAdminAuthenticated } from './api/auth';
 
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="companies" element={<Companies />} />
           <Route path="bookings" element={<Bookings />} />
           <Route path="payments" element={<Payments />} />
+          <Route path="upgrade-requests" element={<UpgradeRequests />} />
           <Route path="reports" element={<Reports />} />
           <Route path="waitlist" element={<WaitlistData />} />
           <Route path="analytics" element={<Analytics />} />

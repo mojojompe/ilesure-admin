@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { adminApi } from '../../api/admin';
 import { removeAdminToken } from '../../api/auth';
 import {
+<<<<<<< HEAD
   DashboardSquare01Icon,
   Building04Icon,
   SecurityCheckIcon,
@@ -61,7 +62,35 @@ const NAV_SECTIONS = [
       { path: '/audit-logs',     label: 'Audit Logs',   icon: Note01Icon },
     ],
   },
+=======
+  LayoutDashboard, Building2, ShieldCheck, Users, Briefcase,
+  ClipboardList, BarChart3, LogOut, Settings,
+  UserCheck, Calendar, CreditCard, Flag, Bell, ScrollText,
+  Megaphone, Star, Sparkles
+} from 'lucide-react';
+import { clsx } from 'clsx';
+
+const navItems = [
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/listings', label: 'Listings', icon: Building2 },
+  { path: '/verification', label: 'Verification Queue', icon: ShieldCheck },
+  { path: '/users', label: 'Users', icon: Users },
+  { path: '/agents', label: 'Agents', icon: UserCheck },
+  { path: '/agent-reviews', label: 'Agent Reviews', icon: Star },
+  { path: '/companies', label: 'Companies', icon: Briefcase },
+  { path: '/bookings', label: 'Bookings', icon: Calendar },
+  { path: '/payments', label: 'Payments', icon: CreditCard },
+  { path: '/upgrade-requests', label: 'Feature Upgrades', icon: Sparkles },
+  { path: '/reports', label: 'Reports', icon: Flag },
+  { path: '/waitlist', label: 'Waitlist Data', icon: ClipboardList },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { path: '/tiers', label: 'Tier Management', icon: BarChart3 },
+  { path: '/notifications', label: 'Notifications', icon: Bell },
+  { path: '/ads', label: 'Ads Management', icon: Megaphone },
+  { path: '/audit-logs', label: 'Audit Logs', icon: ScrollText },
+>>>>>>> 5e64f72acabf8618d4084e032f8e2ca397b7c87d
 ];
+
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const location = useLocation();
