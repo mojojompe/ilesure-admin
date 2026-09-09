@@ -2,7 +2,14 @@ import { useState, useEffect } from 'react';
 import { adminApi } from '../api/admin';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
-import { Plus, Trash2, Link, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
+import {
+  PlusSignIcon,
+  Delete01Icon,
+  Link01Icon,
+  Image01Icon as ImageIcon,
+  Tick01Icon,
+  CancelCircleIcon
+} from '@hugeicons/react';
 import { safeUrl } from '../lib/safeUrl';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
@@ -111,7 +118,7 @@ export function Ads() {
         {/* SECURITY-FIX (AD-H3): creating ads is a privileged action — hidden for roles without ads.manage. */}
         {canManage && (
           <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
+            <PlusSignIcon className="w-4 h-4" />
             Add New Ad
           </Button>
         )}
@@ -134,7 +141,7 @@ export function Ads() {
               <thead>
                 <tr className="border-b border-clay-border bg-white/50">
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Image</th>
-                  <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Link</th>
+                  <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Link01Icon</th>
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Date Added</th>
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider text-right">Actions</th>
@@ -160,7 +167,7 @@ export function Ads() {
                         if (href) {
                           return (
                             <a href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-mustard hover:underline">
-                              <Link className="w-4 h-4" />
+                              <Link01Icon className="w-4 h-4" />
                               {ad.link.length > 30 ? ad.link.substring(0, 30) + '...' : ad.link}
                             </a>
                           );
@@ -176,7 +183,7 @@ export function Ads() {
                           ad.isActive ? 'bg-status-success/10 text-status-success' : 'bg-status-error/10 text-status-error'
                         } ${canManage ? '' : 'opacity-60 cursor-not-allowed'}`}
                       >
-                        {ad.isActive ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        {ad.isActive ? <Tick01Icon className="w-3 h-3" /> : <CancelCircleIcon className="w-3 h-3" />}
                         {ad.isActive ? 'Active' : 'Inactive'}
                       </button>
                     </td>
@@ -191,7 +198,7 @@ export function Ads() {
                           className="p-2 text-text-tertiary hover:text-status-error hover:bg-status-error/10 rounded-pill transition-colors"
                           title="Delete Ad"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Delete01Icon className="w-4 h-4" />
                         </button>
                       ) : (
                         <span className="text-text-tertiary">—</span>
@@ -238,7 +245,7 @@ export function Ads() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-text-primary mb-1">Redirect Link (Optional)</label>
+                <label className="block text-sm font-semibold text-text-primary mb-1">Redirect Link01Icon (Optional)</label>
                 <input 
                   type="url"
                   placeholder="https://example.com"

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Calendar } from 'lucide-react';
+import {
+  Calendar01Icon
+} from '@hugeicons/react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -124,7 +126,7 @@ export function Analytics() {
         ].map(({ label, value }) => (
           <ClayCard key={label} padding="md">
             <div className="flex items-center gap-2 mb-1">
-              <Calendar className="w-4 h-4 text-mustard flex-shrink-0" />
+              <Calendar01Icon className="w-4 h-4 text-mustard flex-shrink-0" />
               <p className="text-[10px] text-text-tertiary font-semibold uppercase tracking-wide">{label}</p>
             </div>
             <p className="text-xl font-bold text-text-primary">{value}</p>

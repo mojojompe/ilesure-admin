@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react';
 import {
-  Send,
-  Mail,
-  Globe,
-  Users,
-  UserCog,
-  List,
-  X,
-  Eye,
-  Copy,
-  Check,
-  RotateCcw,
-  Clock,
-  AlertTriangle,
-  FileText,
-  User as UserIcon,
-} from 'lucide-react';
+  SentIcon,
+  Mail01Icon,
+  GlobeIcon,
+  UserMultipleIcon,
+  UserIcon,
+  CheckListIcon,
+  Cancel01Icon,
+  ViewIcon,
+  Copy01Icon,
+  Tick01Icon,
+  RefreshIcon,
+  Time02Icon,
+  Alert02Icon,
+  File01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../../components/ui/ClayCard';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -40,11 +39,11 @@ interface BroadcastRecord {
 }
 
 const RECIPIENT_OPTIONS = [
-  { value: 'all', label: 'All Verified + Waitlist', icon: Globe },
-  { value: 'students', label: 'Students', icon: Users },
-  { value: 'landlords', label: 'Landlords', icon: Users },
-  { value: 'agents_companies', label: 'Agents & Companies', icon: UserCog },
-  { value: 'waitlist', label: 'Waitlist Only', icon: List },
+  { value: 'all', label: 'All Verified + Waitlist', icon: GlobeIcon },
+  { value: 'students', label: 'Students', icon: UserMultipleIcon },
+  { value: 'landlords', label: 'Landlords', icon: UserMultipleIcon },
+  { value: 'agents_companies', label: 'Agents & Companies', icon: UserIcon },
+  { value: 'waitlist', label: 'Waitlist Only', icon: CheckListIcon },
 ];
 
 export function EmailTab() {
@@ -164,7 +163,7 @@ export function EmailTab() {
             className="ml-auto text-current opacity-60 hover:opacity-100"
             onClick={() => setResult(null)}
           >
-            <X className="w-4 h-4" />
+            <Cancel01Icon className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -240,15 +239,15 @@ export function EmailTab() {
         </div>
       </ClayCard>
 
-      {/* Send button */}
+      {/* SentIcon button */}
       <div className="flex justify-end">
         <Button
           variant="mustard"
-          icon={<Send className="w-4 h-4" />}
+          icon={<SentIcon className="w-4 h-4" />}
           onClick={() => setShowPreview(true)}
           disabled={!canSend}
         >
-          Preview & Send
+          Preview & SentIcon
         </Button>
       </div>
 
@@ -340,7 +339,7 @@ export function EmailTab() {
                         className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-clay-sm bg-clay-border-light hover:bg-mustard hover:text-white transition-colors text-text-secondary"
                         title="View Broadcast Details"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <ViewIcon className="w-3.5 h-3.5" />
                         <span>Details</span>
                       </button>
                     </td>
@@ -398,7 +397,7 @@ export function EmailTab() {
                 <Button
                   variant="mustard"
                   size="sm"
-                  icon={<RotateCcw className="w-3.5 h-3.5" />}
+                  icon={<RefreshIcon className="w-3.5 h-3.5" />}
                   onClick={() => {
                     setSubject(selectedBroadcast.subject);
                     setBody(selectedBroadcast.body || '');
@@ -420,14 +419,14 @@ export function EmailTab() {
             <div className="p-4 rounded-clay-lg bg-clay-border-light/60 border border-clay-border flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-clay bg-burnt-brown-pale flex items-center justify-center text-burnt-brown flex-shrink-0 shadow-clay-sm">
-                  <Mail className="w-5 h-5" />
+                  <Mail01Icon className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-text-primary">
                     {selectedBroadcast.subject}
                   </h3>
                   <div className="flex items-center gap-2 mt-1 text-xs text-text-tertiary">
-                    <Clock className="w-3.5 h-3.5" />
+                    <Time02Icon className="w-3.5 h-3.5" />
                     <span>
                       {new Date(selectedBroadcast.createdAt).toLocaleDateString('en-GB', {
                         day: 'numeric',
@@ -492,7 +491,7 @@ export function EmailTab() {
             {/* Error banner if any */}
             {selectedBroadcast.errorMessage && (
               <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-clay-sm flex items-start gap-2.5 text-rose-800 text-xs">
-                <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+                <Alert02Icon className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <strong className="font-semibold">Delivery Warning / Error:</strong>
                   <p className="mt-0.5">{selectedBroadcast.errorMessage}</p>
@@ -504,7 +503,7 @@ export function EmailTab() {
             <div className="border border-clay-border rounded-clay-lg overflow-hidden bg-white shadow-sm">
               <div className="flex items-center justify-between px-4 py-2.5 bg-clay-border-light/70 border-b border-clay-border">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-burnt-brown" />
+                  <File01Icon className="w-4 h-4 text-burnt-brown" />
                   <span className="text-xs font-bold text-text-primary">Email Message Body</span>
                 </div>
                 <button
@@ -513,13 +512,13 @@ export function EmailTab() {
                 >
                   {copiedMessage ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <Tick01Icon className="w-3.5 h-3.5 text-emerald-600" />
                       <span className="text-emerald-700 font-medium">Copied!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Text</span>
+                      <Copy01Icon className="w-3.5 h-3.5" />
+                      <span>Copy01Icon Text</span>
                     </>
                   )}
                 </button>
@@ -542,7 +541,7 @@ export function EmailTab() {
         </Modal>
       )}
 
-      {/* Preview & Send Modal */}
+      {/* Preview & SentIcon Modal */}
       <Modal
         open={showPreview}
         onClose={() => setShowPreview(false)}
@@ -556,14 +555,14 @@ export function EmailTab() {
             <Button
               variant="mustard"
               size="sm"
-              icon={<Send className="w-4 h-4" />}
+              icon={<SentIcon className="w-4 h-4" />}
               loading={sending}
               onClick={async () => {
                 await handleSend();
                 setShowPreview(false);
               }}
             >
-              Send Now
+              SentIcon Now
             </Button>
           </>
         }
@@ -572,7 +571,7 @@ export function EmailTab() {
           <div className="bg-clay-border-light rounded-clay-lg p-5 border border-clay-border">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-pill bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white flex-shrink-0 shadow-clay-sm">
-                <Mail className="w-5 h-5" />
+                <Mail01Icon className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-text-primary">

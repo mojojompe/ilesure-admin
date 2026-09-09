@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Eye, EyeOff, Loader, Search, Star } from 'lucide-react';
+import {
+  Delete01Icon,
+  ViewIcon,
+  ViewOffIcon,
+  Loading01Icon,
+  Search01Icon,
+  StarIcon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -61,10 +68,10 @@ export function AgentReviews() {
       <ClayCard className="p-4">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by agent, reviewer, or comment..."
+              placeholder="Search01Icon by agent, reviewer, or comment..."
               className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -74,7 +81,7 @@ export function AgentReviews() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <Loader className="w-8 h-8 animate-spin mb-4 text-primary" />
+            <Loading01Icon className="w-8 h-8 animate-spin mb-4 text-primary" />
             <p>Loading reviews...</p>
           </div>
         ) : filtered.length === 0 ? (
@@ -108,7 +115,7 @@ export function AgentReviews() {
                     <td className="py-4">
                       <div className="flex items-center gap-1">
                         <span className="font-medium">{review.rating}</span>
-                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                        <StarIcon className="w-4 h-4 text-amber-400 fill-amber-400" />
                       </div>
                     </td>
                     <td className="py-4">
@@ -129,7 +136,7 @@ export function AgentReviews() {
                             disabled={updating}
                             title="Hide Review"
                           >
-                            <EyeOff className="w-4 h-4" />
+                            <ViewOffIcon className="w-4 h-4" />
                           </Button>
                         ) : (
                           <Button 
@@ -139,7 +146,7 @@ export function AgentReviews() {
                             disabled={updating}
                             title="Show Review"
                           >
-                            <Eye className="w-4 h-4" />
+                            <ViewIcon className="w-4 h-4" />
                           </Button>
                         )}
                       </div>

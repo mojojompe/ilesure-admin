@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ScrollText,
-  Loader,
-  Search,
-  ArrowLeft,
-  Activity,
-  Copy,
-  Check,
-  Eye,
-  FileJson,
-  Shield,
-  Clock,
-  User as UserIcon,
-  Server,
-  Layers,
-} from 'lucide-react';
+  Note01Icon,
+  Loading01Icon,
+  Search01Icon,
+  ArrowLeft01Icon,
+  Analytics01Icon,
+  Copy01Icon,
+  Tick01Icon,
+  ViewIcon,
+  File01Icon,
+  SecurityCheckIcon,
+  Time02Icon,
+  UserIcon as UserIcon,
+  CloudServerIcon,
+  Layers01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
@@ -221,10 +221,10 @@ export function AuditLogs() {
             onClick={() => navigate('/settings')}
             className="w-9 h-9 rounded-clay-sm bg-clay-border-light flex items-center justify-center hover:bg-clay-border transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 text-text-secondary" />
+            <ArrowLeft01Icon className="w-4 h-4 text-text-secondary" />
           </button>
           <div className="w-12 h-12 rounded-clay bg-burnt-brown-pale flex items-center justify-center flex-shrink-0 shadow-clay-sm">
-            <ScrollText className="w-6 h-6 text-burnt-brown" />
+            <Note01Icon className="w-6 h-6 text-burnt-brown" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-text-primary">Enterprise Audit Logs</h2>
@@ -236,7 +236,7 @@ export function AuditLogs() {
 
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-pill bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
-            <Shield className="w-3.5 h-3.5" /> SOC 2 / Event-Standard Active
+            <SecurityCheckIcon className="w-3.5 h-3.5" /> SOC 2 / Event-Standard Active
           </span>
         </div>
       </div>
@@ -327,7 +327,7 @@ export function AuditLogs() {
           <Button
             variant="primary"
             size="sm"
-            icon={<Search className="w-3.5 h-3.5" />}
+            icon={<Search01Icon className="w-3.5 h-3.5" />}
             onClick={handleSearch}
           >
             Apply Filters
@@ -339,7 +339,7 @@ export function AuditLogs() {
       <ClayCard padding="none">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm flex items-center gap-2">
-            <Activity className="w-4 h-4 text-mustard" />
+            <Analytics01Icon className="w-4 h-4 text-mustard" />
             Audit Trail ({total})
           </h3>
           <span className="text-xs text-text-tertiary">
@@ -366,7 +366,7 @@ export function AuditLogs() {
                 <tr>
                   <td colSpan={8} className="text-center py-12">
                     <div className="flex items-center justify-center gap-2">
-                      <Loader className="w-5 h-5 animate-spin text-mustard" />
+                      <Loading01Icon className="w-5 h-5 animate-spin text-mustard" />
                       <span className="text-text-tertiary">Loading audit events...</span>
                     </div>
                   </td>
@@ -399,7 +399,7 @@ export function AuditLogs() {
                       {/* Timestamp */}
                       <td>
                         <div className="flex items-center gap-1.5 text-xs text-text-secondary whitespace-nowrap">
-                          <Clock className="w-3.5 h-3.5 text-text-tertiary" />
+                          <Time02Icon className="w-3.5 h-3.5 text-text-tertiary" />
                           <span>{formatTimestamp(log.timestamp)}</span>
                         </div>
                       </td>
@@ -488,7 +488,7 @@ export function AuditLogs() {
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-clay-sm bg-clay-border-light hover:bg-mustard hover:text-white transition-colors text-text-secondary"
                           title="Inspect Event JSON"
                         >
-                          <FileJson className="w-3.5 h-3.5" />
+                          <File01Icon className="w-3.5 h-3.5" />
                           <span>Inspect</span>
                         </button>
                       </td>
@@ -550,14 +550,14 @@ export function AuditLogs() {
                   size="sm"
                   icon={
                     copiedId === inspectEvent.event_id ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <Tick01Icon className="w-3.5 h-3.5 text-emerald-400" />
                     ) : (
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy01Icon className="w-3.5 h-3.5" />
                     )
                   }
                   onClick={() => handleCopyJson(inspectEvent)}
                 >
-                  {copiedId === inspectEvent.event_id ? 'Copied JSON!' : 'Copy Event JSON'}
+                  {copiedId === inspectEvent.event_id ? 'Copied JSON!' : 'Copy01Icon Event JSON'}
                 </Button>
               </div>
             </div>
@@ -613,7 +613,7 @@ export function AuditLogs() {
             <div className="rounded-clay border border-slate-800 overflow-hidden shadow-sm">
               <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 text-slate-300 text-xs font-mono border-b border-slate-800">
                 <div className="flex items-center gap-2">
-                  <FileJson className="w-4 h-4 text-emerald-400" />
+                  <File01Icon className="w-4 h-4 text-emerald-400" />
                   <span className="text-slate-200 font-semibold">Audit Event Payload (JSON)</span>
                 </div>
                 <button
@@ -622,13 +622,13 @@ export function AuditLogs() {
                 >
                   {copiedId === inspectEvent.event_id ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <Tick01Icon className="w-3.5 h-3.5 text-emerald-400" />
                       <span className="text-emerald-400 font-medium">Copied!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy JSON</span>
+                      <Copy01Icon className="w-3.5 h-3.5" />
+                      <span>Copy01Icon JSON</span>
                     </>
                   )}
                 </button>

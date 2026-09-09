@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Search, Users as UsersIcon, GraduationCap, Home, Building2, UserX, UserCheck, Eye } from 'lucide-react';
+import {
+  Search01Icon,
+  UserMultipleIcon as UsersIcon,
+  Book01Icon,
+  Home01Icon,
+  Building04Icon,
+  UserIcon,
+  UserCheck01Icon,
+  ViewIcon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -17,12 +26,12 @@ const roleLabel: Record<string, string> = {
   company_admin: 'Company Admin', company: 'Company Admin', sub_agent: 'Sub-Agent',
 };
 const roleIcon: Record<string, React.ReactNode> = {
-  tenant: <GraduationCap className="w-3.5 h-3.5" />,
-  agent: <Home className="w-3.5 h-3.5" />,
-  landlord: <Home className="w-3.5 h-3.5" />,
-  company_admin: <Building2 className="w-3.5 h-3.5" />,
-  company: <Building2 className="w-3.5 h-3.5" />,
-  sub_agent: <Home className="w-3.5 h-3.5" />,
+  tenant: <Book01Icon className="w-3.5 h-3.5" />,
+  agent: <Home01Icon className="w-3.5 h-3.5" />,
+  landlord: <Home01Icon className="w-3.5 h-3.5" />,
+  company_admin: <Building04Icon className="w-3.5 h-3.5" />,
+  company: <Building04Icon className="w-3.5 h-3.5" />,
+  sub_agent: <Home01Icon className="w-3.5 h-3.5" />,
 };
 
 export function Users() {
@@ -108,9 +117,9 @@ export function Users() {
 
   const tabs: { key: TabKey; label: string; icon: React.ReactNode; count: number }[] = [
     { key: 'all',           label: 'All Users',      icon: <UsersIcon className="w-3.5 h-3.5" />,     count: users.length },
-    { key: 'tenant',        label: 'Tenants',        icon: <GraduationCap className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'tenant').length },
-    { key: 'agent_landlord',label: 'Agents',         icon: <Home className="w-3.5 h-3.5" />,          count: users.filter(u => u.role === 'agent' || u.role === 'landlord').length },
-    { key: 'company',       label: 'Company Admins', icon: <Building2 className="w-3.5 h-3.5" />,     count: users.filter(u => u.role === 'company_admin').length },
+    { key: 'tenant',        label: 'Tenants',        icon: <Book01Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'tenant').length },
+    { key: 'agent_landlord',label: 'Agents',         icon: <Home01Icon className="w-3.5 h-3.5" />,          count: users.filter(u => u.role === 'agent' || u.role === 'landlord').length },
+    { key: 'company',       label: 'Company Admins', icon: <Building04Icon className="w-3.5 h-3.5" />,     count: users.filter(u => u.role === 'company_admin').length },
   ];
 
   return (
@@ -120,9 +129,9 @@ export function Users() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Users',   value: totalUsers,                                        icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
-          { label: 'Tenants',       value: users.filter(u => u.role === 'tenant').length,       icon: <GraduationCap className="w-5 h-5 text-mustard" />,    bg: 'bg-mustard/10' },
-          { label: 'Agents',        value: users.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Suspended',     value: users.filter(u => u.status === 'suspended').length,  icon: <UserX className="w-5 h-5 text-status-error" />,       bg: 'bg-status-error/10' },
+          { label: 'Tenants',       value: users.filter(u => u.role === 'tenant').length,       icon: <Book01Icon className="w-5 h-5 text-mustard" />,    bg: 'bg-mustard/10' },
+          { label: 'Agents',        value: users.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Suspended',     value: users.filter(u => u.status === 'suspended').length,  icon: <UserIcon className="w-5 h-5 text-status-error" />,       bg: 'bg-status-error/10' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -134,7 +143,7 @@ export function Users() {
         ))}
       </div>
 
-      {/* ── Tabs + Search ───────────────────────────────── */}
+      {/* ── Tabs + Search01Icon ───────────────────────────────── */}
       <ClayCard padding="sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           {/* Tabs */}
@@ -157,13 +166,13 @@ export function Users() {
               </button>
             ))}
           </div>
-          {/* Search */}
+          {/* Search01Icon */}
           <div className="relative flex-1 w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+            <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by name or email..."
+              placeholder="Search01Icon by name or email..."
               className="w-full pl-9 pr-4 py-2 bg-clay-border-light border border-clay-border rounded-pill text-sm placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all"
             />
           </div>
@@ -237,7 +246,7 @@ export function Users() {
                         className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors"
                         title="View profile"
                       >
-                        <Eye className="w-3.5 h-3.5 text-text-secondary" />
+                        <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
                       </button>
                       {/* SECURITY-FIX (AD-H3): suspend/unsuspend hidden without users.suspend. */}
                       {canSuspend && (
@@ -252,8 +261,8 @@ export function Users() {
                           title={user.status === 'suspended' ? 'Unsuspend' : 'Suspend'}
                         >
                           {user.status === 'suspended'
-                            ? <UserCheck className="w-3.5 h-3.5" />
-                            : <UserX className="w-3.5 h-3.5" />}
+                            ? <UserCheck01Icon className="w-3.5 h-3.5" />
+                            : <UserIcon className="w-3.5 h-3.5" />}
                         </button>
                       )}
                     </div>

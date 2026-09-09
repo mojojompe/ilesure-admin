@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Flag, Trash2, Eye, X, Loader, Search } from 'lucide-react';
+import {
+  Flag01Icon,
+  Delete01Icon,
+  ViewIcon,
+  Cancel01Icon,
+  Loading01Icon,
+  Search01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -78,7 +85,7 @@ export function Reports() {
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-clay-sm bg-red-50 flex items-center justify-center shadow-clay-sm flex-shrink-0">
-              <Flag className="w-5 h-5 text-red-500" />
+              <Flag01Icon className="w-5 h-5 text-red-500" />
             </div>
             <div>
               <div className="text-2xl font-bold text-text-primary">{s.value}</div>
@@ -101,8 +108,8 @@ export function Reports() {
               ))}
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
-              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+              <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search01Icon..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
@@ -123,7 +130,7 @@ export function Reports() {
               {loading ? (
                 <tr><td colSpan={6} className="text-center py-12">
                   <div className="flex items-center justify-center gap-2">
-                    <Loader className="w-5 h-5 animate-spin text-mustard" />
+                    <Loading01Icon className="w-5 h-5 animate-spin text-mustard" />
                     <span className="text-text-tertiary">Loading...</span>
                   </div>
                 </td></tr>
@@ -148,7 +155,7 @@ export function Reports() {
                   <td><StatusBadge status={(r.status || 'pending') as any} /></td>
                   <td className="text-right pr-4">
                     <button onClick={() => setDetail(r)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
-                      <Eye className="w-3.5 h-3.5 text-text-secondary" />
+                      <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
                     </button>
                   </td>
                 </tr>
@@ -169,8 +176,8 @@ export function Reports() {
             {/* SECURITY-FIX (AD-H3): dismiss / take-down are moderation actions — hidden without reports.action. */}
             {detail?.status === 'pending' && canAction && (
               <>
-                <Button variant="danger" size="sm" loading={updating} onClick={() => handleAction(detail.id, 'dismiss')} icon={<X className="w-3.5 h-3.5" />}>Dismiss</Button>
-                <Button variant="danger" size="sm" loading={updating} onClick={() => handleAction(detail.id, 'takedown')} icon={<Trash2 className="w-3.5 h-3.5" />}>Take Down Listing</Button>
+                <Button variant="danger" size="sm" loading={updating} onClick={() => handleAction(detail.id, 'dismiss')} icon={<Cancel01Icon className="w-3.5 h-3.5" />}>Dismiss</Button>
+                <Button variant="danger" size="sm" loading={updating} onClick={() => handleAction(detail.id, 'takedown')} icon={<Delete01Icon className="w-3.5 h-3.5" />}>Take Down Listing</Button>
               </>
             )}
           </>

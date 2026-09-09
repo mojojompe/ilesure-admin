@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { UserCheck, Shield, Home, Search, Eye, Ban, CheckCircle, Loader } from 'lucide-react';
+import {
+  UserCheck01Icon,
+  SecurityCheckIcon,
+  Home01Icon,
+  Search01Icon,
+  ViewIcon,
+  Cancel01Icon,
+  Tick01Icon,
+  Loading01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -58,10 +67,10 @@ export function Agents() {
   );
 
   const summaryStats = [
-    { label: 'Total Agents', value: agents.length, icon: <UserCheck className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
-    { label: 'Verified', value: agents.filter((a: any) => a.verificationStatus === 'verified').length, icon: <Shield className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
-    { label: 'Pending Review', value: agents.filter((a: any) => a.status === 'pending').length, icon: <Shield className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
-    { label: 'Total Listings', value: agents.reduce((s: number, a: any) => s + (a.listingsCount || 0), 0), icon: <Home className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+    { label: 'Total Agents', value: agents.length, icon: <UserCheck01Icon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+    { label: 'Verified', value: agents.filter((a: any) => a.verificationStatus === 'verified').length, icon: <SecurityCheckIcon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
+    { label: 'Pending Review', value: agents.filter((a: any) => a.status === 'pending').length, icon: <SecurityCheckIcon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
+    { label: 'Total Listings', value: agents.reduce((s: number, a: any) => s + (a.listingsCount || 0), 0), icon: <Home01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
   ];
 
   return (
@@ -84,10 +93,10 @@ export function Agents() {
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm">All Agents</h3>
           <div className="relative w-56">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+            <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
             <input
               className="clay-input w-full pl-9 py-1.5 text-sm"
-              placeholder="Search agents..."
+              placeholder="Search01Icon agents..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -111,7 +120,7 @@ export function Agents() {
               {loading ? (
                 <tr><td colSpan={7} className="text-center py-12">
                   <div className="flex items-center justify-center gap-2">
-                    <Loader className="w-5 h-5 animate-spin text-mustard" />
+                    <Loading01Icon className="w-5 h-5 animate-spin text-mustard" />
                     <span className="text-text-tertiary">Loading agents...</span>
                   </div>
                 </td></tr>
@@ -133,12 +142,12 @@ export function Agents() {
                   <td><StatusBadge status={agent.status as any} /></td>
                   <td>
                     {agent.isVerified
-                      ? <span className="flex items-center gap-1 text-status-success text-xs font-semibold"><CheckCircle className="w-3.5 h-3.5" /> KYC</span>
+                      ? <span className="flex items-center gap-1 text-status-success text-xs font-semibold"><Tick01Icon className="w-3.5 h-3.5" /> KYC</span>
                       : <span className="text-xs text-text-tertiary">Pending</span>}
                   </td>
                   <td className="text-right pr-4">
                     <button onClick={() => setDetail(agent)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors" title="View">
-                      <Eye className="w-3.5 h-3.5 text-text-secondary" />
+                      <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
                     </button>
                   </td>
                 </tr>
@@ -159,7 +168,7 @@ export function Agents() {
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
             {/* SECURITY-FIX (AD-H3): suspend/activate hidden without agents.suspend. */}
             {canSuspend && (detail?.status === 'active'
-              ? <Button variant="danger" size="sm" onClick={() => detail && handleSuspend(detail)} icon={<Ban className="w-3.5 h-3.5" />}>Suspend Agent</Button>
+              ? <Button variant="danger" size="sm" onClick={() => detail && handleSuspend(detail)} icon={<Cancel01Icon className="w-3.5 h-3.5" />}>Suspend Agent</Button>
               : <Button variant="success" size="sm" onClick={() => detail && handleActivate(detail)}>Activate Agent</Button>)}
           </>
         }

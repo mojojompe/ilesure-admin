@@ -1,5 +1,16 @@
 import { Fragment, useState, useEffect } from 'react';
-import { Search, Filter, Download, ChevronDown, ChevronUp, Eye, Home, MapPin, User, Image as ImageIcon } from 'lucide-react';
+import {
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  ViewIcon,
+  Home01Icon,
+  Location01Icon,
+  UserIcon,
+  Image01Icon as ImageIcon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -176,7 +187,7 @@ export function Listings() {
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* ── Filter Tabs ─────────────────────────────────── */}
+      {/* ── FilterIcon Tabs ─────────────────────────────────── */}
       <div className="flex flex-wrap gap-2">
         {statusTabs.map(tab => (
           <button
@@ -203,17 +214,17 @@ export function Listings() {
       <ClayCard padding="sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+            <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by title, agent, or area..."
+              placeholder="Search01Icon by title, agent, or area..."
               className="w-full pl-9 pr-4 py-2 bg-clay-border-light border border-clay-border rounded-pill text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all"
             />
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Button variant="secondary" size="sm" icon={<Filter className="w-3.5 h-3.5" />} onClick={() => prompt('Enter filter keyword:')}>Filter</Button>
-            <Button variant="ghost" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => alert('Exporting listings...')}>Export</Button>
+            <Button variant="secondary" size="sm" icon={<FilterIcon className="w-3.5 h-3.5" />} onClick={() => prompt('Enter filter keyword:')}>FilterIcon</Button>
+            <Button variant="ghost" size="sm" icon={<Download01Icon className="w-3.5 h-3.5" />} onClick={() => alert('Exporting listings...')}>Export</Button>
           </div>
         </div>
       </ClayCard>
@@ -267,7 +278,7 @@ export function Listings() {
                     <td>
                       <div className="flex items-center gap-2.5">
                         <div className="w-10 h-10 rounded-clay-sm bg-burnt-brown-pale flex items-center justify-center flex-shrink-0 overflow-hidden border border-clay-border relative">
-                          <Home className="w-5 h-5 text-burnt-brown absolute inset-0 m-auto" />
+                          <Home01Icon className="w-5 h-5 text-burnt-brown absolute inset-0 m-auto" />
                           {listing.images && listing.images.length > 0 && listing.images[0] ? (
                             <img
                               src={listing.images[0]}
@@ -287,7 +298,7 @@ export function Listings() {
                     </td>
                     <td>
                       <div className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-text-tertiary flex-shrink-0" />
+                        <UserIcon className="w-3.5 h-3.5 text-text-tertiary flex-shrink-0" />
                         <span className="text-sm text-text-secondary max-w-[140px] truncate">{listing.agentName}</span>
                         {listing.isCompany && (
                           <span className="text-[10px] bg-burnt-brown/10 text-burnt-brown px-1.5 py-0.5 rounded-pill font-semibold">Co.</span>
@@ -301,7 +312,7 @@ export function Listings() {
                     <td><span className="font-bold text-burnt-brown">{formatListingRent(listing)}</span></td>
                     <td>
                       <div className="flex items-center gap-1 text-sm text-text-secondary">
-                        <MapPin className="w-3 h-3 text-text-tertiary flex-shrink-0" />
+                        <Location01Icon className="w-3 h-3 text-text-tertiary flex-shrink-0" />
                         {listing.areaCluster}
                       </div>
                     </td>
@@ -323,8 +334,8 @@ export function Listings() {
                           title="Expand"
                         >
                           {expandedId === listing.id
-                            ? <ChevronUp className="w-3.5 h-3.5 text-text-secondary" />
-                            : <ChevronDown className="w-3.5 h-3.5 text-text-secondary" />}
+                            ? <ArrowUp01Icon className="w-3.5 h-3.5 text-text-secondary" />
+                            : <ArrowDown01Icon className="w-3.5 h-3.5 text-text-secondary" />}
                         </button>
                       </div>
                     </td>
@@ -395,7 +406,7 @@ export function Listings() {
                                     }}
                                   />
                                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                    <Eye className="w-4 h-4 text-white" />
+                                    <ViewIcon className="w-4 h-4 text-white" />
                                   </div>
                                   {idx === 0 && (
                                     <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-semibold backdrop-blur-xs">
@@ -432,7 +443,7 @@ export function Listings() {
                 <tr>
                   <td colSpan={8} className="py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <Eye className="w-8 h-8 text-clay-border" />
+                      <ViewIcon className="w-8 h-8 text-clay-border" />
                       <p className="text-text-tertiary font-medium">No listings found</p>
                     </div>
                   </td>

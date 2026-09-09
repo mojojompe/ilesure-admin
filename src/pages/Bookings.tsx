@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Check, X, Loader, Search, Eye, RotateCcw } from 'lucide-react';
+import {
+  Calendar01Icon,
+  Tick01Icon,
+  Cancel01Icon,
+  Loading01Icon,
+  Search01Icon,
+  ViewIcon,
+  RefreshIcon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -95,7 +103,7 @@ export function Bookings() {
         {summary.map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-clay-sm bg-burnt-brown-pale flex items-center justify-center shadow-clay-sm flex-shrink-0">
-              <Calendar className="w-5 h-5 text-burnt-brown" />
+              <Calendar01Icon className="w-5 h-5 text-burnt-brown" />
             </div>
             <div>
               <div className="text-2xl font-bold text-text-primary">{s.value}</div>
@@ -123,8 +131,8 @@ export function Bookings() {
               ))}
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
-              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+              <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search01Icon..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
@@ -148,7 +156,7 @@ export function Bookings() {
               {loading ? (
                 <tr><td colSpan={9} className="text-center py-12">
                   <div className="flex items-center justify-center gap-2">
-                    <Loader className="w-5 h-5 animate-spin text-mustard" />
+                    <Loading01Icon className="w-5 h-5 animate-spin text-mustard" />
                     <span className="text-text-tertiary">Loading...</span>
                   </div>
                 </td></tr>
@@ -193,7 +201,7 @@ export function Bookings() {
                   <td><StatusBadge status={(b.paymentStatus || 'pending') as any} /></td>
                   <td className="text-right pr-4">
                     <button onClick={() => setDetail(b)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors" title="View">
-                      <Eye className="w-3.5 h-3.5 text-text-secondary" />
+                      <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
                     </button>
                   </td>
                 </tr>
@@ -213,12 +221,12 @@ export function Bookings() {
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
             {detail?.status === 'pending' && canResolve && (
               <>
-                <Button variant="success" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'confirm')} icon={<Check className="w-3.5 h-3.5" />}>Confirm</Button>
-                <Button variant="danger" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'cancel')} icon={<X className="w-3.5 h-3.5" />}>Cancel</Button>
+                <Button variant="success" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'confirm')} icon={<Tick01Icon className="w-3.5 h-3.5" />}>Confirm</Button>
+                <Button variant="danger" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'cancel')} icon={<Cancel01Icon className="w-3.5 h-3.5" />}>Cancel</Button>
               </>
             )}
             {detail?.status === 'confirmed' && detail?.paymentStatus === 'paid' && canResolve && (
-              <Button variant="danger" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'refund')} icon={<RotateCcw className="w-3.5 h-3.5" />}>Refund</Button>
+              <Button variant="danger" size="sm" loading={updating} onClick={() => confirmResolve(detail.id, 'refund')} icon={<RefreshIcon className="w-3.5 h-3.5" />}>Refund</Button>
             )}
           </>
         }

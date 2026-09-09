@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Bell, Mail } from 'lucide-react';
+import {
+  Notification01Icon,
+  Mail01Icon
+} from '@hugeicons/react';
 import { clsx } from 'clsx';
 import { PushTab } from './notifications/PushTab';
 import { EmailTab } from './notifications/EmailTab';
@@ -22,7 +25,7 @@ export function PushNotifications() {
               : 'text-text-secondary hover:text-text-primary',
           )}
         >
-          <Bell className="w-4 h-4" />
+          <Notification01Icon className="w-4 h-4" />
           Push Notifications
         </button>
         <button
@@ -34,7 +37,7 @@ export function PushNotifications() {
               : 'text-text-secondary hover:text-text-primary',
           )}
         >
-          <Mail className="w-4 h-4" />
+          <Mail01Icon className="w-4 h-4" />
           Email Broadcast
         </button>
       </div>

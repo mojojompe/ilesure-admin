@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Send, Bell, Globe, Users, Search, X } from 'lucide-react';
+import {
+  SentIcon,
+  Notification01Icon,
+  GlobeIcon,
+  UserMultipleIcon,
+  Search01Icon,
+  Cancel01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../../components/ui/ClayCard';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -116,7 +123,7 @@ export function PushTab() {
         )}>
           <span className="text-sm font-semibold">{result.message}</span>
           <button className="ml-auto text-current opacity-60 hover:opacity-100" onClick={() => setResult(null)}>
-            <X className="w-4 h-4" />
+            <Cancel01Icon className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -177,9 +184,9 @@ export function PushTab() {
             <label className="block text-xs font-bold text-text-tertiary uppercase tracking-wider mb-3">Target Audience</label>
             <div className="flex gap-2 mb-4">
               {[
-                { mode: 'all' as TargetMode, label: 'All Users', icon: <Globe className="w-3.5 h-3.5" /> },
-                { mode: 'roles' as TargetMode, label: 'By Role', icon: <Users className="w-3.5 h-3.5" /> },
-                { mode: 'users' as TargetMode, label: 'Specific Users', icon: <Search className="w-3.5 h-3.5" /> },
+                { mode: 'all' as TargetMode, label: 'All UserMultipleIcon', icon: <GlobeIcon className="w-3.5 h-3.5" /> },
+                { mode: 'roles' as TargetMode, label: 'By Role', icon: <UserMultipleIcon className="w-3.5 h-3.5" /> },
+                { mode: 'users' as TargetMode, label: 'Specific UserMultipleIcon', icon: <Search01Icon className="w-3.5 h-3.5" /> },
               ].map(t => (
                 <button
                   key={t.mode}
@@ -225,18 +232,18 @@ export function PushTab() {
                       <span key={u._id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-burnt-brown-pale text-burnt-brown-dark rounded-pill text-xs font-semibold">
                         {u.fullName || u.email}
                         <button onClick={() => removeUser(u._id)} className="hover:text-status-error transition-colors">
-                          <X className="w-3 h-3" />
+                          <Cancel01Icon className="w-3 h-3" />
                         </button>
                       </span>
                     ))}
                   </div>
                 )}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+                  <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
                   <input
                     value={userSearch}
                     onChange={e => setUserSearch(e.target.value)}
-                    placeholder="Search users by name or email..."
+                    placeholder="Search01Icon users by name or email..."
                     className="w-full pl-9 pr-4 py-2 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all"
                   />
                   {searching && (
@@ -274,7 +281,7 @@ export function PushTab() {
 
             {targetMode === 'all' && (
               <p className="text-sm text-text-tertiary bg-clay-border-light rounded-clay-sm px-3 py-2">
-                <Globe className="w-3.5 h-3.5 inline mr-1.5" />
+                <GlobeIcon className="w-3.5 h-3.5 inline mr-1.5" />
                 This notification will be sent to <strong>all registered users</strong>.
               </p>
             )}
@@ -283,21 +290,21 @@ export function PushTab() {
       </ClayCard>
 
       {/* BUGFIX (QA-ADM-028): the Push tab had NO send control at all. The only
-          "Send Now" button lived inside the preview modal below, and nothing ever
+          "SentIcon Now" button lived inside the preview modal below, and nothing ever
           called setShowPreview(true) — so a notification could not be sent from the
           console even though the endpoint worked. Mirrors EmailTab's trigger. */}
       <div className="flex justify-end">
         <Button
           variant="mustard"
-          icon={<Send className="w-4 h-4" />}
+          icon={<SentIcon className="w-4 h-4" />}
           onClick={() => setShowPreview(true)}
           disabled={!canSend}
         >
-          Preview & Send
+          Preview & SentIcon
         </Button>
       </div>
 
-      {/* Preview & Send Modal */}
+      {/* Preview & SentIcon Modal */}
       <Modal
         open={showPreview}
         onClose={() => setShowPreview(false)}
@@ -309,12 +316,12 @@ export function PushTab() {
             <Button
               variant="mustard"
               size="sm"
-              icon={<Send className="w-4 h-4" />}
+              icon={<SentIcon className="w-4 h-4" />}
               loading={sending}
               disabled={!canSend}
               onClick={async () => { await handleSend(); setShowPreview(false); }}
             >
-              Send Now
+              SentIcon Now
             </Button>
           </>
         }
@@ -323,7 +330,7 @@ export function PushTab() {
           <div className="bg-clay-border-light rounded-clay-lg p-5 border border-clay-border">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-pill bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white flex-shrink-0 shadow-clay-sm">
-                <Bell className="w-5 h-5" />
+                <Notification01Icon className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-text-primary">{title || 'Notification Title'}</p>
@@ -331,7 +338,7 @@ export function PushTab() {
                 <p className="text-[10px] text-text-tertiary mt-2">
                   Type: {NOTIFICATION_TYPES.find(nt => nt.value === type)?.label || type}
                   {' · '}
-                  {targetMode === 'all' ? 'All Users'
+                  {targetMode === 'all' ? 'All UserMultipleIcon'
                     : targetMode === 'roles' ? `Roles: ${selectedRoles.join(', ') || 'none'}`
                     : `${selectedUsers.length} specific user(s)`}
                 </p>

@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, XCircle, AlertCircle, Clock, ChevronRight, User, Building2, Loader } from 'lucide-react';
+import {
+  File01Icon,
+  Tick01Icon,
+  CancelCircleIcon,
+  Alert01Icon,
+  Time02Icon,
+  ArrowRight01Icon,
+  UserIcon,
+  Building04Icon,
+  Loading01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -209,7 +219,7 @@ export function VerificationQueue() {
             read "Pending Verifications (20)" while the API reported 22 total — and the list
             was never filtered to pending at all. */}
         <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-clay-border">
-          <Clock className="w-4 h-4 text-mustard" />
+          <Time02Icon className="w-4 h-4 text-mustard" />
           <h3 className="font-bold text-text-primary text-sm">
             {statusFilter === 'all' ? 'All Verifications' : `${statusFilter.charAt(0).toUpperCase()}${statusFilter.slice(1)} Verifications`} ({totalItems})
           </h3>
@@ -248,13 +258,13 @@ export function VerificationQueue() {
               <div className={clsx('w-9 h-9 rounded-pill flex items-center justify-center text-sm font-bold shadow-clay-sm flex-shrink-0',
                 req.role === 'company' ? 'bg-mustard/15 text-mustard' : 'bg-burnt-brown-pale text-burnt-brown'
               )}>
-                {req.role === 'company' ? <Building2 className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                {req.role === 'company' ? <Building04Icon className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-text-primary truncate">{req.applicantName}</p>
                 <p className="text-xs text-text-tertiary capitalize">{req.role} · {req.submittedDate}</p>
               </div>
-              <ChevronRight className={clsx('w-4 h-4 text-text-tertiary ml-auto flex-shrink-0 transition-transform', selected?.id === req.id && 'text-burnt-brown')} />
+              <ArrowRight01Icon className={clsx('w-4 h-4 text-text-tertiary ml-auto flex-shrink-0 transition-transform', selected?.id === req.id && 'text-burnt-brown')} />
             </button>
           ))}
           {!loading && verifications.length === 0 && (
@@ -314,7 +324,7 @@ export function VerificationQueue() {
             <div className="p-6">
               <div className="bg-clay-border-light rounded-clay border-2 border-dashed border-clay-border flex flex-col items-center justify-center min-h-72 gap-4">
                 <div className="w-16 h-16 rounded-clay bg-burnt-brown-pale flex items-center justify-center shadow-clay">
-                  <FileText className="w-8 h-8 text-burnt-brown" />
+                  <File01Icon className="w-8 h-8 text-burnt-brown" />
                 </div>
                 <div className="text-center">
                   <p className="font-semibold text-text-primary text-sm">{docLabels[activeDoc] || activeDoc}</p>
@@ -344,7 +354,7 @@ export function VerificationQueue() {
                 {/* Verification badge on doc */}
                 {(selected?.documents as any)?.[activeDoc]?.verified && (
                   <span className="flex items-center gap-1 text-xs font-semibold text-status-success bg-status-success/10 px-3 py-1 rounded-pill">
-                    <CheckCircle className="w-3 h-3" /> Previously verified
+                    <Tick01Icon className="w-3 h-3" /> Previously verified
                   </span>
                 )}
               </div>
@@ -354,7 +364,7 @@ export function VerificationQueue() {
           {/* Applicant info summary */}
           <ClayCard padding="md">
             <h4 className="font-bold text-text-primary text-sm mb-3 flex items-center gap-2">
-              <User className="w-4 h-4 text-burnt-brown" /> Applicant Details
+              <UserIcon className="w-4 h-4 text-burnt-brown" /> Applicant Details
             </h4>
             {selected && (
             <div className="grid grid-cols-2 gap-3">
@@ -425,7 +435,7 @@ export function VerificationQueue() {
                         checklist[key] ? 'bg-status-success border-status-success' : 'bg-white border-clay-border',
                       )}
                     >
-                      {checklist[key] && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                      {checklist[key] && <Tick01Icon className="w-3.5 h-3.5 text-white" />}
                     </span>
                   </span>
                   <span className={clsx('text-xs font-medium flex-1', checklist[key] ? 'text-status-success line-through decoration-status-success/40' : 'text-text-secondary')}>
@@ -471,13 +481,13 @@ export function VerificationQueue() {
               backend is authoritative). */}
           {canReview && (
             <div className="space-y-2">
-              <Button variant="success" className="w-full" icon={<CheckCircle className="w-4 h-4" />} onClick={() => setConfirmModal('approve')}>
+              <Button variant="success" className="w-full" icon={<Tick01Icon className="w-4 h-4" />} onClick={() => setConfirmModal('approve')}>
                 Approve Verification
               </Button>
-              <Button variant="mustard" className="w-full" icon={<AlertCircle className="w-4 h-4" />} onClick={() => setConfirmModal('info')}>
+              <Button variant="mustard" className="w-full" icon={<Alert01Icon className="w-4 h-4" />} onClick={() => setConfirmModal('info')}>
                 Request More Information
               </Button>
-              <Button variant="danger" className="w-full" icon={<XCircle className="w-4 h-4" />} onClick={() => setConfirmModal('reject')}>
+              <Button variant="danger" className="w-full" icon={<CancelCircleIcon className="w-4 h-4" />} onClick={() => setConfirmModal('reject')}>
                 Reject Application
               </Button>
             </div>

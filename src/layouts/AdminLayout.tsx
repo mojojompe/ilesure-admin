@@ -7,21 +7,21 @@ export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-off-white font-sans">
+    <div className="min-h-screen page-bg font-sans">
       {/* Mobile overlay */}
       {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-20 md:hidden backdrop-blur-sm"
+        <div
+          className="fixed inset-0 bg-black/60 z-20 md:hidden backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-      
+
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <TopHeader onMenuClick={() => setIsSidebarOpen(true)} />
-      
-      {/* Main content — offset for pill sidebar (w-60 + left-3 gap) and pill header (h-14 + top-3) */}
-      <main className="md:ml-[264px] pt-[6rem] min-h-screen">
-        <div className="p-4 md:p-6 lg:p-8">
+
+      {/* Main content area */}
+      <main className="md:ml-[272px] pt-[5.5rem] min-h-screen">
+        <div className="p-4 md:p-6 lg:p-8 animate-fade-in">
           <Outlet />
         </div>
       </main>

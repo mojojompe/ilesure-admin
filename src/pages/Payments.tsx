@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, CheckCircle, Clock, Loader, Search, Eye } from 'lucide-react';
+import {
+  CreditCardIcon,
+  Tick01Icon,
+  Time02Icon,
+  Loading01Icon,
+  Search01Icon,
+  ViewIcon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -216,8 +223,8 @@ function PayoutsSection() {
               ))}
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
-              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+              <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search01Icon..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
@@ -238,7 +245,7 @@ function PayoutsSection() {
               {loading ? (
                 <tr><td colSpan={6} className="text-center py-12">
                   <div className="flex items-center justify-center gap-2">
-                    <Loader className="w-5 h-5 animate-spin text-mustard" />
+                    <Loading01Icon className="w-5 h-5 animate-spin text-mustard" />
                     <span className="text-text-tertiary">Loading...</span>
                   </div>
                 </td></tr>
@@ -273,7 +280,7 @@ function PayoutsSection() {
                   <td><StatusBadge status={(p.status || 'pending') as any} /></td>
                   <td className="text-right pr-4">
                     <button onClick={() => setDetail(p)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
-                      <Eye className="w-3.5 h-3.5 text-text-secondary" />
+                      <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
                     </button>
                   </td>
                 </tr>
@@ -315,7 +322,7 @@ function PayoutsSection() {
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
             {detail?.status === 'pending' && canProcess && (
-              <Button variant="success" size="sm" loading={updating} onClick={() => confirmMarkProcessed(detail)} icon={<CheckCircle className="w-3.5 h-3.5" />}>
+              <Button variant="success" size="sm" loading={updating} onClick={() => confirmMarkProcessed(detail)} icon={<Tick01Icon className="w-3.5 h-3.5" />}>
                 Mark as Processed
               </Button>
             )}
@@ -467,7 +474,7 @@ function PaystackSection() {
               {loading ? (
                 <tr><td colSpan={6} className="text-center py-12">
                   <div className="flex items-center justify-center gap-2">
-                    <Loader className="w-5 h-5 animate-spin text-mustard" />
+                    <Loading01Icon className="w-5 h-5 animate-spin text-mustard" />
                     <span className="text-text-tertiary">Loading...</span>
                   </div>
                 </td></tr>
@@ -482,7 +489,7 @@ function PaystackSection() {
                   <td><span className="text-xs text-text-tertiary">{formatDate(t)}</span></td>
                   <td className="text-right pr-4">
                     <button onClick={() => viewDetail(t.id)} className="w-7 h-7 inline-flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
-                      <Eye className="w-3.5 h-3.5 text-text-secondary" />
+                      <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
                     </button>
                   </td>
                 </tr>
@@ -512,7 +519,7 @@ function PaystackSection() {
         footer={<Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>}
       >
         {detailLoading ? (
-          <div className="flex items-center justify-center py-8"><Loader className="w-5 h-5 animate-spin text-mustard" /></div>
+          <div className="flex items-center justify-center py-8"><Loading01Icon className="w-5 h-5 animate-spin text-mustard" /></div>
         ) : detail ? (
           <div className="grid grid-cols-2 gap-3">
             {[

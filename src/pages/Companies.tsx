@@ -1,5 +1,12 @@
 import { Fragment, useState, useEffect } from 'react';
-import { Building2, Users, Home, ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import {
+  Building04Icon,
+  UserMultipleIcon,
+  Home01Icon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  ViewIcon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -120,10 +127,10 @@ export function Companies() {
       {/* ── Summary Row ─────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Companies', value: companies.length, icon: <Building2 className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Verified',        value: companies.filter((c: any) => c.status === 'verified').length,  icon: <Building2 className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
-          { label: 'Pending',         value: companies.filter((c: any) => c.status === 'pending').length,   icon: <Building2 className="w-5 h-5 text-mustard" />,        bg: 'bg-mustard/10' },
-          { label: 'Total Agents',    value: companies.reduce((s: number, c: any) => s + (c.agentsCount || 0), 0),       icon: <Users className="w-5 h-5 text-burnt-brown-light" />,   bg: 'bg-burnt-brown-pale' },
+          { label: 'Total Companies', value: companies.length, icon: <Building04Icon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Verified',        value: companies.filter((c: any) => c.status === 'verified').length,  icon: <Building04Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
+          { label: 'Pending',         value: companies.filter((c: any) => c.status === 'pending').length,   icon: <Building04Icon className="w-5 h-5 text-mustard" />,        bg: 'bg-mustard/10' },
+          { label: 'Total Agents',    value: companies.reduce((s: number, c: any) => s + (c.agentsCount || 0), 0),       icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown-light" />,   bg: 'bg-burnt-brown-pale' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -212,7 +219,7 @@ export function Companies() {
                     <td>
                       <div className="flex items-center gap-1.5">
                         <div className="w-6 h-6 rounded-pill bg-mustard/10 flex items-center justify-center">
-                          <Users className="w-3.5 h-3.5 text-mustard" />
+                          <UserMultipleIcon className="w-3.5 h-3.5 text-mustard" />
                         </div>
                         <span className="text-sm font-semibold text-text-primary">{company.agentsCount}</span>
                       </div>
@@ -220,7 +227,7 @@ export function Companies() {
                     <td>
                       <div className="flex items-center gap-1.5">
                         <div className="w-6 h-6 rounded-pill bg-burnt-brown-pale flex items-center justify-center">
-                          <Home className="w-3.5 h-3.5 text-burnt-brown" />
+                          <Home01Icon className="w-3.5 h-3.5 text-burnt-brown" />
                         </div>
                         <span className="text-sm font-semibold text-text-primary">{company.listingsCount}</span>
                       </div>
@@ -230,10 +237,10 @@ export function Companies() {
                     <td className="text-right pr-4">
                       <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setDetailCompany(company)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors" title="View">
-                          <Eye className="w-3.5 h-3.5 text-text-secondary" />
+                          <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
                         </button>
                         <button onClick={() => handleExpand(company.id)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
-                          {expandedId === company.id ? <ChevronUp className="w-3.5 h-3.5 text-text-secondary" /> : <ChevronDown className="w-3.5 h-3.5 text-text-secondary" />}
+                          {expandedId === company.id ? <ArrowUp01Icon className="w-3.5 h-3.5 text-text-secondary" /> : <ArrowDown01Icon className="w-3.5 h-3.5 text-text-secondary" />}
                         </button>
                       </div>
                     </td>

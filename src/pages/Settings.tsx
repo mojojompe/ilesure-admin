@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings as SettingsIcon, User, Bell, Shield, Key, Save, ScrollText, ArrowRight } from 'lucide-react';
+import {
+  Settings01Icon as SettingsIcon,
+  UserIcon,
+  Notification01Icon,
+  SecurityCheckIcon,
+  LockIcon,
+  FloppyDiskIcon,
+  Note01Icon,
+  ArrowRight01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { adminApi } from '../api/admin';
@@ -160,9 +169,9 @@ export function Settings() {
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'profile', label: 'Profile', icon: UserIcon },
+    { id: 'security', label: 'Security', icon: SecurityCheckIcon },
+    { id: 'notifications', label: 'Notifications', icon: Notification01Icon },
     { id: 'platform', label: 'Platform', icon: SettingsIcon },
   ];
 
@@ -275,7 +284,7 @@ export function Settings() {
               </div>
 
 <div className="flex justify-end pt-4 border-t border-clay-border">
-                <Button variant="primary" icon={<Save className="w-4 h-4" />} onClick={handleProfileSave}>Save Changes</Button>
+                <Button variant="primary" icon={<FloppyDiskIcon className="w-4 h-4" />} onClick={handleProfileSave}>FloppyDiskIcon Changes</Button>
               </div>
             </ClayCard>
           )}
@@ -283,7 +292,7 @@ export function Settings() {
           {activeTab === 'security' && (
             <ClayCard padding="md" className="space-y-6">
               <h3 className="text-base font-bold text-text-primary border-b border-clay-border pb-3 flex items-center gap-2">
-                <Key className="w-4 h-4 text-mustard" /> Change Password
+                <LockIcon className="w-4 h-4 text-mustard" /> Change Password
               </h3>
 
               <div className="space-y-4 max-w-md">
@@ -335,7 +344,7 @@ export function Settings() {
                 {[
                   { key: 'newListings', title: 'New Listings', desc: 'Receive emails when a new listing is submitted for approval' },
                   { key: 'verificationRequests', title: 'Verification Requests', desc: 'Get notified when an agent or company submits verification docs' },
-                  { key: 'newUserRegistrations', title: 'New User Registrations', desc: 'Weekly summary of new signups' },
+                  { key: 'newUserRegistrations', title: 'New UserIcon Registrations', desc: 'Weekly summary of new signups' },
                   { key: 'criticalAlerts', title: 'Critical System Alerts', desc: 'Uptime warnings and platform errors' },
                 ].map(item => (
                   <label key={item.key} className="flex items-start gap-3 p-3 rounded-clay-sm hover:bg-clay-border-light cursor-pointer transition-colors">
@@ -355,7 +364,7 @@ export function Settings() {
               </div>
 
               <div className="flex justify-end pt-4 border-t border-clay-border">
-                <Button variant="primary" icon={<Save className="w-4 h-4" />} onClick={saveSettings}>Save Preferences</Button>
+                <Button variant="primary" icon={<FloppyDiskIcon className="w-4 h-4" />} onClick={saveSettings}>FloppyDiskIcon Preferences</Button>
               </div>
             </ClayCard>
           )}
@@ -384,7 +393,7 @@ export function Settings() {
                       description="Refuses public API traffic. The admin console stays reachable."
                     />
                     <PlatformToggle
-                      label="User Registration"
+                      label="UserIcon Registration"
                       checked={platform?.registrationEnabled !== false}
                       onChange={(v) => setPlatform({ ...platform, registrationEnabled: v })}
                       description="When off, new signups are refused."
@@ -433,10 +442,10 @@ export function Settings() {
               </div>
 
               <div className="flex justify-end pt-4 border-t border-clay-border">
-                <Button variant="primary" icon={<Save className="w-4 h-4" />} onClick={() => {
+                <Button variant="primary" icon={<FloppyDiskIcon className="w-4 h-4" />} onClick={() => {
                   adminApi.settings.updatePlatform({ platform, limits });
                   showToast('Platform settings saved!');
-                }}>Save Settings</Button>
+                }}>FloppyDiskIcon Settings</Button>
               </div>
             </ClayCard>
           )}
@@ -447,14 +456,14 @@ export function Settings() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-clay bg-burnt-brown-pale flex items-center justify-center flex-shrink-0">
-              <ScrollText className="w-6 h-6 text-burnt-brown" />
+              <Note01Icon className="w-6 h-6 text-burnt-brown" />
             </div>
             <div>
               <h3 className="text-base font-bold text-text-primary">Audit Logs</h3>
               <p className="text-sm text-text-tertiary mt-0.5">Review all actions performed across the platform</p>
             </div>
           </div>
-          <Button variant="primary" size="sm" icon={<ArrowRight className="w-4 h-4" />} onClick={() => navigate('/audit-logs')}>
+          <Button variant="primary" size="sm" icon={<ArrowRight01Icon className="w-4 h-4" />} onClick={() => navigate('/audit-logs')}>
             View Logs
           </Button>
         </div>

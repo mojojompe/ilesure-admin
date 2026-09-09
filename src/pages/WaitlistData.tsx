@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Users, MapPin, Download, Search, MessageSquare, Phone, Mail } from 'lucide-react';
+import {
+  ClipboardIcon,
+  UserMultipleIcon,
+  Location01Icon,
+  Download01Icon,
+  Search01Icon,
+  Message01Icon,
+  SmartPhone01Icon,
+  Mail01Icon
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -143,9 +152,9 @@ export function WaitlistData() {
   const needsRoommate = waitlist.filter(e => e.roommateNeeded).length;
   const topCorridor = corridorDemand && corridorDemand.length > 0 ? corridorDemand[0] : { corridor: 'N/A', demand: 0 };
 
-  const channelIcon: Record<string, React.ReactNode> = { whatsapp: <MessageSquare className="w-3.5 h-3.5 text-status-success" />, sms: <Phone className="w-3.5 h-3.5 text-mustard" />, email: <Mail className="w-3.5 h-3.5 text-burnt-brown" /> };
+  const channelIcon: Record<string, React.ReactNode> = { whatsapp: <Message01Icon className="w-3.5 h-3.5 text-status-success" />, sms: <SmartPhone01Icon className="w-3.5 h-3.5 text-mustard" />, email: <Mail01Icon className="w-3.5 h-3.5 text-burnt-brown" /> };
 
-  const getChannelIcon = (channel: string) => channelIcon[channel] || <Mail className="w-3.5 h-3.5 text-burnt-brown" />;
+  const getChannelIcon = (channel: string) => channelIcon[channel] || <Mail01Icon className="w-3.5 h-3.5 text-burnt-brown" />;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -153,10 +162,10 @@ export function WaitlistData() {
       {/* ── Summary Insights ────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total on Waitlist',   value: total,                   icon: <ClipboardList className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
-          { label: 'Need Roommate',        value: needsRoommate,               icon: <Users className="w-5 h-5 text-mustard" />,               bg: 'bg-mustard/10' },
-          { label: 'Avg. Min Budget',      value: `₦${(avgBudget / 1000).toFixed(0)}k`, icon: <ClipboardList className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Top Corridor',         value: topCorridor.corridor,        icon: <MapPin className="w-5 h-5 text-status-success" />,        bg: 'bg-status-success/10' },
+          { label: 'Total on Waitlist',   value: total,                   icon: <ClipboardIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
+          { label: 'Need Roommate',        value: needsRoommate,               icon: <UserMultipleIcon className="w-5 h-5 text-mustard" />,               bg: 'bg-mustard/10' },
+          { label: 'Avg. Min Budget',      value: `₦${(avgBudget / 1000).toFixed(0)}k`, icon: <ClipboardIcon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Top Corridor',         value: topCorridor.corridor,        icon: <Location01Icon className="w-5 h-5 text-status-success" />,        bg: 'bg-status-success/10' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -175,7 +184,7 @@ export function WaitlistData() {
             <h3 className="font-bold text-text-primary text-base">Demand by Corridor</h3>
             <p className="text-xs text-text-tertiary mt-0.5">Total waitlist entries per area cluster</p>
           </div>
-          <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={handleExport}>Export CSV</Button>
+          <Button variant="secondary" size="sm" icon={<Download01Icon className="w-3.5 h-3.5" />} onClick={handleExport}>Export CSV</Button>
         </div>
         <div className="p-6">
           <ResponsiveContainer width="100%" height={200}>
@@ -202,7 +211,7 @@ export function WaitlistData() {
         {/* Top corridors */}
         <ClayCard padding="md">
           <h4 className="font-bold text-text-primary text-sm mb-3 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-mustard" /> Top Requested Corridors
+            <Location01Icon className="w-4 h-4 text-mustard" /> Top Requested Corridors
           </h4>
           <div className="space-y-2.5">
             {corridorDemand.slice(0, 4).map((d, i) => (
@@ -278,11 +287,11 @@ export function WaitlistData() {
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm">All Waitlist Entries</h3>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-tertiary" />
+            <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-tertiary" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search..."
+              placeholder="Search01Icon..."
               className="pl-8 pr-4 py-1.5 bg-clay-border-light border border-clay-border rounded-pill text-xs placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all w-48"
             />
           </div>
@@ -342,7 +351,7 @@ export function WaitlistData() {
         </div>
         <div className="flex items-center justify-between px-5 py-3 border-t border-clay-border bg-off-white rounded-b-clay">
           <p className="text-xs text-text-tertiary">Showing {filtered.length} of {waitlist.length} entries</p>
-          <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={handleExport}>Export All to CSV</Button>
+          <Button variant="secondary" size="sm" icon={<Download01Icon className="w-3.5 h-3.5" />} onClick={handleExport}>Export All to CSV</Button>
         </div>
       </ClayCard>
     </div>
