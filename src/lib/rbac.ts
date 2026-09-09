@@ -4,10 +4,10 @@ import { getAdminRole, getAdminPermissions } from '../api/auth';
 // actions are hidden/disabled for roles that lack the permission.
 //
 // DECISION: The backend is the AUTHORITATIVE RBAC enforcer (its per-role
-// authorization gap is being fixed separately — audit finding A-M2). This module is
+// authorization gap is being fixed separately, audit finding A-M2). This module is
 // DEFENSE-IN-DEPTH ONLY: it keeps a lower-privilege admin from being shown (and
 // tempted to fire) an action the server will reject. It is NOT a security boundary
-// and must never be treated as one — anyone can edit client state.
+// and must never be treated as one, anyone can edit client state.
 //
 // DECISION: Capability resolution is deliberately conservative but non-breaking,
 // because we cannot know the exact permission strings the backend mints:

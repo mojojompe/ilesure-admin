@@ -57,8 +57,8 @@ export function WaitlistData() {
     setError(null);
     try {
       // FIX: the list endpoint defaults to limit=20, so the page only ever received the
-      // first 20 rows. This page has no pagination UI — it filters client-side and shows
-      // everything it holds — so request the full set instead of a single default page.
+      // first 20 rows. This page has no pagination UI, it filters client-side and shows
+      // everything it holds, so request the full set instead of a single default page.
       const [waitlistRes, analyticsRes] = await Promise.all([
         adminApi.waitlist.list('?limit=1000'),
         adminApi.analytics.waitlist(),
@@ -83,7 +83,7 @@ export function WaitlistData() {
         setWaitlist(formatted);
         // FIX: the "Total on Waitlist" tile previously showed waitlist.length, i.e. the size
         // of the page just fetched (always 20), not the real count. The server already
-        // reports the true total — use it, and only fall back to what we hold.
+        // reports the true total, use it, and only fall back to what we hold.
         setTotal(
           waitlistRes.data.summary?.total
           ?? waitlistRes.data.pagination?.totalItems
@@ -162,10 +162,10 @@ export function WaitlistData() {
       {/* ── Summary Insights ────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total on Waitlist',   value: total,                   icon: <ClipboardIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
-          { label: 'Need Roommate',        value: needsRoommate,               icon: <UserMultipleIcon className="w-5 h-5 text-mustard" />,               bg: 'bg-mustard/10' },
-          { label: 'Avg. Min Budget',      value: `₦${(avgBudget / 1000).toFixed(0)}k`, icon: <ClipboardIcon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Top Corridor',         value: topCorridor.corridor,        icon: <Location01Icon className="w-5 h-5 text-status-success" />,        bg: 'bg-status-success/10' },
+          { label: 'Total on Waitlist', value: total, icon: <ClipboardIcon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Need Roommate', value: needsRoommate, icon: <UserMultipleIcon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
+          { label: 'Avg. Min Budget', value: `₦${(avgBudget / 1000).toFixed(0)}k`, icon: <ClipboardIcon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Top Corridor', value: topCorridor.corridor, icon: <Location01Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -236,10 +236,10 @@ export function WaitlistData() {
           <h4 className="font-bold text-text-primary text-sm mb-3">Budget Distribution</h4>
           <div className="space-y-2">
             {[
-              { label: '< ₦200k',     count: waitlist.filter(e => e.budgetMax < 200000).length },
-              { label: '₦200–350k',   count: waitlist.filter(e => e.budgetMin >= 200000 && e.budgetMax <= 350000).length },
-              { label: '₦350–500k',   count: waitlist.filter(e => e.budgetMin >= 350000 && e.budgetMax <= 500000).length },
-              { label: '> ₦500k',     count: waitlist.filter(e => e.budgetMin > 500000).length },
+              { label: '< ₦200k', count: waitlist.filter(e => e.budgetMax < 200000).length },
+              { label: '₦200–350k', count: waitlist.filter(e => e.budgetMin >= 200000 && e.budgetMax <= 350000).length },
+              { label: '₦350–500k', count: waitlist.filter(e => e.budgetMin >= 350000 && e.budgetMax <= 500000).length },
+              { label: '> ₦500k', count: waitlist.filter(e => e.budgetMin > 500000).length },
             ].map(({ label, count }) => (
               <div key={label} className="flex items-center justify-between">
                 <span className="text-xs text-text-secondary">{label}</span>

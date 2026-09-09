@@ -11,10 +11,10 @@ import { Button } from '../components/ui/Button';
 import { adminLogin, setAdminToken } from '../api/auth';
 
 export function Login() {
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -41,7 +41,7 @@ export function Login() {
   return (
     <div className="min-h-screen flex selection:bg-mustard selection:text-white">
 
-      {/* ── Left Panel — Brand ──────────────────────────────── */}
+      {/* ── Left Panel, Brand ──────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden flex-col justify-between p-12"
         style={{ background: 'linear-gradient(155deg, #5C2E0F 0%, #3D1D0A 50%, #2A1206 100%)' }}>
 
@@ -75,7 +75,7 @@ export function Login() {
             <span style={{ color: '#E8941E' }}>Management Hub</span>
           </h1>
           <p className="text-white/50 text-[15px] leading-relaxed max-w-sm">
-            Full visibility and control over listings, users, agents, bookings, and platform analytics — all in one place.
+            Full visibility and control over listings, users, agents, bookings, and platform analytics, all in one place.
           </p>
 
           {/* Feature chips */}
@@ -98,7 +98,7 @@ export function Login() {
         </div>
       </div>
 
-      {/* ── Right Panel — Form ──────────────────────────────── */}
+      {/* ── Right Panel, Form ──────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-off-white">
         {/* Subtle background decor */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">

@@ -161,7 +161,7 @@ export const adminApi = {
     list: (params?: Record<string, any>) => adminFetch(`/admin/v1/payments${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
     markProcessed: (id: string) => adminFetch(`/admin/v1/payments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'processed' }) }),
     // QA-ADM-036: the console advertised a "Refunded" state it had no way to reach. The
-    // server-side path already exists and is real — PATCH .../status with 'refunded' goes
+    // server-side path already exists and is real, PATCH .../status with 'refunded' goes
     // through refundService.refundPayment, which verifies with Paystack and calls the
     // refund API rather than just flipping a flag.
     refund: (id: string) => adminFetch(`/admin/v1/payments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'refunded' }) }),

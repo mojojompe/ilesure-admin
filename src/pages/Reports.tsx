@@ -140,9 +140,9 @@ export function Reports() {
                 <tr key={r.id || r._id}>
                   <td>
                     <p className="font-medium text-text-primary text-sm">
-                      {r.reportedListingTitle && r.reportedListingTitle !== 'N/A' ? `Listing: ${r.reportedListingTitle}` : 
-                       r.reportedUserName && r.reportedUserName !== 'N/A' ? `Agent: ${r.reportedUserName}` : 
-                       r.listingTitle || '—'}
+                      {r.reportedListingTitle && r.reportedListingTitle !== 'N/A' ? `Listing: ${r.reportedListingTitle}` :
+                        r.reportedUserName && r.reportedUserName !== 'N/A' ? `Agent: ${r.reportedUserName}` :
+                          r.listingTitle || '—'}
                     </p>
                   </td>
                   <td><span className="text-sm text-text-secondary">{r.reporterName || '—'}</span></td>
@@ -173,7 +173,7 @@ export function Reports() {
         footer={
           <>
             <Button variant="secondary" size="sm" onClick={() => setDetail(null)}>Close</Button>
-            {/* SECURITY-FIX (AD-H3): dismiss / take-down are moderation actions — hidden without reports.action. */}
+            {/* SECURITY-FIX (AD-H3): dismiss / take-down are moderation actions, hidden without reports.action. */}
             {detail?.status === 'pending' && canAction && (
               <>
                 <Button variant="danger" size="sm" loading={updating} onClick={() => handleAction(detail.id, 'dismiss')} icon={<Cancel01Icon className="w-3.5 h-3.5" />}>Dismiss</Button>

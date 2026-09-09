@@ -115,7 +115,7 @@ export function Ads() {
           <h1 className="text-2xl font-bold text-text-primary">Ads Management</h1>
           <p className="text-sm text-text-secondary mt-1">Manage carousel ads for the home screens</p>
         </div>
-        {/* SECURITY-FIX (AD-H3): creating ads is a privileged action — hidden for roles without ads.manage. */}
+        {/* SECURITY-FIX (AD-H3): creating ads is a privileged action, hidden for roles without ads.manage. */}
         {canManage && (
           <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
             <PlusSignIcon className="w-4 h-4" />
@@ -179,9 +179,8 @@ export function Ads() {
                       <button
                         onClick={() => handleToggleStatus(ad)}
                         disabled={!canManage}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-pill text-xs font-bold transition-colors ${
-                          ad.isActive ? 'bg-status-success/10 text-status-success' : 'bg-status-error/10 text-status-error'
-                        } ${canManage ? '' : 'opacity-60 cursor-not-allowed'}`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-pill text-xs font-bold transition-colors ${ad.isActive ? 'bg-status-success/10 text-status-success' : 'bg-status-error/10 text-status-error'
+                          } ${canManage ? '' : 'opacity-60 cursor-not-allowed'}`}
                       >
                         {ad.isActive ? <Tick01Icon className="w-3 h-3" /> : <CancelCircleIcon className="w-3 h-3" />}
                         {ad.isActive ? 'Active' : 'Inactive'}
@@ -191,7 +190,7 @@ export function Ads() {
                       {new Date(ad.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {/* SECURITY-FIX (AD-H3): deleting an ad is destructive — hidden without ads.manage. */}
+                      {/* SECURITY-FIX (AD-H3): deleting an ad is destructive, hidden without ads.manage. */}
                       {canManage ? (
                         <button
                           onClick={() => handleDeleteAd(ad._id)}
@@ -217,11 +216,11 @@ export function Ads() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <ClayCard className="max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-text-primary mb-4">Add New Ad</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-text-primary mb-1">Ad Image *</label>
-                <div 
+                <div
                   className="w-full h-40 border-2 border-dashed border-clay-border rounded-xl flex flex-col items-center justify-center bg-white/50 hover:bg-white transition-colors cursor-pointer relative overflow-hidden"
                   onClick={() => document.getElementById('adImageUpload')?.click()}
                 >
@@ -235,18 +234,18 @@ export function Ads() {
                     </>
                   )}
                 </div>
-                <input 
-                  type="file" 
-                  id="adImageUpload" 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={handleImageUpload} 
+                <input
+                  type="file"
+                  id="adImageUpload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-text-primary mb-1">Redirect Link01Icon (Optional)</label>
-                <input 
+                <input
                   type="url"
                   placeholder="https://example.com"
                   className="w-full px-4 py-3 rounded-clay-sm border-none bg-white shadow-inner-sm text-sm focus:ring-2 focus:ring-mustard outline-none transition-all"
@@ -257,14 +256,14 @@ export function Ads() {
             </div>
 
             <div className="flex gap-3 mt-6 pt-6 border-t border-clay-border">
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 className="flex-1"
                 onClick={() => setShowAddModal(false)}
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 className="flex-1"
                 onClick={handleCreateAd}
                 loading={isSubmitting}

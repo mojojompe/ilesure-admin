@@ -44,7 +44,7 @@ export function Users() {
 
   const canSuspend = can(CAP.USERS_SUSPEND);
   // BUGFIX (QA-ADM-022): the page requested the API's default first page and then
-  // reported `users.length` as "Total Users" — so with 25 accounts it showed
+  // reported `users.length` as "Total Users", so with 25 accounts it showed
   // "Total Users 20 / Showing 20 of 20", and searching for a user who happened to be
   // on page 2 returned "No users found". Track the server's own total, and ask for a
   // page large enough to hold the whole list the page filters client-side.
@@ -110,16 +110,16 @@ export function Users() {
       u.email.toLowerCase().includes(search.toLowerCase());
     const matchTab = tab === 'all' ? true
       : tab === 'tenant' ? u.role === 'tenant'
-      : tab === 'agent_landlord' ? (u.role === 'agent' || u.role === 'landlord')
-      : u.role === 'company_admin';
+        : tab === 'agent_landlord' ? (u.role === 'agent' || u.role === 'landlord')
+          : u.role === 'company_admin';
     return matchSearch && matchTab;
   });
 
   const tabs: { key: TabKey; label: string; icon: React.ReactNode; count: number }[] = [
-    { key: 'all',           label: 'All Users',      icon: <UsersIcon className="w-3.5 h-3.5" />,     count: users.length },
-    { key: 'tenant',        label: 'Tenants',        icon: <Book01Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'tenant').length },
-    { key: 'agent_landlord',label: 'Agents',         icon: <Home01Icon className="w-3.5 h-3.5" />,          count: users.filter(u => u.role === 'agent' || u.role === 'landlord').length },
-    { key: 'company',       label: 'Company Admins', icon: <Building04Icon className="w-3.5 h-3.5" />,     count: users.filter(u => u.role === 'company_admin').length },
+    { key: 'all', label: 'All Users', icon: <UsersIcon className="w-3.5 h-3.5" />, count: users.length },
+    { key: 'tenant', label: 'Tenants', icon: <Book01Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'tenant').length },
+    { key: 'agent_landlord', label: 'Agents', icon: <Home01Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'agent' || u.role === 'landlord').length },
+    { key: 'company', label: 'Company Admins', icon: <Building04Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'company_admin').length },
   ];
 
   return (
@@ -128,10 +128,10 @@ export function Users() {
       {/* ── Summary Cards ───────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Users',   value: totalUsers,                                        icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />,    bg: 'bg-burnt-brown-pale' },
-          { label: 'Tenants',       value: users.filter(u => u.role === 'tenant').length,       icon: <Book01Icon className="w-5 h-5 text-mustard" />,    bg: 'bg-mustard/10' },
-          { label: 'Agents',        value: users.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Suspended',     value: users.filter(u => u.status === 'suspended').length,  icon: <UserIcon className="w-5 h-5 text-status-error" />,       bg: 'bg-status-error/10' },
+          { label: 'Total Users', value: totalUsers, icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Tenants', value: users.filter(u => u.role === 'tenant').length, icon: <Book01Icon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
+          { label: 'Agents', value: users.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Suspended', value: users.filter(u => u.status === 'suspended').length, icon: <UserIcon className="w-5 h-5 text-status-error" />, bg: 'bg-status-error/10' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -306,11 +306,11 @@ export function Users() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Role',         value: roleLabel[detailUser.role] },
-                { label: 'Joined',       value: detailUser.joinDate },
-                { label: 'University',   value: detailUser.university || 'N/A' },
-                { label: 'Bookings',     value: `${detailUser.bookings ?? 0}` },
-                { label: 'Listings',     value: `${detailUser.listings ?? 0}` },
+                { label: 'Role', value: roleLabel[detailUser.role] },
+                { label: 'Joined', value: detailUser.joinDate },
+                { label: 'University', value: detailUser.university || 'N/A' },
+                { label: 'Bookings', value: `${detailUser.bookings ?? 0}` },
+                { label: 'Listings', value: `${detailUser.listings ?? 0}` },
                 { label: 'Verification', value: detailUser.verificationStatus },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">

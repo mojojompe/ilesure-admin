@@ -43,10 +43,10 @@ function getGreeting() {
 export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [recentListings, setRecentListings] = useState<any[]>([]);
-  const [waitlistTrend, setWaitlistTrend]   = useState<any[]>([]);
-  const [revenue, setRevenue]               = useState<any[]>([]);
-  const [activities, setActivities]         = useState<any[]>([]);
-  const [loading, setLoading]               = useState(true);
+  const [waitlistTrend, setWaitlistTrend] = useState<any[]>([]);
+  const [revenue, setRevenue] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
@@ -68,8 +68,8 @@ export function Dashboard() {
       if (dashboardRes.success && dashboardRes.data) {
         setDashboardData(dashboardRes.data);
         setRecentListings(dashboardRes.data.recentListings || []);
-        setWaitlistTrend(dashboardRes.data.waitlistTrend  || []);
-        setRevenue(dashboardRes.data.revenue              || []);
+        setWaitlistTrend(dashboardRes.data.waitlistTrend || []);
+        setRevenue(dashboardRes.data.revenue || []);
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -79,7 +79,7 @@ export function Dashboard() {
   };
 
   const quickStats = dashboardData?.quickStats;
-  const kpis       = dashboardData?.kpis;
+  const kpis = dashboardData?.kpis;
 
   const CHART_TOOLTIP_STYLE = {
     borderRadius: 14,
@@ -180,7 +180,7 @@ export function Dashboard() {
       {/* ── Charts Row ─────────────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-        {/* Waitlist Trend — 2/3 */}
+        {/* Waitlist Trend, 2/3 */}
         <ClayCard className="xl:col-span-2" padding="none">
           <div className="section-header">
             <div>
@@ -198,7 +198,7 @@ export function Dashboard() {
                 <AreaChart data={waitlistTrend} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorEntries" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#C97B1C" stopOpacity={0.3} />
+                      <stop offset="5%" stopColor="#C97B1C" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="#C97B1C" stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -223,7 +223,7 @@ export function Dashboard() {
           )}
         </ClayCard>
 
-        {/* Revenue Breakdown — 1/3 */}
+        {/* Revenue Breakdown, 1/3 */}
         <ClayCard padding="none">
           <div className="section-header">
             <div>
@@ -247,7 +247,7 @@ export function Dashboard() {
                     formatter={(v: number) => [`₦${(v / 1000).toFixed(0)}k`, '']} />
                   <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                   <Bar dataKey="subscription" name="Subscriptions" fill="#6B3A1F" radius={[5, 5, 0, 0]} />
-                  <Bar dataKey="transaction"  name="Transactions"  fill="#E8941E" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="transaction" name="Transactions" fill="#E8941E" radius={[5, 5, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -265,7 +265,7 @@ export function Dashboard() {
       {/* ── Bottom Row ─────────────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-        {/* Recent Listings — 2/3 */}
+        {/* Recent Listings, 2/3 */}
         <ClayCard className="xl:col-span-2" padding="none">
           <div className="section-header">
             <h3 className="font-bold text-text-primary text-base">Recent Listings</h3>
@@ -304,7 +304,7 @@ export function Dashboard() {
           )}
         </ClayCard>
 
-        {/* Activity Feed — 1/3 */}
+        {/* Activity Feed, 1/3 */}
         <ClayCard padding="none">
           <div className="section-header">
             <h3 className="font-bold text-text-primary text-base">Recent Activity</h3>
@@ -339,10 +339,10 @@ export function Dashboard() {
       {/* ── Quick Stats Strip ───────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Waitlist Size',       value: quickStats?.waitlistSize     ?? 0, icon: <ClipboardIcon className="w-5 h-5 text-mustard" />,         bg: 'bg-mustard/10',         trend: <AnalyticsUpIcon className="w-3 h-3 text-mustard" /> },
-          { label: 'New UserMultipleIcon This Week', value: quickStats?.newUsersThisWeek ?? 0, icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown" />,             bg: 'bg-burnt-brown-pale',   trend: <AnalyticsUpIcon className="w-3 h-3 text-status-success" /> },
-          { label: 'Bookings This Month', value: quickStats?.bookingsThisMonth ?? 0, icon: <Tick01Icon className="w-5 h-5 text-status-success" />,  bg: 'bg-status-success/10',  trend: null },
-          { label: 'Active Companies',    value: quickStats?.activeCompanies  ?? 0, icon: <Layers01Icon className="w-5 h-5 text-burnt-brown-light" />,      bg: 'bg-burnt-brown-pale',   trend: null },
+          { label: 'Waitlist Size', value: quickStats?.waitlistSize ?? 0, icon: <ClipboardIcon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10', trend: <AnalyticsUpIcon className="w-3 h-3 text-mustard" /> },
+          { label: 'New UserMultipleIcon This Week', value: quickStats?.newUsersThisWeek ?? 0, icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale', trend: <AnalyticsUpIcon className="w-3 h-3 text-status-success" /> },
+          { label: 'Bookings This Month', value: quickStats?.bookingsThisMonth ?? 0, icon: <Tick01Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10', trend: null },
+          { label: 'Active Companies', value: quickStats?.activeCompanies ?? 0, icon: <Layers01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale', trend: null },
         ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-5 flex items-center gap-3.5 hover:shadow-clay-hover hover:-translate-y-0.5 transition-all duration-200">
             <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-clay-sm ${stat.bg}`}>

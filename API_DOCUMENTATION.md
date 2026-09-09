@@ -1,4 +1,4 @@
-# iléSure Admin Dashboard — API Documentation
+# iléSure Admin Dashboard, API Documentation
 
 **Base URL:** `https://api.iléSure.com/admin/v1`  
 **Content-Type:** `application/json`  
@@ -1695,7 +1695,7 @@ Get recent platform activity.
         "id": "a2",
         "type": "listing",
         "title": "New Listing Submitted",
-        "description": "Emeka Court Room B3 — Toll Gate, Ibadan",
+        "description": "Emeka Court Room B3, Toll Gate, Ibadan",
         "timestamp": "2025-02-15T13:42:00Z",
         "metadata": {
           "listingId": "l1",

@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
 import {
-  Layers,
-  Sparkles,
-  Search,
-  Filter,
-  ChevronDown,
-  ChevronUp,
-  User,
-  CheckCircle2,
-  Clock,
-  Flame,
-  Award,
-  Calendar,
-  MessageSquare,
-  Save,
-  Tag,
-  Loader,
-} from 'lucide-react';
+  Layers01Icon,
+  SparklesIcon,
+  Search01Icon,
+  FilterIcon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  UserIcon,
+  CheckmarkCircle02Icon,
+  Clock01Icon,
+  FireIcon,
+  Award01Icon,
+  Calendar01Icon,
+  Message01Icon,
+  FloppyDiskIcon,
+  Tag01Icon,
+  Loading01Icon,
+} from '@hugeicons/react';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -105,7 +105,7 @@ export function UpgradeRequests() {
     if (rank === 1) {
       return (
         <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-black text-sm border border-amber-300">
-          <Award className="w-4 h-4 text-amber-600 fill-amber-500" />
+          <Award01Icon className="w-4 h-4 text-amber-600 fill-amber-500" />
           Rank #1
         </span>
       );
@@ -113,7 +113,7 @@ export function UpgradeRequests() {
     if (rank === 2) {
       return (
         <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-sm border border-slate-300">
-          <Award className="w-4 h-4 text-slate-500" />
+          <Award01Icon className="w-4 h-4 text-slate-500" />
           Rank #2
         </span>
       );
@@ -121,7 +121,7 @@ export function UpgradeRequests() {
     if (rank === 3) {
       return (
         <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-orange-100 text-orange-800 font-bold text-sm border border-orange-300">
-          <Award className="w-4 h-4 text-orange-600" />
+          <Award01Icon className="w-4 h-4 text-orange-600" />
           Rank #3
         </span>
       );
@@ -139,7 +139,7 @@ export function UpgradeRequests() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-textPrimary tracking-tight flex items-center gap-2.5">
-            <Layers className="w-7 h-7 text-primary" />
+            <Layers01Icon className="w-7 h-7 text-primary" />
             Feature Upgrades &amp; Requests
           </h1>
           <p className="text-sm text-textSecondary mt-1">
@@ -155,7 +155,7 @@ export function UpgradeRequests() {
             <span className="text-xs font-bold text-textSecondary uppercase tracking-wider">
               Total Stacks
             </span>
-            <Sparkles className="w-4 h-4 text-primary" />
+            <SparklesIcon className="w-4 h-4 text-primary" />
           </div>
           <p className="text-2xl font-black text-textPrimary mt-2">
             {data?.summary.totalStacks ?? 0}
@@ -166,9 +166,9 @@ export function UpgradeRequests() {
         <ClayCard className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-textSecondary uppercase tracking-wider">
-              User Requests
+              UserIcon Requests
             </span>
-            <MessageSquare className="w-4 h-4 text-blue-600" />
+            <Message01Icon className="w-4 h-4 text-blue-600" />
           </div>
           <p className="text-2xl font-black text-textPrimary mt-2">
             {data?.summary.totalRequests ?? 0}
@@ -181,7 +181,7 @@ export function UpgradeRequests() {
             <span className="text-xs font-bold text-textSecondary uppercase tracking-wider">
               Planned / In Progress
             </span>
-            <Clock className="w-4 h-4 text-amber-600" />
+            <Clock01Icon className="w-4 h-4 text-amber-600" />
           </div>
           <p className="text-2xl font-black text-textPrimary mt-2">
             {(data?.summary.plannedCount ?? 0) + (data?.summary.inProgressCount ?? 0)}
@@ -194,7 +194,7 @@ export function UpgradeRequests() {
             <span className="text-xs font-bold text-textSecondary uppercase tracking-wider">
               Delivered
             </span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <CheckmarkCircle02Icon className="w-4 h-4 text-emerald-600" />
           </div>
           <p className="text-2xl font-black text-textPrimary mt-2">
             {data?.summary.completedCount ?? 0}
@@ -203,7 +203,7 @@ export function UpgradeRequests() {
         </ClayCard>
       </div>
 
-      {/* Filter and Search Bar */}
+      {/* FilterIcon and Search01Icon Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-surface p-4 rounded-2xl border border-border shadow-sm">
         {/* Status Tabs */}
         <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
@@ -229,12 +229,12 @@ export function UpgradeRequests() {
           ))}
         </div>
 
-        {/* Search Input */}
+        {/* Search01Icon Input */}
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary" />
+          <Search01Icon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary" />
           <input
             type="text"
-            placeholder="Search titles, keywords, users..."
+            placeholder="Search01Icon titles, keywords, users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl border border-border bg-background text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -245,12 +245,12 @@ export function UpgradeRequests() {
       {/* Stacks List */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-surface rounded-2xl border border-border">
-          <Loader className="w-8 h-8 text-primary animate-spin mb-3" />
+          <Loading01Icon className="w-8 h-8 text-primary animate-spin mb-3" />
           <p className="text-sm font-medium text-textSecondary">Loading ranked stacks...</p>
         </div>
       ) : filteredStacks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-surface rounded-2xl border border-border text-center px-4">
-          <Sparkles className="w-12 h-12 text-textSecondary/40 mb-3" />
+          <SparklesIcon className="w-12 h-12 text-textSecondary/40 mb-3" />
           <h3 className="text-base font-bold text-textPrimary">No feature requests found</h3>
           <p className="text-xs text-textSecondary mt-1 max-w-sm">
             {searchQuery
@@ -291,7 +291,7 @@ export function UpgradeRequests() {
                         {/* Top Keywords */}
                         <div className="flex flex-wrap items-center gap-1.5 pt-1">
                           <span className="text-xs text-textSecondary flex items-center gap-1 font-medium">
-                            <Tag className="w-3 h-3 text-textSecondary" /> Clustered terms:
+                            <Tag01Icon className="w-3 h-3 text-textSecondary" /> Clustered terms:
                           </span>
                           {stack.topKeywords.map((kw, i) => (
                             <span
@@ -309,13 +309,13 @@ export function UpgradeRequests() {
                     <div className="flex flex-wrap items-center gap-3 self-end lg:self-center">
                       {/* Request Count Badge (The Stack representation) */}
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-extrabold">
-                        <Layers className="w-4 h-4 text-blue-600" />
-                        <span>{stack.requestCount} User Requests Stacked</span>
+                        <Layers01Icon className="w-4 h-4 text-blue-600" />
+                        <span>{stack.requestCount} UserIcon Requests Stacked</span>
                       </div>
 
                       {/* Total Votes */}
                       <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-800 text-xs font-bold border border-neutral-200">
-                        <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                        <FireIcon className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
                         <span>{stack.totalVotes} votes</span>
                       </div>
 
@@ -352,12 +352,12 @@ export function UpgradeRequests() {
                         {isExpanded ? (
                           <>
                             <span>Hide Submissions</span>
-                            <ChevronUp className="w-4 h-4" />
+                            <ArrowUp01Icon className="w-4 h-4" />
                           </>
                         ) : (
                           <>
                             <span>View All {stack.requestCount} Requests</span>
-                            <ChevronDown className="w-4 h-4" />
+                            <ArrowDown01Icon className="w-4 h-4" />
                           </>
                         )}
                       </Button>
@@ -370,8 +370,8 @@ export function UpgradeRequests() {
                   <div className="border-t border-border bg-background/50 p-5 sm:p-6 space-y-5 rounded-b-2xl">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-extrabold text-textSecondary uppercase tracking-wider flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4 text-primary" />
-                        Original User Submissions in this Stack ({stack.requests.length})
+                        <Message01Icon className="w-4 h-4 text-primary" />
+                        Original UserIcon Submissions in this Stack ({stack.requests.length})
                       </h4>
                       <span className="text-[11px] text-textSecondary">
                         Latest: {new Date(stack.latestRequestedAt).toLocaleDateString()}
@@ -397,12 +397,12 @@ export function UpgradeRequests() {
 
                             <div className="flex items-center gap-3 text-xs text-textSecondary">
                               <span className="flex items-center gap-1 font-medium">
-                                <User className="w-3 h-3" />
+                                <UserIcon className="w-3 h-3" />
                                 {item.userName}
                                 {item.userEmail ? ` (${item.userEmail})` : ''}
                               </span>
                               <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
+                                <Calendar01Icon className="w-3 h-3" />
                                 {new Date(item.createdAt).toLocaleDateString()}
                               </span>
                             </div>
@@ -457,8 +457,8 @@ export function UpgradeRequests() {
                           disabled={updatingStackId === stack.stackId}
                           className="self-end flex items-center gap-1.5 font-bold text-xs"
                         >
-                          <Save className="w-3.5 h-3.5" />
-                          Save
+                          <FloppyDiskIcon className="w-3.5 h-3.5" />
+                          FloppyDiskIcon
                         </Button>
                       </div>
                     </div>

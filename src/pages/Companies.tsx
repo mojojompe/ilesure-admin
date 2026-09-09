@@ -39,7 +39,7 @@ export function Companies() {
     try {
       const response = await adminApi.companies.list();
       const companiesData = response.data?.companies || response.data || [];
-      
+
       if (response.success && companiesData.length > 0) {
         const formatted = companiesData.map((c: any) => ({
           id: c._id || c.id,
@@ -73,7 +73,7 @@ export function Companies() {
 
   const fetchCompanyAgents = async (companyId: string) => {
     if (companyAgents[companyId]) return; // already fetched
-    
+
     setLoadingAgents(prev => ({ ...prev, [companyId]: true }));
     try {
       const response = await adminApi.companies.getAgents(companyId);
@@ -128,9 +128,9 @@ export function Companies() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Total Companies', value: companies.length, icon: <Building04Icon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Verified',        value: companies.filter((c: any) => c.status === 'verified').length,  icon: <Building04Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
-          { label: 'Pending',         value: companies.filter((c: any) => c.status === 'pending').length,   icon: <Building04Icon className="w-5 h-5 text-mustard" />,        bg: 'bg-mustard/10' },
-          { label: 'Total Agents',    value: companies.reduce((s: number, c: any) => s + (c.agentsCount || 0), 0),       icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown-light" />,   bg: 'bg-burnt-brown-pale' },
+          { label: 'Verified', value: companies.filter((c: any) => c.status === 'verified').length, icon: <Building04Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
+          { label: 'Pending', value: companies.filter((c: any) => c.status === 'pending').length, icon: <Building04Icon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
+          { label: 'Total Agents', value: companies.reduce((s: number, c: any) => s + (c.agentsCount || 0), 0), icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -198,7 +198,7 @@ export function Companies() {
                   </td>
                 </tr>
               ) : companies.map(company => (
-                /* BUGFIX (QA-ADM-042): keyed fragment — the key on the inner <tr> is not
+                /* BUGFIX (QA-ADM-042): keyed fragment, the key on the inner <tr> is not
                    the key React needs; the fragment is the child of the mapped array. */
                 <Fragment key={company.id}>
                   <tr className="cursor-pointer" onClick={() => handleExpand(company.id)}>
@@ -261,7 +261,7 @@ export function Companies() {
                             }
                           }}>+ Invite Agent</Button>
                         </div>
-                        
+
                         {loadingAgents[company.id] ? (
                           <div className="flex items-center gap-2 py-4">
                             <div className="w-4 h-4 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
@@ -328,22 +328,24 @@ export function Companies() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'CAC Number',     value: detailCompany.cacNumber },
-                { label: 'TIN',            value: detailCompany.tin },
-                { label: 'Director',       value: detailCompany.director },
-                { label: 'Email',          value: detailCompany.email },
-                { label: 'Phone',          value: detailCompany.phone },
+                { label: 'CAC Number', value: detailCompany.cacNumber },
+                { label: 'TIN', value: detailCompany.tin },
+                { label: 'Director', value: detailCompany.director },
+                { label: 'Email', value: detailCompany.email },
+                { label: 'Phone', value: detailCompany.phone },
                 { label: 'Office Address', value: detailCompany.officeAddress },
-                { label: 'Total Agents',   value: String(detailCompany.agentsCount) },
+                { label: 'Total Agents', value: String(detailCompany.agentsCount) },
                 { label: 'Total Listings', value: String(detailCompany.listingsCount) },
-                { label: 'Date Joined',    value: detailCompany.joinDate },
-                { label: 'Tier',           value: detailCompany.tier.charAt(0).toUpperCase() + detailCompany.tier.slice(1) },
-                { label: 'Bank Name',      value: detailCompany.bankName || '—' },
-                { label: 'Account Name',   value: detailCompany.accountName || '—' },
+                { label: 'Date Joined', value: detailCompany.joinDate },
+                { label: 'Tier', value: detailCompany.tier.charAt(0).toUpperCase() + detailCompany.tier.slice(1) },
+                { label: 'Bank Name', value: detailCompany.bankName || '—' },
+                { label: 'Account Name', value: detailCompany.accountName || '—' },
                 { label: 'Account Number', value: detailCompany.accountNumber || '—' },
-                { label: 'Subaccount',     value: detailCompany.subaccountCode ? (
-                  <span className="flex items-center gap-1 text-status-success text-xs font-semibold">Active {(detailCompany.subaccountCode || '').slice(-6)}</span>
-                ) : '—' },
+                {
+                  label: 'Subaccount', value: detailCompany.subaccountCode ? (
+                    <span className="flex items-center gap-1 text-status-success text-xs font-semibold">Active {(detailCompany.subaccountCode || '').slice(-6)}</span>
+                  ) : '—'
+                },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">
                   <p className="text-[10px] text-text-tertiary font-semibold uppercase tracking-wide">{label}</p>

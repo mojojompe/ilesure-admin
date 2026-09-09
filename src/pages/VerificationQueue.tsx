@@ -29,18 +29,18 @@ const docLabels: Record<string, string> = {
 };
 
 const agentChecklist = [
-  { key: 'ninVerified',        label: 'Government ID (NIN) verified' },
-  { key: 'bvnConfirmed',       label: 'BVN confirmed' },
-  { key: 'ownershipReviewed',  label: 'Property ownership document reviewed' },
+  { key: 'ninVerified', label: 'Government ID (NIN) verified' },
+  { key: 'bvnConfirmed', label: 'BVN confirmed' },
+  { key: 'ownershipReviewed', label: 'Property ownership document reviewed' },
   { key: 'utilityBillChecked', label: 'Utility bill not older than 3 months' },
-  { key: 'selfieMatches',      label: 'Selfie matches identity document' },
-  { key: 'otpVerified',        label: 'Phone OTP verified' },
+  { key: 'selfieMatches', label: 'Selfie matches identity document' },
+  { key: 'otpVerified', label: 'Phone OTP verified' },
 ];
 const companyExtra = [
-  { key: 'cacVerified',        label: 'CAC Certificate verified' },
-  { key: 'cacFormVerified',    label: 'CAC Form 2 or 7 reviewed' },
-  { key: 'tinVerified',        label: 'Tax Identification Number (TIN) confirmed' },
-  { key: 'directorNinVerified',label: 'Director NIN verified' },
+  { key: 'cacVerified', label: 'CAC Certificate verified' },
+  { key: 'cacFormVerified', label: 'CAC Form 2 or 7 reviewed' },
+  { key: 'tinVerified', label: 'Tax Identification Number (TIN) confirmed' },
+  { key: 'directorNinVerified', label: 'Director NIN verified' },
 ];
 
 export function VerificationQueue() {
@@ -52,7 +52,7 @@ export function VerificationQueue() {
   const [confirmModal, setConfirmModal] = useState<'approve' | 'reject' | 'info' | null>(null);
   // BUGFIX (QA-ADM-015): the confirm modal's textarea was an unbound, uncontrolled field.
   // The admin typed a rejection reason, and the code sent the unrelated `adminNote`
-  // state instead — so `rejectionReason` was stored as "" while the modal promised
+  // state instead, so `rejectionReason` was stored as "" while the modal promised
   // "They will be notified with the reason below."
   const [actionReason, setActionReason] = useState('');
   const [loading, setLoading] = useState(false);
@@ -171,12 +171,12 @@ export function VerificationQueue() {
   const confirmVerificationAction = async () => {
     if (!selected || !confirmModal) return;
 
-    // The applicant is shown this text — refuse to submit an empty one.
+    // The applicant is shown this text, refuse to submit an empty one.
     if (confirmModal !== 'approve' && !actionReason.trim()) {
-      toast.error('Please enter a reason — the applicant is shown it.');
+      toast.error('Please enter a reason, the applicant is shown it.');
       return;
     }
-    
+
     try {
       switch (confirmModal) {
         case 'approve':
@@ -216,7 +216,7 @@ export function VerificationQueue() {
       {/* ── Queue List (top strip) ───────────────────────── */}
       <ClayCard padding="none">
         {/* BUGFIX (QA-ADM-020): the heading counted the rendered page, not the queue, so it
-            read "Pending Verifications (20)" while the API reported 22 total — and the list
+            read "Pending Verifications (20)" while the API reported 22 total, and the list
             was never filtered to pending at all. */}
         <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-clay-border">
           <Time02Icon className="w-4 h-4 text-mustard" />
@@ -299,7 +299,7 @@ export function VerificationQueue() {
       {/* ── Split Panel ─────────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
 
-        {/* LEFT — Document Viewer (3/5) */}
+        {/* LEFT, Document Viewer (3/5) */}
         <div className="xl:col-span-3 space-y-4">
           {/* Doc Tabs */}
           <ClayCard padding="none">
@@ -367,26 +367,26 @@ export function VerificationQueue() {
               <UserIcon className="w-4 h-4 text-burnt-brown" /> Applicant Details
             </h4>
             {selected && (
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'Name',       value: selected.applicantName },
-                { label: 'Role',       value: selected.role?.charAt(0).toUpperCase() + selected.role?.slice(1) },
-                { label: 'Email',      value: selected.applicantEmail },
-                { label: 'Phone',      value: selected.applicantPhone },
-                { label: 'Submitted', value: selected.submittedDate },
-                { label: 'Company',   value: selected.companyName || 'N/A' },
-              ].map(({ label, value }) => (
-                <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">
-                  <p className="text-[10px] text-text-tertiary font-semibold uppercase tracking-wide">{label}</p>
-                  <p className="text-sm font-semibold text-text-primary mt-0.5 truncate">{value}</p>
-                </div>
-              ))}
-            </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Name', value: selected.applicantName },
+                  { label: 'Role', value: selected.role?.charAt(0).toUpperCase() + selected.role?.slice(1) },
+                  { label: 'Email', value: selected.applicantEmail },
+                  { label: 'Phone', value: selected.applicantPhone },
+                  { label: 'Submitted', value: selected.submittedDate },
+                  { label: 'Company', value: selected.companyName || 'N/A' },
+                ].map(({ label, value }) => (
+                  <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">
+                    <p className="text-[10px] text-text-tertiary font-semibold uppercase tracking-wide">{label}</p>
+                    <p className="text-sm font-semibold text-text-primary mt-0.5 truncate">{value}</p>
+                  </div>
+                ))}
+              </div>
             )}
           </ClayCard>
         </div>
 
-        {/* RIGHT — Checklist (2/5) */}
+        {/* RIGHT, Checklist (2/5) */}
         <div className="xl:col-span-2 space-y-4">
           {/* Progress */}
           <ClayCard padding="md">
@@ -416,7 +416,7 @@ export function VerificationQueue() {
                   )}
                 >
                   {/* BUGFIX (QA-ADM-019): the click handler sat on the inner 20x20px <div>,
-                      so clicking the label text did nothing, and there was no real input —
+                      so clicking the label text did nothing, and there was no real input,
                       the rows could not be focused, tabbed to, or operated by a screen
                       reader. A visually-hidden checkbox inside the <label> restores both
                       the full-row hit area and keyboard/AT operability, with the styled
@@ -445,7 +445,7 @@ export function VerificationQueue() {
               ))}
             </div>
             {/* BUGFIX (QA-ADM-018): handleSaveChecklist existed but was referenced by
-                nothing — there was no save control at all, so ticks never persisted. */}
+                nothing, there was no save control at all, so ticks never persisted. */}
             <button
               type="button"
               onClick={handleSaveChecklist}
@@ -465,7 +465,7 @@ export function VerificationQueue() {
               placeholder="Add notes about this verification..."
               className="w-full clay-input resize-none text-sm"
             />
-            {/* BUGFIX (QA-ADM-018): same as the checklist — handleSaveNotes was dead code. */}
+            {/* BUGFIX (QA-ADM-018): same as the checklist, handleSaveNotes was dead code. */}
             <button
               type="button"
               onClick={handleSaveNotes}
@@ -477,7 +477,7 @@ export function VerificationQueue() {
 
           {/* Action Buttons */}
           {/* SECURITY-FIX (AD-H3): approve/reject/request-info are privileged review
-              actions — hidden for roles without verifications.review (defense-in-depth;
+              actions, hidden for roles without verifications.review (defense-in-depth;
               backend is authoritative). */}
           {canReview && (
             <div className="space-y-2">
@@ -495,15 +495,15 @@ export function VerificationQueue() {
         </div>
       </div>
 
-{/* ── Confirmation Modal ───────────────────────────── */}
+      {/* ── Confirmation Modal ───────────────────────────── */}
       <Modal
         open={!!confirmModal}
         onClose={() => setConfirmModal(null)}
         size="sm"
         title={
           confirmModal === 'approve' ? 'Approve Verification' :
-          confirmModal === 'reject'  ? 'Reject Verification' :
-          'Request More Info'
+            confirmModal === 'reject' ? 'Reject Verification' :
+              'Request More Info'
         }
         footer={
           <>

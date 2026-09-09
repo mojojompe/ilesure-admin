@@ -30,7 +30,7 @@ const API_URL = `${API_BASE_URL}/admin/v1`;
 // manually-attached token and NO 401 handling, drifting from the shared adminApi
 // client. Route every tier call through a dedicated axios instance that (a) attaches
 // the admin JWT via a request interceptor and (b) on 401/403 clears the session and
-// redirects to /login — matching adminFetch's session lifecycle.
+// redirects to /login, matching adminFetch's session lifecycle.
 const tiersApi = axios.create({ baseURL: API_URL });
 
 tiersApi.interceptors.request.use((config) => {
@@ -62,7 +62,7 @@ interface Tier {
   price: number;
   /** Price for one month, in naira. */
   priceMonthly?: number;
-  /** Price for one year, in naira — set explicitly, not derived from the monthly price. */
+  /** Price for one year, in naira, set explicitly, not derived from the monthly price. */
   priceYearly?: number;
   priceDisplay: string;
   billingCycle: string;
@@ -165,7 +165,7 @@ const Tiers: React.FC = () => {
 
   // Open modal for create/edit
   // BUGFIX (QA-ADM-034): setFieldsValue ran while the modal was still unmounted, so the
-  // form instance it targets did not exist yet and every field rendered blank —
+  // form instance it targets did not exist yet and every field rendered blank,
   // including Billing Cycle, which then fell back to the schema default 'yearly'
   // regardless of the tier's real value. Populate AFTER the modal has mounted.
   const openModal = (tier?: Tier) => {
@@ -251,7 +251,7 @@ const Tiers: React.FC = () => {
       title: 'Actions',
       key: 'actions',
       // SECURITY-FIX (AD-H3): Tier create/edit/delete/toggle are destructive; hide
-      // them from roles that lack tiers.manage (defense-in-depth — backend is
+      // them from roles that lack tiers.manage (defense-in-depth, backend is
       // authoritative).
       render: (_: any, record: Tier) =>
         canManage ? (
@@ -346,7 +346,7 @@ const Tiers: React.FC = () => {
           <Form.Item
             label="Yearly price (₦)"
             name="priceYearly"
-            extra="Charged when a subscriber picks yearly billing. Set it to whatever the plan should cost for a year — it is no longer derived from the monthly price. Leave blank to offer monthly only."
+            extra="Charged when a subscriber picks yearly billing. Set it to whatever the plan should cost for a year, it is no longer derived from the monthly price. Leave blank to offer monthly only."
           >
             <Input type="number" placeholder="e.g., 96000" />
           </Form.Item>
@@ -394,7 +394,7 @@ const Tiers: React.FC = () => {
             name="popular"
             valuePropName="checked"
             className="w-fit "
-          >           
+          >
             <Switch checkedChildren="Popular" unCheckedChildren="Not Popular" />
           </Form.Item>
 

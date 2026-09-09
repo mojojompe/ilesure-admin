@@ -16,8 +16,8 @@ import { adminApi } from '../api/admin';
 import { getAdminToken } from '../api/auth';
 
 /**
- * BUGFIX (QA-ADM-033): one accessible switch with a single visual polarity — knob to the
- * right always means "on" — replacing three hand-rolled buttons with contradictory
+ * BUGFIX (QA-ADM-033): one accessible switch with a single visual polarity, knob to the
+ * right always means "on", replacing three hand-rolled buttons with contradictory
  * semantics and no accessible name.
  */
 function PlatformToggle({
@@ -130,17 +130,17 @@ export function Settings() {
   const handlePasswordChange = async () => {
     setPasswordError(null);
     setPasswordSuccess(false);
-    
+
     if (!passwordData.currentPassword || !passwordData.newPassword) {
       setPasswordError('Please fill in all password fields');
       return;
     }
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setPasswordError('New passwords do not match');
       return;
     }
-    
+
     if (passwordData.newPassword.length < 6) {
       setPasswordError('Password must be at least 6 characters');
       return;
@@ -180,9 +180,8 @@ export function Settings() {
 
       {/* ── Toast notification ──────────────────────────── */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-clay shadow-clay-lg text-sm font-semibold animate-fade-in ${
-          toast.type === 'success' ? 'bg-status-success text-white' : 'bg-status-error text-white'
-        }`}>
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-clay shadow-clay-lg text-sm font-semibold animate-fade-in ${toast.type === 'success' ? 'bg-status-success text-white' : 'bg-status-error text-white'
+          }`}>
           {toast.type === 'success' ? '✓' : '✕'} {toast.message}
         </div>
       )}
@@ -209,8 +208,8 @@ export function Settings() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-clay-sm text-sm font-semibold transition-all duration-150 ${isActive
-                    ? 'bg-burnt-brown text-white shadow-clay-sm'
-                    : 'bg-transparent text-text-secondary hover:bg-clay-border-light'
+                  ? 'bg-burnt-brown text-white shadow-clay-sm'
+                  : 'bg-transparent text-text-secondary hover:bg-clay-border-light'
                   }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-mustard-light' : 'text-text-tertiary'}`} />
@@ -227,7 +226,7 @@ export function Settings() {
               <h3 className="text-base font-bold text-text-primary border-b border-clay-border pb-3">Personal Information</h3>
 
               <div className="flex items-center gap-5">
-<div className="w-20 h-20 rounded-pill bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white text-3xl font-bold shadow-clay flex-shrink-0">
+                <div className="w-20 h-20 rounded-pill bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white text-3xl font-bold shadow-clay flex-shrink-0">
                   {profileName?.charAt(0) || 'A'}
                 </div>
                 <div>
@@ -265,25 +264,25 @@ export function Settings() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Email Address</label>
-                  <input 
-                    type="email" 
-                    readOnly 
-                    value={adminData?.email || 'Loading...'} 
-                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm" 
+                  <input
+                    type="email"
+                    readOnly
+                    value={adminData?.email || 'Loading...'}
+                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Role</label>
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={adminData?.role === 'super_admin' ? 'System Administrator' : adminData?.role || 'Loading...'} 
-                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm" 
+                  <input
+                    type="text"
+                    readOnly
+                    value={adminData?.role === 'super_admin' ? 'System Administrator' : adminData?.role || 'Loading...'}
+                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm"
                   />
                 </div>
               </div>
 
-<div className="flex justify-end pt-4 border-t border-clay-border">
+              <div className="flex justify-end pt-4 border-t border-clay-border">
                 <Button variant="primary" icon={<FloppyDiskIcon className="w-4 h-4" />} onClick={handleProfileSave}>FloppyDiskIcon Changes</Button>
               </div>
             </ClayCard>
@@ -298,32 +297,32 @@ export function Settings() {
               <div className="space-y-4 max-w-md">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Current Password</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••••" 
+                  <input
+                    type="password"
+                    placeholder="••••••••"
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors" 
+                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">New Password</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••••" 
+                  <input
+                    type="password"
+                    placeholder="••••••••"
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors" 
+                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-text-secondary uppercase tracking-wide">Confirm New Password</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••••" 
+                  <input
+                    type="password"
+                    placeholder="••••••••"
                     value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors" 
+                    className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors"
                   />
                 </div>
                 {passwordError && <p className="text-status-error text-sm">{passwordError}</p>}
@@ -372,14 +371,14 @@ export function Settings() {
           {activeTab === 'platform' && (
             <ClayCard padding="md" className="space-y-6">
               <h3 className="text-base font-bold text-text-primary border-b border-clay-border pb-3">Platform Settings</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h4 className="text-sm font-bold text-text-primary">Platform Status</h4>
                   <div className="space-y-3">
                     {/* BUGFIX (QA-ADM-033): all three switches rendered identically
                         regardless of their value, and two of the three were driven from the
-                        NEGATED boolean — so "knob right, red" meant ENABLED on one row and
+                        NEGATED boolean, so "knob right, red" meant ENABLED on one row and
                         DISABLED on the next two. They were also bare <button>s with no
                         role, no aria-checked, no accessible name and no state text, so
                         neither a sighted admin nor a screen reader could tell them apart.
@@ -412,29 +411,29 @@ export function Settings() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between py-2 border-b border-clay-border-light">
                       <span className="text-sm text-text-secondary">Max Images per Listing</span>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         defaultValue={limits?.maxImagesPerListing || 10}
                         onChange={(e) => setLimits({ ...limits, maxImagesPerListing: parseInt(e.target.value) })}
-                        className="w-20 px-2 py-1 text-sm text-right border border-clay-border rounded" 
+                        className="w-20 px-2 py-1 text-sm text-right border border-clay-border rounded"
                       />
                     </div>
                     <div className="flex items-center justify-between py-2 border-b border-clay-border-light">
                       <span className="text-sm text-text-secondary">Max Listings per Agent</span>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         defaultValue={limits?.maxListingsPerAgent || 50}
                         onChange={(e) => setLimits({ ...limits, maxListingsPerAgent: parseInt(e.target.value) })}
-                        className="w-20 px-2 py-1 text-sm text-right border border-clay-border rounded" 
+                        className="w-20 px-2 py-1 text-sm text-right border border-clay-border rounded"
                       />
                     </div>
                     <div className="flex items-center justify-between py-2 border-b border-clay-border-light">
                       <span className="text-sm text-text-secondary">Waitlist Max Budget</span>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         defaultValue={limits?.waitlistMaxBudget || 2000000}
                         onChange={(e) => setLimits({ ...limits, waitlistMaxBudget: parseInt(e.target.value) })}
-                        className="w-24 px-2 py-1 text-sm text-right border border-clay-border rounded" 
+                        className="w-24 px-2 py-1 text-sm text-right border border-clay-border rounded"
                       />
                     </div>
                   </div>

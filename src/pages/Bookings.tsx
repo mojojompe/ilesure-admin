@@ -122,9 +122,8 @@ export function Bookings() {
                 <button
                   key={t}
                   onClick={() => setFilter(t)}
-                  className={`px-3 py-1 rounded-pill text-xs font-semibold transition-all ${
-                    filter === t ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'
-                  }`}
+                  className={`px-3 py-1 rounded-pill text-xs font-semibold transition-all ${filter === t ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'
+                    }`}
                 >
                   {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
@@ -171,8 +170,8 @@ export function Bookings() {
                   </td>
                   <td><span className="text-sm text-text-secondary">{b.agentName || '—'}</span></td>
                   <td><span className="font-bold text-mustard text-sm">₦{(b.price || 0).toLocaleString()}</span></td>
-                  {/* QA-API-329: what the tenant was actually billed — rent plus the platform
-                      fee and any caution/agency charges — so this tab reconciles with Payments
+                  {/* QA-API-329: what the tenant was actually billed, rent plus the platform
+                      fee and any caution/agency charges, so this tab reconciles with Payments
                       instead of quietly showing a different number. */}
                   <td>
                     {b.amountPaid == null ? (
@@ -187,7 +186,7 @@ export function Bookings() {
                         )}
                         {b.awaitingManualPayout && (
                           <span
-                            title="Settled entirely to the platform — the payee had no subaccount, so this is owed to them manually."
+                            title="Settled entirely to the platform, the payee had no subaccount, so this is owed to them manually."
                             className="mt-0.5 inline-flex w-fit items-center rounded-pill bg-status-error/10 text-status-error px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
                           >
                             manual payout

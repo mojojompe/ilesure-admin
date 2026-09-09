@@ -65,7 +65,7 @@ export interface AdminTokenPayload {
 }
 
 // SECURITY-FIX (AD-C1): Decode a JWT payload (the middle, base64url segment) WITHOUT
-// verifying the signature — signature verification is the backend's responsibility.
+// verifying the signature, signature verification is the backend's responsibility.
 // The client only needs the claims (exp, role, permissions) to gate the UI and to
 // detect an expired session. Returns null if the token is missing or malformed.
 export function decodeAdminToken(token: string | null = getAdminToken()): AdminTokenPayload | null {
@@ -89,7 +89,7 @@ export function decodeAdminToken(token: string | null = getAdminToken()): AdminT
   }
 }
 
-// SECURITY-FIX (AD-C1): The route guard must gate on a real, non-expired JWT — not on
+// SECURITY-FIX (AD-C1): The route guard must gate on a real, non-expired JWT, not on
 // the spoofable `ilesure_admin_auth` boolean flag. Returns true only when a token is
 // present, decodes, and (if it carries an `exp` claim) has not expired.
 export function isAdminAuthenticated(): boolean {
@@ -111,7 +111,7 @@ export function getAdminPermissions(): string[] {
   return Array.isArray(perms) ? perms : [];
 }
 
-// SECURITY-FIX (AD-C2 / AD-H2): Clear the WHOLE admin session — the JWT and the UI
+// SECURITY-FIX (AD-C2 / AD-H2): Clear the WHOLE admin session, the JWT and the UI
 // convenience flag. Used by logout and by the 401/403 handler in adminFetch so an
 // expired/invalid session cannot linger as "authenticated".
 export function clearAdminSession(): void {

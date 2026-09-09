@@ -291,7 +291,7 @@ export function PushTab() {
 
       {/* BUGFIX (QA-ADM-028): the Push tab had NO send control at all. The only
           "SentIcon Now" button lived inside the preview modal below, and nothing ever
-          called setShowPreview(true) — so a notification could not be sent from the
+          called setShowPreview(true), so a notification could not be sent from the
           console even though the endpoint worked. Mirrors EmailTab's trigger. */}
       <div className="flex justify-end">
         <Button
@@ -340,7 +340,7 @@ export function PushTab() {
                   {' · '}
                   {targetMode === 'all' ? 'All UserMultipleIcon'
                     : targetMode === 'roles' ? `Roles: ${selectedRoles.join(', ') || 'none'}`
-                    : `${selectedUsers.length} specific user(s)`}
+                      : `${selectedUsers.length} specific user(s)`}
                 </p>
               </div>
             </div>

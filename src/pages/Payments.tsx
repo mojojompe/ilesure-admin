@@ -68,7 +68,7 @@ function PayoutsSection() {
     setLoading(true);
     try {
       // BUGFIX (QA-ADM2-027): this asked for no page and no limit, so it rendered the API's
-      // first 20 rows with no pager — the rest were unreachable — and computed the money
+      // first 20 rows with no pager, the rest were unreachable, and computed the money
       // tiles from those 20, understating them silently.
       const params: Record<string, any> = { page: payPage, limit: 20 };
       if (filter !== 'all') params.status = filter;
@@ -105,7 +105,7 @@ function PayoutsSection() {
   };
 
   // BUGFIX (QA-ADM-036): the Payments screen offered a "Refunded" filter tab and no way
-  // to reach that state — the ACTIONS column held a single view icon and the detail modal
+  // to reach that state, the ACTIONS column held a single view icon and the detail modal
   // offered only Close and Mark as Processed. The server-side refund is real (it verifies
   // with Paystack and calls the refund API through refundService), it simply had no
   // control. Refunding money is irreversible, so it asks first, exactly like Mark as
@@ -127,7 +127,7 @@ function PayoutsSection() {
   const confirmRefund = (payment: any) => {
     // QA-ADM-037: close the detail modal first. antd's Modal.confirm portal and this app's
     // own Modal component compete for the stacking context, so the confirmation rendered
-    // washed-out and interleaved with the still-open record behind it — barely legible for
+    // washed-out and interleaved with the still-open record behind it, barely legible for
     // a dialog whose entire job is to be read before money moves.
     setDetail(null);
     AntModal.confirm({
@@ -145,7 +145,7 @@ function PayoutsSection() {
   // action; require an explicit confirmation before firing it (consistent with the
   // Users suspend confirm pattern).
   const confirmMarkProcessed = (payment: any) => {
-    // BUGFIX (QA-ADM-037): see confirmRefund — the confirm was drawn behind/through the
+    // BUGFIX (QA-ADM-037): see confirmRefund, the confirm was drawn behind/through the
     // open detail modal.
     setDetail(null);
     AntModal.confirm({
@@ -163,7 +163,7 @@ function PayoutsSection() {
     `${p.agentName} ${p.description}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  // BUGFIX (QA-ADM-035): this filtered on 'processed', which the backend never stores —
+  // BUGFIX (QA-ADM-035): this filtered on 'processed', which the backend never stores,
   // it normalises 'processed' to 'completed' on the way in. The tile therefore read
   // "PROCESSED ₦0" while hundreds of thousands of naira of completed payments existed.
   // BUGFIX (QA-ADM2-027): these summed the CURRENT PAGE. They now come from the server's
@@ -196,7 +196,7 @@ function PayoutsSection() {
         </div>
         {/* BUGFIX (QA-API-292): the API has always returned this count and the console threw
             it away, so an operator could be told three payments needed review with no way to
-            see which. The tile is the filter — clicking it narrows the table to those rows. */}
+            see which. The tile is the filter, clicking it narrows the table to those rows. */}
         <button
           type="button"
           onClick={() => setFlaggedOnly(v => !v)}
@@ -206,7 +206,7 @@ function PayoutsSection() {
         >
           <p className="text-xs text-text-tertiary font-semibold uppercase tracking-wide mb-1">Flagged for Review</p>
           <p className={`text-3xl font-bold ${flaggedCount > 0 ? 'text-status-error' : 'text-text-primary'}`}>{flaggedCount}</p>
-          <p className="text-[11px] text-text-tertiary mt-1">{flaggedOnly ? 'Showing flagged only — click to clear' : 'Click to filter'}</p>
+          <p className="text-[11px] text-text-tertiary mt-1">{flaggedOnly ? 'Showing flagged only, click to clear' : 'Click to filter'}</p>
         </button>
       </div>
 
@@ -359,12 +359,12 @@ function PayoutsSection() {
 
 /* ─── Paystack Transactions ─────────────── */
 const PAYSTACK_STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  success:    { label: 'Success',    color: 'bg-status-success/10 text-status-success' },
-  failed:     { label: 'Failed',     color: 'bg-status-error/10 text-status-error' },
-  abandoned:  { label: 'Abandoned',  color: 'bg-mustard/15 text-mustard' },
-  reversed:   { label: 'Reversed',   color: 'bg-text-tertiary/10 text-text-tertiary' },
+  success: { label: 'Success', color: 'bg-status-success/10 text-status-success' },
+  failed: { label: 'Failed', color: 'bg-status-error/10 text-status-error' },
+  abandoned: { label: 'Abandoned', color: 'bg-mustard/15 text-mustard' },
+  reversed: { label: 'Reversed', color: 'bg-text-tertiary/10 text-text-tertiary' },
   processing: { label: 'Processing', color: 'bg-status-info/10 text-status-info' },
-  pending:    { label: 'Pending',    color: 'bg-mustard/15 text-mustard' },
+  pending: { label: 'Pending', color: 'bg-mustard/15 text-mustard' },
 };
 
 function PaystackStatusBadge({ status }: { status: string }) {

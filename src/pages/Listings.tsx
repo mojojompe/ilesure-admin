@@ -33,7 +33,7 @@ const propertyTypeLabel: Record<string, string> = {
  * BUGFIX: renders what a listing actually costs.
  *
  * The table divided annualRent by 1000 unconditionally. A shortlet carries rentAnnual 0 with
- * its real prices in shortletRates[], so every shortlet in the console read "₦0k" — which
+ * its real prices in shortletRates[], so every shortlet in the console read "₦0k", which
  * looks like a free property rather than one priced per night.
  */
 function formatListingRent(listing: any, long = false): string {
@@ -62,7 +62,7 @@ export function Listings() {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // BUGFIX (QA-ADM-039): the pager was the literal array [1, 2, 3] — three inert buttons
+  // BUGFIX (QA-ADM-039): the pager was the literal array [1, 2, 3], three inert buttons
   // that never changed the request, printed under "Showing 5 of 5 listings". Meanwhile the
   // API caps a page at 20, so with more than 20 listings the extras were unreachable.
   const [page, setPage] = useState(1);
@@ -86,10 +86,10 @@ export function Listings() {
     try {
       const params = new URLSearchParams({ page: String(page), limit: '20' });
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      
+
       const response = await adminApi.listings.list(`?${params.toString()}`);
       const listingsData = response.data?.listings || response.data || [];
-      
+
       if (response.success && listingsData.length > 0) {
         const formattedListings = listingsData.map((l: any) => ({
           id: l._id || l.id,
@@ -144,7 +144,7 @@ export function Listings() {
   const confirmAction = async () => {
     if (!actionModal) return;
     const { type, listing } = actionModal;
-    
+
     try {
       switch (type) {
         case 'approve':
@@ -269,7 +269,7 @@ export function Listings() {
                 </tr>
               ) : filtered.map((listing) => (
                 /* BUGFIX (QA-ADM-042): the fragment was the list child, so React saw an
-                   unkeyed array — the key on the inner <tr> does not count. */
+                   unkeyed array, the key on the inner <tr> does not count. */
                 <Fragment key={listing.id}>
                   <tr
                     className="cursor-pointer"
@@ -307,7 +307,7 @@ export function Listings() {
                     </td>
                     <td><span className="text-sm text-text-secondary">{propertyTypeLabel[listing.propertyType]}</span></td>
                     {/* BUGFIX: a shortlet stores rentAnnual 0 and keeps its real prices in
-                        shortletRates[], so every shortlet rendered as "₦0k" — indistinguishable
+                        shortletRates[], so every shortlet rendered as "₦0k", indistinguishable
                         from free. Show the actual rate range instead. */}
                     <td><span className="font-bold text-burnt-brown">{formatListingRent(listing)}</span></td>
                     <td>
@@ -392,7 +392,7 @@ export function Listings() {
                                     e.stopPropagation();
                                     setPreviewImage({
                                       url: imgUrl,
-                                      title: `${listing.title} — Photo ${idx + 1}`,
+                                      title: `${listing.title}, Photo ${idx + 1}`,
                                     });
                                   }}
                                   className="group relative h-24 rounded-clay-sm overflow-hidden border border-clay-border cursor-pointer shadow-sm hover:shadow-md transition-all bg-clay-border-light"
@@ -483,8 +483,8 @@ export function Listings() {
         size="sm"
         title={
           actionModal?.type === 'approve' ? 'Approve Listing' :
-          actionModal?.type === 'reject' ? 'Reject Listing' :
-          'Request Changes'
+            actionModal?.type === 'reject' ? 'Reject Listing' :
+              'Request Changes'
         }
         footer={
           <>
