@@ -27,7 +27,7 @@ type StatusType =
   // BUGFIX (QA-ADM-039 / QA-ADM-040): these are real values the API returns and they had
   // no entry here, so Listings showed a raw unstyled "archived" beside styled badges, and
   // Payments/Bookings did the same for "abandoned", "disputed" and "unpaid".
-  | 'archived' | 'abandoned' | 'disputed' | 'unpaid' | 'paid' | 'draft'
+  | 'archived' | 'abandoned' | 'disputed' | 'unpaid' | 'paid' | 'draft' | 'deleted'
   | 'free' | 'basic' | 'premium' | 'enterprise';
 
 const config: Record<StatusType, { label: string; className: string; icon?: React.ComponentType<{ className?: string }> }> = {
@@ -41,6 +41,7 @@ const config: Record<StatusType, { label: string; className: string; icon?: Reac
   verified: { label: 'Verified', className: 'bg-status-success/10 text-status-success', icon: SecurityCheckIcon },
   more_info: { label: 'Needs More Info', className: 'bg-mustard/15 text-mustard', icon: Alert01Icon },
   suspended: { label: 'Suspended', className: 'bg-status-error/10 text-status-error', icon: CancelCircleIcon },
+  deleted: { label: 'Deleted', className: 'bg-status-error/10 text-status-error line-through', icon: CancelCircleIcon },
   notified: { label: 'Notified', className: 'bg-status-info/10 text-status-info', icon: Tick01Icon },
   matched: { label: 'Matched', className: 'bg-status-success/10 text-status-success', icon: Tick01Icon },
   waiting: { label: 'Waiting', className: 'bg-mustard/15 text-mustard', icon: Time02Icon },
@@ -58,11 +59,11 @@ const config: Record<StatusType, { label: string; className: string; icon?: Reac
   premium: { label: 'Premium', className: 'bg-burnt-brown/10 text-burnt-brown', icon: Award01Icon },
   enterprise: { label: 'Enterprise', className: 'bg-mustard/15 text-mustard-light', icon: CrownIcon },
   archived: { label: 'Archived', className: 'bg-text-tertiary/10 text-text-tertiary', icon: MinusSignIcon },
-  abandoned: { label: 'Abandoned', className: 'bg-text-tertiary/10 text-text-tertiary', icon: MinusSignIcon },
+  abandoned: { label: 'Abandoned', className: 'bg-status-error/10 text-status-error', icon: CancelCircleIcon },
   disputed: { label: 'Disputed', className: 'bg-status-error/10 text-status-error', icon: Alert01Icon },
-  unpaid: { label: 'Unpaid', className: 'bg-mustard/15 text-mustard', icon: Time02Icon },
+  unpaid: { label: 'Unpaid', className: 'bg-text-tertiary/10 text-text-tertiary', icon: Time02Icon },
   paid: { label: 'Paid', className: 'bg-status-success/10 text-status-success', icon: Tick01Icon },
-  draft: { label: 'Draft', className: 'bg-clay-border text-text-secondary', icon: MinusSignIcon },
+  draft: { label: 'Draft', className: 'bg-text-tertiary/10 text-text-tertiary', icon: MinusSignIcon },
 };
 
 /**
