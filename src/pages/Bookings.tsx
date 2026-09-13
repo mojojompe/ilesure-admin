@@ -131,7 +131,7 @@ export function Bookings() {
             </div>
             <div className="relative">
               <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
-              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search01Icon..." value={search} onChange={e => setSearch(e.target.value)} />
+              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
         </div>

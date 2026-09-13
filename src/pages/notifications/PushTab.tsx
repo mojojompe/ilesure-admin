@@ -184,9 +184,9 @@ export function PushTab() {
             <label className="block text-xs font-bold text-text-tertiary uppercase tracking-wider mb-3">Target Audience</label>
             <div className="flex gap-2 mb-4">
               {[
-                { mode: 'all' as TargetMode, label: 'All UserMultipleIcon', icon: <GlobeIcon className="w-3.5 h-3.5" /> },
+                { mode: 'all' as TargetMode, label: 'All UserMultiple', icon: <GlobeIcon className="w-3.5 h-3.5" /> },
                 { mode: 'roles' as TargetMode, label: 'By Role', icon: <UserMultipleIcon className="w-3.5 h-3.5" /> },
-                { mode: 'users' as TargetMode, label: 'Specific UserMultipleIcon', icon: <Search01Icon className="w-3.5 h-3.5" /> },
+                { mode: 'users' as TargetMode, label: 'Specific UserMultiple', icon: <Search01Icon className="w-3.5 h-3.5" /> },
               ].map(t => (
                 <button
                   key={t.mode}
@@ -243,7 +243,7 @@ export function PushTab() {
                   <input
                     value={userSearch}
                     onChange={e => setUserSearch(e.target.value)}
-                    placeholder="Search01Icon users by name or email..."
+                    placeholder="Search users by name or email..."
                     className="w-full pl-9 pr-4 py-2 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all"
                   />
                   {searching && (
@@ -290,7 +290,7 @@ export function PushTab() {
       </ClayCard>
 
       {/* BUGFIX (QA-ADM-028): the Push tab had NO send control at all. The only
-          "SentIcon Now" button lived inside the preview modal below, and nothing ever
+          "Sent Now" button lived inside the preview modal below, and nothing ever
           called setShowPreview(true), so a notification could not be sent from the
           console even though the endpoint worked. Mirrors EmailTab's trigger. */}
       <div className="flex justify-end">
@@ -338,7 +338,7 @@ export function PushTab() {
                 <p className="text-[10px] text-text-tertiary mt-2">
                   Type: {NOTIFICATION_TYPES.find(nt => nt.value === type)?.label || type}
                   {' · '}
-                  {targetMode === 'all' ? 'All UserMultipleIcon'
+                  {targetMode === 'all' ? 'All UserMultiple'
                     : targetMode === 'roles' ? `Roles: ${selectedRoles.join(', ') || 'none'}`
                       : `${selectedUsers.length} specific user(s)`}
                 </p>

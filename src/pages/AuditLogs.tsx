@@ -557,7 +557,7 @@ export function AuditLogs() {
                   }
                   onClick={() => handleCopyJson(inspectEvent)}
                 >
-                  {copiedId === inspectEvent.event_id ? 'Copied JSON!' : 'Copy01Icon Event JSON'}
+                  {copiedId === inspectEvent.event_id ? 'Copied JSON!' : 'Copy Event JSON'}
                 </Button>
               </div>
             </div>
@@ -628,7 +628,7 @@ export function AuditLogs() {
                   ) : (
                     <>
                       <Copy01Icon className="w-3.5 h-3.5" />
-                      <span>Copy01Icon JSON</span>
+                      <span>Copy JSON</span>
                     </>
                   )}
                 </button>

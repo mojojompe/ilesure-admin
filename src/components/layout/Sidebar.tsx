@@ -181,7 +181,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white/90 hover:bg-white/7 transition-all duration-150 group"
           >
             <Settings01Icon className="w-4.5 h-4.5 group-hover:rotate-45 transition-transform duration-300 text-white/40 group-hover:text-white/70" />
-            <span>Settings01Icon</span>
+            <span>Settings</span>
           </NavLink>
 
           {/* Admin Profile chip */}

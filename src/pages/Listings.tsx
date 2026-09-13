@@ -218,13 +218,11 @@ export function Listings() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search01Icon by title, agent, or area..."
+              placeholder="Search by title, agent, or area..."
               className="w-full pl-9 pr-4 py-2 bg-clay-border-light border border-clay-border rounded-pill text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all"
             />
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Button variant="secondary" size="sm" icon={<FilterIcon className="w-3.5 h-3.5" />} onClick={() => prompt('Enter filter keyword:')}>FilterIcon</Button>
-            <Button variant="ghost" size="sm" icon={<Download01Icon className="w-3.5 h-3.5" />} onClick={() => alert('Exporting listings...')}>Export</Button>
+          <div className="flex items-center gap-2">
           </div>
         </div>
       </ClayCard>

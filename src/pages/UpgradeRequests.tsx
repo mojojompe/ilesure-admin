@@ -234,7 +234,7 @@ export function UpgradeRequests() {
           <Search01Icon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary" />
           <input
             type="text"
-            placeholder="Search01Icon titles, keywords, users..."
+            placeholder="Search titles, keywords, users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl border border-border bg-background text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -310,7 +310,7 @@ export function UpgradeRequests() {
                       {/* Request Count Badge (The Stack representation) */}
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-extrabold">
                         <Layers01Icon className="w-4 h-4 text-blue-600" />
-                        <span>{stack.requestCount} UserIcon Requests Stacked</span>
+                        <span>{stack.requestCount} User Requests Stacked</span>
                       </div>
 
                       {/* Total Votes */}

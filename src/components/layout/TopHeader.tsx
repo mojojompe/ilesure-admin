@@ -53,7 +53,7 @@ export function TopHeader({ onMenuClick }: { onMenuClick: () => void }) {
         <Search01Icon className="absolute left-3.5 w-3.5 h-3.5 text-text-tertiary pointer-events-none" />
         <input
           type="text"
-          placeholder="Search01Icon anything..."
+          placeholder="Search anything..."
           className="w-full pl-9 pr-4 py-2 bg-clay-border-light/70 border border-clay-border/50 rounded-xl
             text-sm text-text-primary placeholder:text-text-tertiary/70 outline-none
             focus:border-mustard focus:ring-2 focus:ring-mustard/15 focus:bg-white transition-all duration-150"

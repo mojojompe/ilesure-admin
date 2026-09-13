@@ -182,15 +182,17 @@ export const adminApi = {
     history: (params?: string) => adminFetch(`/admin/v1/emails/history${params || ''}`),
     detail: (id: string) => adminFetch(`/admin/v1/emails/history/${id}`),
   },
+  ads: {
+    list: () => adminFetch('/admin/v1/ads'),
+    create: (data: { imageUrl: string; link?: string; isActive?: boolean }) =>
+      adminFetch('/admin/v1/ads', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: { imageUrl?: string; link?: string; isActive?: boolean }) =>
+      adminFetch(`/admin/v1/ads/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => adminFetch(`/admin/v1/ads/${id}`, { method: 'DELETE' }),
+  },
   audit: {
     logs: (params?: Record<string, any>) => adminFetch(`/admin/v1/audit/logs${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
     paystackTransactions: (params?: Record<string, any>) => adminFetch(`/admin/v1/audit/paystack-transactions${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
     paystackTransactionDetail: (id: string) => adminFetch(`/admin/v1/audit/paystack-transactions/${id}`),
-  },
-  ads: {
-    list: () => adminFetch(`/admin/v1/ads`),
-    create: (data: any) => adminFetch(`/admin/v1/ads`, { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: any) => adminFetch(`/admin/v1/ads/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (id: string) => adminFetch(`/admin/v1/ads/${id}`, { method: 'DELETE' }),
   },
 };

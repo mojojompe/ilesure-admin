@@ -291,7 +291,7 @@ export function WaitlistData() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search01Icon..."
+              placeholder="Search..."
               className="pl-8 pr-4 py-1.5 bg-clay-border-light border border-clay-border rounded-pill text-xs placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all w-48"
             />
           </div>

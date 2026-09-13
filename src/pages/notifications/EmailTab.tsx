@@ -518,7 +518,7 @@ export function EmailTab() {
                   ) : (
                     <>
                       <Copy01Icon className="w-3.5 h-3.5" />
-                      <span>Copy01Icon Text</span>
+                      <span>Copy Text</span>
                     </>
                   )}
                 </button>

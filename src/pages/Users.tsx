@@ -172,7 +172,7 @@ export function Users() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search01Icon by name or email..."
+              placeholder="Search by name or email..."
               className="w-full pl-9 pr-4 py-2 bg-clay-border-light border border-clay-border rounded-pill text-sm placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all"
             />
           </div>

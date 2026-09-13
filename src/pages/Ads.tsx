@@ -141,7 +141,7 @@ export function Ads() {
               <thead>
                 <tr className="border-b border-clay-border bg-white/50">
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Image</th>
-                  <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Link01Icon</th>
+                  <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Link</th>
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider">Date Added</th>
                   <th className="px-6 py-4 text-xs font-bold text-text-tertiary uppercase tracking-wider text-right">Actions</th>
@@ -244,7 +244,7 @@ export function Ads() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-text-primary mb-1">Redirect Link01Icon (Optional)</label>
+                <label className="block text-sm font-semibold text-text-primary mb-1">Redirect Link (Optional)</label>
                 <input
                   type="url"
                   placeholder="https://example.com"

@@ -105,6 +105,7 @@ body {
   .badge-mustard  { @apply bg-mustard text-white; }
 
   /* Tables */
+  .clay-table { @apply w-full min-w-[800px]; }
   .clay-table th {
     @apply text-left text-[11px] font-bold text-text-tertiary uppercase tracking-widest
            px-5 py-3.5 bg-off-white border-b border-clay-border;
