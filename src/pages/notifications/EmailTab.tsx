@@ -221,8 +221,8 @@ export function EmailTab() {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder={'Hello {{name}},\n\nYour message here...'}
-              rows={8}
-              className="w-full px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all resize-none"
+              rows={12}
+              className="w-full px-4 py-3 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all resize-y min-h-[200px]"
             />
             <p className="text-[10px] text-text-tertiary mt-1">
               Use {'{{name}}'} to personalise with each recipient&apos;s name. Separate paragraphs with a blank line.
