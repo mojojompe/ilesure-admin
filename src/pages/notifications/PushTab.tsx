@@ -321,7 +321,7 @@ export function PushTab() {
               disabled={!canSend}
               onClick={async () => { await handleSend(); setShowPreview(false); }}
             >
-              SentIcon Now
+              Send Now
             </Button>
           </>
         }

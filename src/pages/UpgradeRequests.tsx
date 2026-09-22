@@ -166,7 +166,7 @@ export function UpgradeRequests() {
         <ClayCard className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-textSecondary uppercase tracking-wider">
-              UserIcon Requests
+              User Requests
             </span>
             <Message01Icon className="w-4 h-4 text-blue-600" />
           </div>
@@ -371,7 +371,7 @@ export function UpgradeRequests() {
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-extrabold text-textSecondary uppercase tracking-wider flex items-center gap-2">
                         <Message01Icon className="w-4 h-4 text-primary" />
-                        Original UserIcon Submissions in this Stack ({stack.requests.length})
+                        Original User Submissions in this Stack ({stack.requests.length})
                       </h4>
                       <span className="text-[11px] text-textSecondary">
                         Latest: {new Date(stack.latestRequestedAt).toLocaleDateString()}

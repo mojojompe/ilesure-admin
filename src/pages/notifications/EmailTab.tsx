@@ -562,7 +562,7 @@ export function EmailTab() {
                 setShowPreview(false);
               }}
             >
-              SentIcon Now
+              Send Now
             </Button>
           </>
         }

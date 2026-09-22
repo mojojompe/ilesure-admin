@@ -114,7 +114,7 @@ const Tiers: React.FC = () => {
         priceYearly: values.priceYearly === undefined || values.priceYearly === ''
           ? undefined
           : parseFloat(values.priceYearly),
-        priceDisplay: `₦${values.priceMonthly}`,
+        priceDisplay: `₦${Number(values.priceMonthly).toLocaleString()}`,
         billingCycle: values.billingCycle || 'yearly',
         features: {
           maxListings: values.maxListings,

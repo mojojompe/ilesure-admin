@@ -223,7 +223,7 @@ export function WaitlistData() {
                     <span className="text-xs font-bold text-burnt-brown">{d.demand}</span>
                   </div>
                   <div className="h-1.5 bg-clay-border-light rounded-pill overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-burnt-brown to-mustard rounded-pill" style={{ width: `${(d.demand / corridorDemand[0].demand) * 100}%` }} />
+                    <div className="h-full bg-gradient-to-r from-burnt-brown to-mustard rounded-pill" style={{ width: `${corridorDemand[0].demand > 0 ? (d.demand / corridorDemand[0].demand) * 100 : 0}%` }} />
                   </div>
                 </div>
               </div>
@@ -245,7 +245,7 @@ export function WaitlistData() {
                 <span className="text-xs text-text-secondary">{label}</span>
                 <div className="flex items-center gap-2">
                   <div className="w-16 h-1.5 bg-clay-border-light rounded-pill overflow-hidden">
-                    <div className="h-full bg-mustard rounded-pill" style={{ width: `${(count / waitlist.length) * 100}%` }} />
+                    <div className="h-full bg-mustard rounded-pill" style={{ width: `${waitlist.length > 0 ? (count / waitlist.length) * 100 : 0}%` }} />
                   </div>
                   <span className="text-xs font-bold text-text-primary w-4 text-right">{count}</span>
                 </div>
