@@ -45,7 +45,9 @@ tiersApi.interceptors.response.use(
   (res) => res,
   (error) => {
     const status = error?.response?.status;
-    if (status === 401 || status === 403) {
+    // Only 401 ends the session. A 403 is an RBAC refusal for this one action and is
+    // left to the caller's error toast, as in adminFetch.
+    if (status === 401) {
       clearAdminSession();
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.href = '/login';

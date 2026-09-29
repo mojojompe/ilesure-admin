@@ -20,6 +20,19 @@ function handleAuthFailure(): void {
   }
 }
 
+/**
+ * Thrown for a 403: the admin is signed in but their role lacks the permission the
+ * endpoint requires (RBAC). Callers surface `message` (they already toast
+ * `error.message`); the session is left intact.
+ */
+export class PermissionDeniedError extends Error {
+  readonly status = 403;
+  constructor(message: string) {
+    super(message);
+    this.name = 'PermissionDeniedError';
+  }
+}
+
 async function extractErrorMessage(response: Response, fallback: string): Promise<string> {
   try {
     const data = await response.json();
@@ -29,13 +42,36 @@ async function extractErrorMessage(response: Response, fallback: string): Promis
   }
 }
 
+/**
+ * Maps the auth-related statuses. The admin API has no refresh endpoint, so a 401
+ * (missing/expired/revoked admin token) is final: clear the session and go to login.
+ * A 403 is NOT a session problem, it is a permission refusal for this one action
+ * (e.g. "Missing permission: users.suspend"), so it must never log the admin out.
+ */
+async function handleAuthStatus(response: Response): Promise<void> {
+  if (response.status === 401) {
+    handleAuthFailure();
+    throw new Error(
+      await extractErrorMessage(response, 'Your session has expired. Please sign in again.'),
+    );
+  }
+  if (response.status === 403) {
+    const detail = await extractErrorMessage(response, '');
+    throw new PermissionDeniedError(
+      detail
+        ? `You don't have permission to do this. ${detail}`
+        : "You don't have permission to do this.",
+    );
+  }
+}
+
 // SECURITY-FIX (AD-H2): adminFetch previously called response.json() unconditionally
-// and never inspected response.status/.ok, so an expired/invalid session (401/403)
+// and never inspected response.status/.ok, so an expired/invalid session (401)
 // was swallowed and the UI stayed "authenticated" forever, and API errors were
-// silently parsed as if successful. Now: 401/403 clears the session and redirects to
-// login; other non-OK responses throw with a surfaced message; only OK responses are
-// parsed as JSON.
-async function adminFetch(url: string, options: RequestInit = {}): Promise<any> {
+// silently parsed as if successful. Now: 401 clears the session and redirects to
+// login; 403 throws a PermissionDeniedError without touching the session; other
+// non-OK responses throw with a surfaced message; only OK responses are parsed as JSON.
+export async function adminFetch(url: string, options: RequestInit = {}): Promise<any> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
     headers: {
@@ -44,12 +80,7 @@ async function adminFetch(url: string, options: RequestInit = {}): Promise<any> 
     },
   });
 
-  if (response.status === 401 || response.status === 403) {
-    handleAuthFailure();
-    throw new Error(
-      await extractErrorMessage(response, 'Your session has expired. Please sign in again.'),
-    );
-  }
+  await handleAuthStatus(response);
 
   if (!response.ok) {
     throw new Error(await extractErrorMessage(response, `Request failed (${response.status})`));
@@ -59,7 +90,7 @@ async function adminFetch(url: string, options: RequestInit = {}): Promise<any> 
 }
 
 // SECURITY-FIX (AD-H2 / AD-M2): Raw variant that returns the Response untouched (for
-// non-JSON payloads such as CSV export). Applies the same 401/403 session handling as
+// non-JSON payloads such as CSV export). Applies the same 401/403 handling as
 // adminFetch, so callers get consistent auth behaviour without the json() coercion.
 export async function adminFetchRaw(url: string, options: RequestInit = {}): Promise<Response> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
@@ -70,10 +101,7 @@ export async function adminFetchRaw(url: string, options: RequestInit = {}): Pro
     },
   });
 
-  if (response.status === 401 || response.status === 403) {
-    handleAuthFailure();
-    throw new Error('Your session has expired. Please sign in again.');
-  }
+  await handleAuthStatus(response);
 
   if (!response.ok) {
     throw new Error(`Request failed (${response.status})`);

@@ -1,53 +1,6 @@
-import API_BASE_URL from '../lib/config';
-import { getAdminToken, clearAdminSession } from './auth';
-
-function getHeaders(): HeadersInit {
-  const token = getAdminToken();
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
-}
-
-function handleAuthFailure(): void {
-  clearAdminSession();
-  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-    window.location.href = '/login';
-  }
-}
-
-async function extractErrorMessage(response: Response, fallback: string): Promise<string> {
-  try {
-    const data = await response.json();
-    return data?.error?.message || data?.message || fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-async function adminFetch(url: string, options: RequestInit = {}): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers: {
-      ...getHeaders(),
-      ...options.headers,
-    },
-  });
-
-  if (response.status === 401 || response.status === 403) {
-    handleAuthFailure();
-    throw new Error(
-      await extractErrorMessage(response, 'Your session has expired. Please sign in again.'),
-    );
-  }
-
-  if (!response.ok) {
-    throw new Error(await extractErrorMessage(response, `Request failed (${response.status})`));
-  }
-
-  return response.json();
-}
+// Shares admin.ts's adminFetch so 401/403 handling cannot drift between two copies
+// (a 403 permission refusal must not log the admin out).
+import { adminFetch } from './admin';
 
 export interface IndividualRequest {
   _id: string;

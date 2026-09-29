@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search01Icon,
   UserMultipleIcon as UsersIcon,
@@ -20,6 +20,28 @@ import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 
 type TabKey = 'all' | 'tenant' | 'agent_landlord' | 'company';
+
+/** Server-side role filter for each tab (the API accepts a comma-separated list). */
+const TAB_ROLE: Record<TabKey, string | null> = {
+  all: null,
+  tenant: 'student',
+  agent_landlord: 'agent,landlord',
+  company: 'company,company_admin',
+};
+
+const PAGE_SIZE = 25;
+
+/** The API matches `search` as a regex; escape it so "a+b" or "(" is a literal search, not a 500. */
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+type Counts = { all: number; tenant: number; agent_landlord: number; company: number; suspended: number };
+
+/** Total matching a filter, read from the pagination block of a one-row page. */
+async function countUsers(params: Record<string, string>): Promise<number> {
+  const qs = new URLSearchParams({ ...params, limit: '1' });
+  const response = await adminApi.users.list(`?${qs.toString()}`);
+  return response?.data?.pagination?.totalItems ?? 0;
+}
 
 const roleLabel: Record<string, string> = {
   tenant: 'Tenant', agent: 'Agent', landlord: 'Landlord',
@@ -43,27 +65,56 @@ export function Users() {
   const [loading, setLoading] = useState(true);
 
   const canSuspend = can(CAP.USERS_SUSPEND);
-  // BUGFIX (QA-ADM-022): the page requested the API's default first page and then
-  // reported `users.length` as "Total Users", so with 25 accounts it showed
-  // "Total Users 20 / Showing 20 of 20", and searching for a user who happened to be
-  // on page 2 returned "No users found". Track the server's own total, and ask for a
-  // page large enough to hold the whole list the page filters client-side.
-  const [totalUsers, setTotalUsers] = useState(0);
+  // BUGFIX (QA-ADM-022, revisited): the page fetched one `limit=200` page and filtered
+  // it in the browser, so every account past the 200 newest was invisible to the table
+  // and to search alike. The API paginates and searches server-side (`page`, `limit`,
+  // `role`, `search`, `status`), so the table shows one server page at a time, search
+  // runs against every account, and the summary counts come from the server's totals.
+  const [page, setPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [totalUsers, setTotalUsers] = useState(0); // matches for the current tab + search
+  const [totalPages, setTotalPages] = useState(1);
+  const [counts, setCounts] = useState<Counts>({ all: 0, tenant: 0, agent_landlord: 0, company: 0, suspended: 0 });
+  const requestSeq = useRef(0);
 
   useEffect(() => {
-    fetchUsers();
-  }, [tab]);
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const fetchUsers = async () => {
+  // A new tab or search starts from the first page.
+  useEffect(() => { setPage(1); }, [tab, debouncedSearch]);
+
+  const fetchCounts = useCallback(async () => {
+    try {
+      const [all, tenant, agentLandlord, company, suspended] = await Promise.all([
+        countUsers({}),
+        countUsers({ role: TAB_ROLE.tenant! }),
+        countUsers({ role: TAB_ROLE.agent_landlord! }),
+        countUsers({ role: TAB_ROLE.company! }),
+        countUsers({ status: 'suspended' }),
+      ]);
+      setCounts({ all, tenant, agent_landlord: agentLandlord, company, suspended });
+    } catch {
+      // The summary cards are secondary; the table reports its own errors.
+    }
+  }, []);
+
+  useEffect(() => { fetchCounts(); }, [fetchCounts]);
+
+  const fetchUsers = useCallback(async () => {
+    const seq = ++requestSeq.current;
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (tab === 'tenant') params.set('role', 'student');
-      else if (tab === 'agent_landlord') params.set('role', 'agent,landlord');
-      else if (tab === 'company') params.set('role', 'company,company_admin');
-
-      params.set('limit', '200');
+      const role = TAB_ROLE[tab];
+      if (role) params.set('role', role);
+      if (debouncedSearch) params.set('search', escapeRegex(debouncedSearch));
+      params.set('page', String(page));
+      params.set('limit', String(PAGE_SIZE));
       const response = await adminApi.users.list(`?${params.toString()}`);
+      // A slower response for an older tab/page/search must not overwrite a newer one.
+      if (seq !== requestSeq.current) return;
       if (response.success && response.data?.users) {
         const formattedUsers = response.data.users.map((u: any) => ({
           id: u._id || u.id,
@@ -80,14 +131,18 @@ export function Users() {
         }));
         setUsers(formattedUsers);
         setTotalUsers(response.data?.pagination?.totalItems ?? formattedUsers.length);
+        setTotalPages(Math.max(response.data?.pagination?.totalPages ?? 1, 1));
       }
     } catch (error: any) {
+      if (seq !== requestSeq.current) return;
       console.error('Failed to fetch users:', error);
       toast.error(error?.message || 'Failed to fetch users');
     } finally {
-      setLoading(false);
+      if (seq === requestSeq.current) setLoading(false);
     }
-  };
+  }, [tab, page, debouncedSearch]);
+
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handleSuspend = async (user: User) => {
     try {
@@ -96,7 +151,7 @@ export function Users() {
       } else {
         await adminApi.users.suspend(user.id);
       }
-      await fetchUsers();
+      await Promise.all([fetchUsers(), fetchCounts()]);
       toast.success(user.status === 'suspended' ? 'User unsuspended successfully' : 'User suspended successfully');
       setSuspendConfirm(null);
     } catch (error: any) {
@@ -105,21 +160,16 @@ export function Users() {
     }
   };
 
-  const filtered = users.filter(u => {
-    const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
-    const matchTab = tab === 'all' ? true
-      : tab === 'tenant' ? u.role === 'tenant'
-        : tab === 'agent_landlord' ? (u.role === 'agent' || u.role === 'landlord')
-          : u.role === 'company_admin';
-    return matchSearch && matchTab;
-  });
+  // Tab and search filtering happen on the server; `users` is already the visible page.
+  const filtered = users;
+  const firstShown = totalUsers === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const lastShown = (page - 1) * PAGE_SIZE + users.length;
 
   const tabs: { key: TabKey; label: string; icon: React.ReactNode; count: number }[] = [
-    { key: 'all', label: 'All Users', icon: <UsersIcon className="w-3.5 h-3.5" />, count: users.length },
-    { key: 'tenant', label: 'Tenants', icon: <Book01Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'tenant').length },
-    { key: 'agent_landlord', label: 'Agents', icon: <Home01Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'agent' || u.role === 'landlord').length },
-    { key: 'company', label: 'Company Admins', icon: <Building04Icon className="w-3.5 h-3.5" />, count: users.filter(u => u.role === 'company_admin').length },
+    { key: 'all', label: 'All Users', icon: <UsersIcon className="w-3.5 h-3.5" />, count: counts.all },
+    { key: 'tenant', label: 'Tenants', icon: <Book01Icon className="w-3.5 h-3.5" />, count: counts.tenant },
+    { key: 'agent_landlord', label: 'Agents', icon: <Home01Icon className="w-3.5 h-3.5" />, count: counts.agent_landlord },
+    { key: 'company', label: 'Company Admins', icon: <Building04Icon className="w-3.5 h-3.5" />, count: counts.company },
   ];
 
   return (
@@ -128,10 +178,10 @@ export function Users() {
       {/* ── Summary Cards ───────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Users', value: totalUsers, icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Tenants', value: users.filter(u => u.role === 'tenant').length, icon: <Book01Icon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
-          { label: 'Agents', value: users.filter(u => u.role === 'agent' || u.role === 'landlord').length, icon: <Home01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Suspended', value: users.filter(u => u.status === 'suspended').length, icon: <UserIcon className="w-5 h-5 text-status-error" />, bg: 'bg-status-error/10' },
+          { label: 'Total Users', value: counts.all, icon: <UsersIcon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Tenants', value: counts.tenant, icon: <Book01Icon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
+          { label: 'Agents', value: counts.agent_landlord, icon: <Home01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
+          { label: 'Suspended', value: counts.suspended, icon: <UserIcon className="w-5 h-5 text-status-error" />, bg: 'bg-status-error/10' },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
@@ -272,8 +322,19 @@ export function Users() {
             </tbody>
           </table>
         </div>
-        <div className="px-5 py-3 border-t border-clay-border bg-off-white rounded-b-clay">
-          <p className="text-xs text-text-tertiary">Showing {filtered.length} of {totalUsers} users</p>
+        <div className="px-5 py-3 border-t border-clay-border bg-off-white rounded-b-clay flex items-center justify-between gap-3">
+          <p className="text-xs text-text-tertiary">
+            Showing {firstShown}–{lastShown} of {totalUsers} users
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" disabled={loading || page <= 1} onClick={() => setPage(p => Math.max(p - 1, 1))}>
+              Previous
+            </Button>
+            <span className="text-xs text-text-tertiary">Page {page} of {totalPages}</span>
+            <Button variant="secondary" size="sm" disabled={loading || page >= totalPages} onClick={() => setPage(p => Math.min(p + 1, totalPages))}>
+              Next
+            </Button>
+          </div>
         </div>
       </ClayCard>
 
