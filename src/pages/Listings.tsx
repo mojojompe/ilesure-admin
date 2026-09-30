@@ -16,18 +16,18 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { Listing } from '../types';
+import { PROPERTY_TYPE_LABELS, type ListingStatus } from '../contracts/generated';
 import { clsx } from 'clsx';
 import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
+import { errorMessage } from '../api/errors';
 
-type FilterStatus = 'all' | 'pending_approval' | 'active' | 'needs_roommate' | 'fully_booked' | 'archived' | 'rejected';
+type FilterStatus = 'all' | ListingStatus;
 
-const propertyTypeLabel: Record<string, string> = {
-  self_con: 'Self-con', '1_bed': '1-Bed Flat', '2_bed': '2-Bed Flat', '3_bed': '3-Bed Flat',
-  mini_flat: 'Mini Flat', studio: 'Studio', penthouse: 'Penthouse',
-  hostel_room: 'Hostel Room', shared_apartment: 'Shared Apt', shortlet: 'Shortlet',
-};
+/** Contract label for a stored property type; unknown values are shown raw. */
+const propertyTypeLabel = (type: string): string =>
+  (PROPERTY_TYPE_LABELS as Record<string, string>)[type] ?? type;
 
 /**
  * BUGFIX: renders what a listing actually costs.
@@ -129,7 +129,7 @@ export function Listings() {
       }
     } catch (error: any) {
       console.error('Failed to fetch listings:', error);
-      toast.error(error?.message || 'Failed to fetch listings');
+      toast.error(errorMessage(error, 'Failed to fetch listings'));
       setError('Failed to fetch listings');
     } finally {
       setLoading(false);
@@ -161,7 +161,7 @@ export function Listings() {
       toast.success('Action completed successfully');
       setActionModal(null);
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to perform action');
+      toast.error(errorMessage(error, 'Failed to perform action'));
       console.error('Failed to perform action:', error);
     }
   };
@@ -303,7 +303,7 @@ export function Listings() {
                         )}
                       </div>
                     </td>
-                    <td><span className="text-sm text-text-secondary">{propertyTypeLabel[listing.propertyType]}</span></td>
+                    <td><span className="text-sm text-text-secondary">{propertyTypeLabel(listing.propertyType)}</span></td>
                     {/* BUGFIX: a shortlet stores rentAnnual 0 and keeps its real prices in
                         shortletRates[], so every shortlet rendered as "₦0k", indistinguishable
                         from free. Show the actual rate range instead. */}

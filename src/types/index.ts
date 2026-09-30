@@ -1,10 +1,35 @@
 // ── iléSure Admin, TypeScript Types ──────────────────────────────
 
-export type UserRole = 'student' | 'landlord' | 'agent' | 'company' | 'company_admin' | 'sub_agent' | 'admin';
-export type VerificationStatus = 'pending' | 'verified' | 'rejected' | 'more_info';
-export type ListingStatus = 'pending_approval' | 'active' | 'needs_roommate' | 'fully_booked' | 'archived' | 'rejected';
-export type TierName = 'free' | 'basic' | 'premium' | 'enterprise';
-export type PropertyType = 'self_con' | '1_bed' | '2_bed' | '3_bed' | 'mini_flat' | 'hostel_room' | 'shared_apartment' | 'shortlet';
+// Shared vocabulary comes from the backend contract (src/contracts/generated.ts, never
+// edited here). The interfaces below are admin-specific view shapes built on it.
+import type {
+  AccountStatus,
+  AdminRole,
+  CompanyStatus,
+  Furnishing,
+  GenderRestriction,
+  ListingStatus,
+  PropertyType,
+  TierId,
+  UserRole,
+  VerificationStatus,
+} from '../contracts/generated';
+
+export type {
+  AccountStatus,
+  AdminRole,
+  BookingStatus,
+  CompanyStatus,
+  ListingStatus,
+  PropertyType,
+  TierId,
+  UserRole,
+  VerificationStatus,
+} from '../contracts/generated';
+export type { ApiResponse, ErrorEnvelope, SuccessEnvelope } from '../contracts/generated';
+
+/** @deprecated use TierId from the contract. */
+export type TierName = TierId;
 export type WaitlistStatus = 'waiting' | 'converted' | 'expired';
 
 export interface User {
@@ -13,7 +38,7 @@ export interface User {
   email: string;
   phone: string;
   role: UserRole;
-  status: 'active' | 'suspended' | 'pending';
+  status: AccountStatus;
   verificationStatus: VerificationStatus;
   joinDate: string;
   avatar?: string;
@@ -28,8 +53,8 @@ export interface Company {
   tradingName?: string;
   cacNumber: string;
   tin: string;
-  status: VerificationStatus;
-  tier: TierName;
+  status: CompanyStatus;
+  tier: TierId;
   agentsCount: number;
   listingsCount: number;
   joinDate: string;
@@ -57,8 +82,8 @@ export interface Listing {
   totalMoveinCost: number;
   status: ListingStatus;
   canBeShared: boolean;
-  genderRestriction: 'any' | 'male_only' | 'female_only' | 'mixed';
-  furnishing: 'fully_furnished' | 'semi_furnished' | 'unfurnished';
+  genderRestriction: GenderRestriction;
+  furnishing: Furnishing;
   powerSource: string;
   waterSource: string;
   hasWifi: boolean;
@@ -68,7 +93,7 @@ export interface Listing {
   approvedDate?: string;
   images?: string[];
   interestCount: number;
-  tier: TierName;
+  tier: TierId;
 }
 
 export interface VerificationRequest {
@@ -130,17 +155,10 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
-  role: 'super_admin' | 'support' | 'moderator';
+  role: AdminRole;
   avatar?: string;
   lastLogin?: string;
   permissions: string[];
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: { code: string; message: string };
-  message?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -159,8 +177,8 @@ export interface UsersListResponse {
     fullName: string;
     email: string;
     phone?: string;
-    role: string;
-    status: 'active' | 'suspended' | 'pending';
+    role: UserRole;
+    status: AccountStatus;
     verificationStatus: VerificationStatus;
     university?: string;
     createdAt: string;
@@ -216,7 +234,7 @@ export interface CompaniesListResponse {
     tradingName?: string;
     cacNumber: string;
     tin?: string;
-    status: VerificationStatus;
+    status: CompanyStatus;
     director?: string;
     email?: string;
     phone?: string;

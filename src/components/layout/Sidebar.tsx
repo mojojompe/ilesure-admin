@@ -1,97 +1,45 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { adminApi } from '../../api/admin';
-import { removeAdminToken } from '../../api/auth';
-import {
-  DashboardSquare01Icon,
-  Building04Icon,
-  SecurityCheckIcon,
-  UserMultipleIcon,
-  Briefcase01Icon,
-  ClipboardIcon,
-  Analytics01Icon,
-  Logout01Icon,
-  Settings01Icon,
-  UserCheck01Icon,
-  Calendar01Icon,
-  CreditCardIcon,
-  Flag01Icon,
-  Notification01Icon,
-  Note01Icon,
-  Megaphone01Icon,
-  StarIcon,
-  SparklesIcon,
-  ArrowRight01Icon
-} from '@hugeicons/react';
+import { clearAdminSession } from '../../api/auth';
+import { Logout01Icon, ArrowRight01Icon } from '@hugeicons/react';
 import { clsx } from 'clsx';
-
-const NAV_SECTIONS = [
-  {
-    title: 'Core',
-    items: [
-      { path: '/',         label: 'Dashboard',   icon: DashboardSquare01Icon },
-      { path: '/listings', label: 'Listings',     icon: Building04Icon },
-      { path: '/verification', label: 'Verification', icon: SecurityCheckIcon },
-    ],
-  },
-  {
-    title: 'People',
-    items: [
-      { path: '/users',         label: 'Users',        icon: UserMultipleIcon },
-      { path: '/agents',        label: 'Agents',        icon: UserCheck01Icon },
-      { path: '/agent-reviews', label: 'Reviews',       icon: StarIcon },
-      { path: '/companies',     label: 'Companies',     icon: Briefcase01Icon },
-    ],
-  },
-  {
-    title: 'Operations',
-    items: [
-      { path: '/bookings',   label: 'Bookings',    icon: Calendar01Icon },
-      { path: '/payments',   label: 'Payments',    icon: CreditCardIcon },
-      { path: '/upgrade-requests', label: 'Feature Upgrades', icon: SparklesIcon },
-      { path: '/reports',    label: 'Reports',     icon: Flag01Icon },
-      { path: '/waitlist',   label: 'Waitlist',    icon: ClipboardIcon },
-    ],
-  },
-  {
-    title: 'Growth',
-    items: [
-      { path: '/analytics',      label: 'Analytics',   icon: Analytics01Icon },
-      { path: '/tiers',          label: 'Tiers',        icon: Analytics01Icon },
-      { path: '/notifications',  label: 'Notifications',icon: Notification01Icon },
-      { path: '/ads',            label: 'Ads',          icon: Megaphone01Icon },
-      { path: '/audit-logs',     label: 'Audit Logs',   icon: Note01Icon },
-    ],
-  },
-];
-
+import { can } from '../../lib/rbac';
+import { NAV_TABLE } from '../../navigation/routeTable';
+import { deriveSidebar, isActivePath } from '../../navigation/access';
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const location = useLocation();
+  // Items the admin can't access are hidden (the route guard covers direct navigation).
+  const { sections, footer } = deriveSidebar(NAV_TABLE, can);
+  const visiblePaths = new Set([...sections.flatMap(sct => sct.items), ...footer].map(e => e.path));
+  const showVerifications = visiblePaths.has('/verification');
+  const showListings = visiblePaths.has('/listings');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [pendingVerifications, setPendingVerifications] = useState(0);
   const [pendingListings, setPendingListings] = useState(0);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    removeAdminToken();
-    localStorage.removeItem('ilesure_admin_auth');
+    clearAdminSession();
     window.location.href = '/login';
   };
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
+        // Only ask for badge counts the admin is allowed to read.
+        const none = Promise.resolve(null);
         const [verificationsRes, listingsRes] = await Promise.all([
-          adminApi.verifications.list('?status=pending'),
-          adminApi.listings.list('?status=pending'),
+          showVerifications ? adminApi.verifications.list('?status=pending') : none,
+          showListings ? adminApi.listings.list('?status=pending') : none,
         ]);
-        if (verificationsRes.success) {
+        if (verificationsRes?.success) {
           const total = verificationsRes.data?.pagination?.totalItems
             || (verificationsRes.data?.verifications || verificationsRes.verifications || []).length;
           setPendingVerifications(total);
         }
-        if (listingsRes.success) {
+        if (listingsRes?.success) {
           const total = listingsRes.data?.pagination?.totalItems
             || (listingsRes.data?.listings || listingsRes.listings || []).length;
           setPendingListings(total);
@@ -101,12 +49,12 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       }
     };
     fetchCounts();
-  }, []);
+  }, [showVerifications, showListings]);
 
-  const getBadge = (path: string, label: string) => {
-    if (label === 'Verification' && pendingVerifications > 0)
+  const getBadge = (path: string) => {
+    if (path === '/verification' && pendingVerifications > 0)
       return <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-mustard-light text-burnt-brown-dark min-w-[18px] text-center leading-none">{pendingVerifications}</span>;
-    if (label === 'Listings' && pendingListings > 0)
+    if (path === '/listings' && pendingListings > 0)
       return <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white min-w-[18px] text-center leading-none">{pendingListings}</span>;
     return null;
   };
@@ -138,14 +86,14 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
         {/* ── Navigation ────────────────────────────────────── */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
-          {NAV_SECTIONS.map((section) => (
+          {sections.map((section) => (
             <div key={section.title}>
               <div className="text-[10px] font-bold uppercase tracking-widest px-3 mb-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
                 {section.title}
               </div>
               <div className="space-y-0.5">
                 {section.items.map(({ path, label, icon: Icon }) => {
-                  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+                  const isActive = isActivePath(path, location.pathname);
                   return (
                     <NavLink
                       key={path}
@@ -163,7 +111,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                         isActive ? 'text-mustard-light' : 'text-white/45 group-hover:text-white/70',
                       )} />
                       <span className="truncate flex-1">{label}</span>
-                      {getBadge(path, label)}
+                      {getBadge(path)}
                       {isActive && <ArrowRight01Icon className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />}
                     </NavLink>
                   );
@@ -175,14 +123,17 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
         {/* ── Bottom Section ─────────────────────────────────── */}
         <div className="px-3 pb-4 border-t border-white/8 pt-3 space-y-1">
-          <NavLink
-            to="/settings"
-            onClick={onClose}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white/90 hover:bg-white/7 transition-all duration-150 group"
-          >
-            <Settings01Icon className="w-4.5 h-4.5 group-hover:rotate-45 transition-transform duration-300 text-white/40 group-hover:text-white/70" />
-            <span>Settings</span>
-          </NavLink>
+          {footer.map(({ path, label, icon: Icon }) => (
+            <NavLink
+              key={path}
+              to={path}
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white/90 hover:bg-white/7 transition-all duration-150 group"
+            >
+              <Icon className="w-4.5 h-4.5 group-hover:rotate-45 transition-transform duration-300 text-white/40 group-hover:text-white/70" />
+              <span>{label}</span>
+            </NavLink>
+          ))}
 
           {/* Admin Profile chip */}
           <div className="flex items-center gap-3 px-3 py-3 mt-1 rounded-xl bg-white/7 border border-white/8">

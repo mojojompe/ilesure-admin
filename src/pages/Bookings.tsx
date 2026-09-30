@@ -17,13 +17,17 @@ import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
+import { errorMessage } from '../api/errors';
+import { BOOKING_STATUSES, type BookingStatus } from '../contracts/generated';
 
-type BookingStatus = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
+// Booking statuses come from the contract. 'refunded' was a tab here but is a payment
+// status, never a booking status, so that tab could only ever be empty.
+type BookingFilter = 'all' | BookingStatus;
 
 export function Bookings() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<BookingStatus>('all');
+  const [filter, setFilter] = useState<BookingFilter>('all');
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -40,7 +44,7 @@ export function Bookings() {
         setBookings(Array.isArray(res.data) ? res.data : res.data.bookings ?? []);
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to fetch bookings');
+      toast.error(errorMessage(error, 'Failed to fetch bookings'));
       setBookings([]);
     } finally {
       setLoading(false);
@@ -57,7 +61,7 @@ export function Bookings() {
       await fetchBookings();
       setDetail(null);
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to update booking');
+      toast.error(errorMessage(error, 'Failed to update booking'));
     } finally {
       setUpdating(false);
     }
@@ -87,7 +91,7 @@ export function Bookings() {
     `${b.listingTitle} ${b.tenantName} ${b.agentName}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const tabs: BookingStatus[] = ['all', 'pending', 'confirmed', 'completed', 'cancelled', 'refunded'];
+  const tabs: BookingFilter[] = ['all', ...BOOKING_STATUSES];
 
   const summary = [
     { label: 'Total', value: bookings.length },

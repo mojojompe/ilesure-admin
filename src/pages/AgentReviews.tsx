@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { adminApi } from '../api/admin';
 import toast from 'react-hot-toast';
+import { errorMessage } from '../api/errors';
 
 export function AgentReviews() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -24,12 +25,12 @@ export function AgentReviews() {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const res = await adminApi.agents?.getReviews?.() ?? { success: false, data: null };
+      const res = await adminApi.agents.getReviews();
       if (res.success && res.data) {
         setReviews(res.data);
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to fetch reviews');
+      toast.error(errorMessage(error, 'Failed to fetch reviews'));
       setReviews([]);
     } finally {
       setLoading(false);
@@ -40,11 +41,11 @@ export function AgentReviews() {
     setUpdating(true);
     const newStatus = currentStatus === 'active' ? 'hidden' : 'active';
     try {
-      await adminApi.agents?.updateReviewStatus?.(id, newStatus);
+      await adminApi.agents.updateReviewStatus(id, newStatus);
       toast.success(`Review is now ${newStatus}`);
       await fetchReviews();
     } catch (error: any) {
-      toast.error(error?.message || `Failed to update review status`);
+      toast.error(errorMessage(error, `Failed to update review status`));
     } finally {
       setUpdating(false);
     }

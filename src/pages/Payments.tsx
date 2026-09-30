@@ -17,6 +17,7 @@ import { Modal as AntModal } from 'antd';
 import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
+import { errorMessage } from '../api/errors';
 
 type PayFilter = 'all' | 'pending' | 'processed' | 'refunded' | 'failed';
 
@@ -81,7 +82,7 @@ function PayoutsSection() {
         setFlaggedCount(res.data?.flaggedForReview ?? 0);
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to fetch payments');
+      toast.error(errorMessage(error, 'Failed to fetch payments'));
       setPayments([]);
     } finally {
       setLoading(false);
@@ -98,7 +99,7 @@ function PayoutsSection() {
       await fetchPayments();
       setDetail(null);
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to mark payment as processed');
+      toast.error(errorMessage(error, 'Failed to mark payment as processed'));
     } finally {
       setUpdating(false);
     }
@@ -118,7 +119,7 @@ function PayoutsSection() {
       await fetchPayments();
       setDetail(null);
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to refund payment');
+      toast.error(errorMessage(error, 'Failed to refund payment'));
     } finally {
       setUpdating(false);
     }
@@ -404,7 +405,7 @@ function PaystackSection() {
         setMeta({});
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to fetch Paystack transactions');
+      toast.error(errorMessage(error, 'Failed to fetch Paystack transactions'));
       setTxns([]);
     } finally {
       setLoading(false);
@@ -417,7 +418,7 @@ function PaystackSection() {
       const res = await adminApi.audit.paystackTransactionDetail(String(id));
       setDetail(res.data ?? res);
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to view Paystack transaction details');
+      toast.error(errorMessage(error, 'Failed to view Paystack transaction details'));
       setDetail(null);
     } finally {
       setDetailLoading(false);

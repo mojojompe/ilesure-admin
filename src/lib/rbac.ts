@@ -1,4 +1,4 @@
-import { getAdminRole, getAdminPermissions } from '../api/auth';
+import { getAdminRole, getAdminPermissions, hasKnownAdminPermissions } from '../api/auth';
 
 // SECURITY-FIX (AD-H3): Lightweight client-side capability checks so destructive
 // actions are hidden/disabled for roles that lack the permission.
@@ -9,20 +9,32 @@ import { getAdminRole, getAdminPermissions } from '../api/auth';
 // tempted to fire) an action the server will reject. It is NOT a security boundary
 // and must never be treated as one, anyone can edit client state.
 //
-// DECISION: Capability resolution is deliberately conservative but non-breaking,
-// because we cannot know the exact permission strings the backend mints:
-//   - role 'super_admin'                 -> allowed (full access)
-//   - permissions[] contains the cap,
-//     or a '*' / 'all' wildcard           -> allowed
-//   - known limited role (support|moderator)
-//     with no matching permission         -> denied (least-privilege by default)
-//   - token carries NEITHER a recognised
-//     role NOR any permissions            -> allowed (legacy/opaque token: we can't
-//                                            determine capabilities client-side and
-//                                            the backend enforces authoritatively, so
-//                                            we avoid breaking the console for a valid
-//                                            admin)
+// DECISION: Capabilities use the backend contract's vocabulary (contracts/generated.ts).
+// Every admin request is gated by `read:<resource>` (GET) or `write:<resource>` (anything
+// else). Pages are gated directly on `read:<resource>`; action names such as
+// 'users.suspend' resolve through ADMIN_ACTION_PERMISSIONS to the permission that really
+// gates the request ('write:users'). Before this, action names were compared verbatim
+// against the permission list, so a limited admin holding 'write:users' never matched
+// 'users.suspend' and lost every action button.
+//
+// Resolution:
+//   - adminHasPermission(role, permissions, required)  -> allowed (super_admin bypasses)
+//   - session without a saved permission list
+//     (signed in before login stored it):
+//       page capability                                 -> allowed (show all; backend enforces)
+//       action, known limited role                      -> denied (least privilege)
+//       action, no recognised role                      -> allowed (legacy/opaque token)
+//   - otherwise                                         -> denied
 
+import {
+  ADMIN_ACTION_PERMISSIONS,
+  ADMIN_ROLES,
+  adminHasPermission,
+  type AdminAction,
+  type AdminPermission,
+} from '../contracts/generated';
+
+/** Action names; each resolves to a backend permission via ADMIN_ACTION_PERMISSIONS. */
 export const CAP = {
   USERS_SUSPEND: 'users.suspend',
   COMPANIES_APPROVE: 'companies.approve',
@@ -36,27 +48,72 @@ export const CAP = {
   TIERS_MANAGE: 'tiers.manage',
   ADS_MANAGE: 'ads.manage',
   NOTIFICATIONS_BROADCAST: 'notifications.broadcast',
-} as const;
+  EMAILS_SEND: 'emails.send',
+  SETTINGS_MANAGE: 'settings.manage',
+  WAITLIST_MANAGE: 'waitlist.manage',
+} as const satisfies Record<string, AdminAction>;
 
-export type Capability = (typeof CAP)[keyof typeof CAP];
+/**
+ * Page access: every GET on /admin/v1/<resource> requires `read:<resource>`, so an account
+ * without it gets a 403 for the page's data. Used by the nav table (src/navigation) to gate
+ * sidebar items and routes.
+ */
+export const PAGE_CAP = {
+  LISTINGS: 'read:listings',
+  VERIFICATIONS: 'read:verifications',
+  USERS: 'read:users',
+  AGENTS: 'read:agents',
+  COMPANIES: 'read:companies',
+  BOOKINGS: 'read:bookings',
+  PAYMENTS: 'read:payments',
+  REPORTS: 'read:reports',
+  WAITLIST: 'read:waitlist',
+  ANALYTICS: 'read:analytics',
+  TIERS: 'read:tiers',
+  AUDIT: 'read:audit',
+  ADS: 'read:ads',
+  NOTIFICATIONS_SEND: 'write:notifications',
+  EMAILS_READ: 'read:emails',
+  EMAILS_SEND: 'write:emails',
+} as const satisfies Record<string, AdminPermission>;
 
-const LIMITED_ROLES = ['support', 'moderator'];
+export type PageCapability = (typeof PAGE_CAP)[keyof typeof PAGE_CAP];
+/** An action name from the contract, or a backend permission string. */
+export type Capability = AdminAction | AdminPermission;
 
-export function can(capability: Capability | string): boolean {
-  const role = getAdminRole();
-  if (role === 'super_admin') return true;
+const isAction = (capability: string): capability is AdminAction =>
+  Object.prototype.hasOwnProperty.call(ADMIN_ACTION_PERMISSIONS, capability);
 
-  const perms = getAdminPermissions();
-  if (perms.includes('*') || perms.includes('all') || perms.includes(capability)) {
-    return true;
-  }
+/** The backend permission that gates a capability. */
+export function requiredPermission(capability: Capability): AdminPermission {
+  return isAction(capability) ? ADMIN_ACTION_PERMISSIONS[capability] : capability;
+}
 
-  // Explicitly limited role without a matching permission -> deny (least privilege).
-  if (role && LIMITED_ROLES.includes(role)) return false;
+export interface AdminSession {
+  role: string | null;
+  permissions: readonly string[];
+  /** False for a session signed in before the login response's permissions were saved. */
+  permissionsKnown: boolean;
+}
 
-  // Legacy/opaque token that carries neither a recognised role nor any permissions:
-  // allow, since the backend remains the authoritative enforcer (see DECISION above).
-  if (!role && perms.length === 0) return true;
+const LIMITED_ROLES: readonly string[] = ADMIN_ROLES.filter((r) => r !== 'super_admin');
 
-  return false;
+/** Pure resolution against an explicit session (see the table above). */
+export function canWith(session: AdminSession, capability: Capability): boolean {
+  if (adminHasPermission(session, requiredPermission(capability))) return true;
+  if (session.permissionsKnown) return false;
+  if (!isAction(capability)) return true;
+  return !(session.role && LIMITED_ROLES.includes(session.role));
+}
+
+export function currentAdminSession(): AdminSession {
+  return {
+    role: getAdminRole(),
+    permissions: getAdminPermissions(),
+    permissionsKnown: hasKnownAdminPermissions(),
+  };
+}
+
+export function can(capability: Capability): boolean {
+  return canWith(currentAdminSession(), capability);
 }

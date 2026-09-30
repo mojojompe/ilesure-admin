@@ -13,6 +13,8 @@ import { Modal } from '../../components/ui/Modal';
 import { clsx } from 'clsx';
 import { adminApi } from '../../api/admin';
 import { can, CAP } from '../../lib/rbac';
+import { errorMessage } from '../../api/errors';
+import type { UserRole } from '../../contracts/generated';
 
 type TargetMode = 'all' | 'roles' | 'users';
 
@@ -25,7 +27,7 @@ const NOTIFICATION_TYPES = [
   { value: 'match', label: 'Match' },
 ];
 
-const ROLE_OPTIONS = [
+const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: 'student', label: 'Students' },
   { value: 'agent', label: 'Agents' },
   { value: 'landlord', label: 'Landlords' },
@@ -89,7 +91,7 @@ export function PushTab() {
         payload.userIds = selectedUsers.map(u => u._id);
       }
       const res = await adminApi.notifications.sendPush(payload);
-      setResult({ success: res.success, message: res.message || (res.success ? 'Sent successfully' : 'Failed to send') });
+      setResult({ success: res.success, message: res.success ? res.message || 'Sent successfully' : errorMessage(res, 'Failed to send') });
       if (res.success) {
         setTitle('');
         setBody('');
@@ -99,7 +101,7 @@ export function PushTab() {
         setSelectedUsers([]);
       }
     } catch (e: any) {
-      setResult({ success: false, message: e?.message || 'Failed to send notification' });
+      setResult({ success: false, message: errorMessage(e, 'Failed to send notification') });
     } finally {
       setSending(false);
     }

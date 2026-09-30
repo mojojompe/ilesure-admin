@@ -12,6 +12,7 @@ import {
 } from '@hugeicons/react';
 import { safeUrl } from '../lib/safeUrl';
 import { can, CAP } from '../lib/rbac';
+import { errorMessage } from '../api/errors';
 import toast from 'react-hot-toast';
 
 export function Ads() {
@@ -32,7 +33,7 @@ export function Ads() {
       }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to load ads');
+      toast.error(errorMessage(err, 'Failed to load ads'));
     } finally {
       setLoading(false);
     }
@@ -67,11 +68,11 @@ export function Ads() {
         setNewAd({ imageUrl: '', link: '' });
         fetchAds();
       } else {
-        toast.error(res.error?.message || 'Failed to create ad');
+        toast.error(errorMessage(res, 'Failed to create ad'));
       }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to create ad');
+      toast.error(errorMessage(err, 'Failed to create ad'));
     } finally {
       setIsSubmitting(false);
     }
@@ -89,7 +90,7 @@ export function Ads() {
       }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to delete ad');
+      toast.error(errorMessage(err, 'Failed to delete ad'));
     }
   };
 
@@ -104,7 +105,7 @@ export function Ads() {
       }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to update ad status');
+      toast.error(errorMessage(err, 'Failed to update ad status'));
     }
   };
 

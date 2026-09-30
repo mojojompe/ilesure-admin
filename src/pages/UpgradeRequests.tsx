@@ -23,6 +23,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 import upgradeRequestsApi, { RankedStack, RankedStacksResponse } from '../api/upgradeRequests';
+import { errorMessage } from '../api/errors';
 
 export function UpgradeRequests() {
   const [data, setData] = useState<RankedStacksResponse | null>(null);
@@ -49,7 +50,7 @@ export function UpgradeRequests() {
       setEditingNotes(initialNotes);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || 'Failed to load feature requests');
+      toast.error(errorMessage(err, 'Failed to load feature requests'));
     } finally {
       setLoading(false);
     }
@@ -66,7 +67,7 @@ export function UpgradeRequests() {
       toast.success('Stack status updated successfully');
       fetchStacks();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update status');
+      toast.error(errorMessage(err, 'Failed to update status'));
     } finally {
       setUpdatingStackId(null);
     }
@@ -80,7 +81,7 @@ export function UpgradeRequests() {
       toast.success('Admin notes saved for stack');
       fetchStacks();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to save notes');
+      toast.error(errorMessage(err, 'Failed to save notes'));
     } finally {
       setUpdatingStackId(null);
     }

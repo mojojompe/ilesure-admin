@@ -20,6 +20,7 @@ import { adminApi } from '../api/admin';
 import { safeUrl } from '../lib/safeUrl';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
+import { errorMessage } from '../api/errors';
 
 const docLabels: Record<string, string> = {
   nin: 'Govt. ID (NIN)', bvn: 'BVN', ownershipCert: 'Ownership Certificate',
@@ -153,7 +154,7 @@ export function VerificationQueue() {
       toast.success('Checklist saved successfully');
     } catch (error: any) {
       console.error('Failed to save checklist:', error);
-      toast.error(error?.message || 'Failed to save checklist');
+      toast.error(errorMessage(error, 'Failed to save checklist'));
     }
   };
 
@@ -164,7 +165,7 @@ export function VerificationQueue() {
       toast.success('Notes saved successfully');
     } catch (error: any) {
       console.error('Failed to save notes:', error);
-      toast.error(error?.message || 'Failed to save notes');
+      toast.error(errorMessage(error, 'Failed to save notes'));
     }
   };
 
@@ -195,7 +196,7 @@ export function VerificationQueue() {
       setActionReason('');
     } catch (error: any) {
       console.error('Failed to perform verification action:', error);
-      toast.error(error?.message || 'Failed to perform action');
+      toast.error(errorMessage(error, 'Failed to perform action'));
     }
   };
 

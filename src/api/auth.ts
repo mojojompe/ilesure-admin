@@ -14,6 +14,7 @@ export interface AdminLoginResponse {
       email: string;
       name: string;
       role: string;
+      permissions?: string[];
     };
   };
   error?: {
@@ -36,6 +37,10 @@ export async function adminLogin(data: AdminLoginData): Promise<AdminLoginRespon
 
 const TOKEN_KEY = 'ilesure_admin_token';
 const AUTH_FLAG_KEY = 'ilesure_admin_auth';
+// The admin JWT carries only { id, role }; the login response carries the account's
+// `permissions` (the backend's read:<resource>/write:<resource> vocabulary). Kept for
+// client-side UI gating only; the backend stays the authoritative enforcer.
+const PERMISSIONS_KEY = 'ilesure_admin_permissions';
 
 // SECURITY-FIX TODO (AD-H1): The admin JWT is stored in localStorage, which is
 // readable by any JavaScript on the page and therefore stealable via XSS or a
@@ -106,9 +111,29 @@ export function getAdminRole(): string | null {
   return decodeAdminToken()?.role ?? null;
 }
 
+export function setAdminPermissions(perms: unknown): void {
+  if (Array.isArray(perms)) localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(perms));
+}
+
+function storedPermissions(): string[] | null {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(PERMISSIONS_KEY) ?? 'null');
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Token claim if present, else the list saved from the login response, else []. */
 export function getAdminPermissions(): string[] {
   const perms = decodeAdminToken()?.permissions;
-  return Array.isArray(perms) ? perms : [];
+  if (Array.isArray(perms)) return perms;
+  return storedPermissions() ?? [];
+}
+
+/** False for a session that predates saving the login response's permissions. */
+export function hasKnownAdminPermissions(): boolean {
+  return Array.isArray(decodeAdminToken()?.permissions) || storedPermissions() !== null;
 }
 
 // SECURITY-FIX (AD-C2 / AD-H2): Clear the WHOLE admin session, the JWT and the UI
@@ -117,4 +142,5 @@ export function getAdminPermissions(): string[] {
 export function clearAdminSession(): void {
   removeAdminToken();
   localStorage.removeItem(AUTH_FLAG_KEY);
+  localStorage.removeItem(PERMISSIONS_KEY);
 }

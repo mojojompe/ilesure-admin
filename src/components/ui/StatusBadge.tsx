@@ -10,16 +10,15 @@ import {
   CrownIcon,
   MinusSignIcon
 } from '@hugeicons/react';
+import type {
+  AccountStatus, BookingStatus, CompanyStatus, ListingStatus, TierId, VerificationStatus,
+} from '../../contracts/generated';
 
+// Every contract status/tier value must have a badge (the Record below fails to compile
+// when the backend adds one); the admin-only extras follow.
 type StatusType =
-  | 'available' | 'active'
-  | 'pending_approval' | 'pending'
-  | 'needs_roommate'
-  | 'fully_booked'
-  | 'rejected'
-  | 'verified'
-  | 'more_info'
-  | 'suspended'
+  | ListingStatus | AccountStatus | VerificationStatus | CompanyStatus | BookingStatus | TierId
+  | 'available'
   | 'notified'
   | 'matched'
   | 'waiting'

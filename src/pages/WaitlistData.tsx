@@ -16,6 +16,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { clsx } from 'clsx';
 import { adminApi, adminFetchRaw } from '../api/admin';
 import toast from 'react-hot-toast';
+import { errorMessage } from '../api/errors';
 
 // SECURITY-FIX (AD-M2): Build a proper CSV string from an array of row objects.
 // Escapes quotes/commas/newlines per RFC 4180 so values containing PII (names,
@@ -137,7 +138,7 @@ export function WaitlistData() {
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
       console.error('Failed to export waitlist:', error);
-      toast.error(error?.message || 'Failed to export waitlist data');
+      toast.error(errorMessage(error, 'Failed to export waitlist data'));
     }
   };
 

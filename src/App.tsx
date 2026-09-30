@@ -1,27 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AdminLayout } from './layouts/AdminLayout';
-import { Dashboard } from './pages/Dashboard';
-import { Listings } from './pages/Listings';
-import { VerificationQueue } from './pages/VerificationQueue';
-import { Users } from './pages/Users';
-import { Companies } from './pages/Companies';
-import { Agents } from './pages/Agents';
-import { AgentReviews } from './pages/AgentReviews';
-import { Bookings } from './pages/Bookings';
-import { Payments } from './pages/Payments';
-import { Reports } from './pages/Reports';
-import { WaitlistData } from './pages/WaitlistData';
-import { Analytics } from './pages/Analytics';
-import Tiers from './pages/Tiers';
 import { Login } from './pages/Login';
-import { Settings } from './pages/Settings';
-import { AuditLogs } from './pages/AuditLogs';
-import { PushNotifications } from './pages/PushNotifications';
-import { Ads } from './pages/Ads';
-import { UpgradeRequests } from './pages/UpgradeRequests';
 import { NotFound } from './pages/NotFound';
 import { isAdminAuthenticated } from './api/auth';
+import { NAV_TABLE } from './navigation/routeTable';
+import { RouteGuard } from './navigation/RouteGuard';
 
 // Auth Guard Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -46,26 +30,13 @@ export default function App() {
         {/* Public Route */}
         <Route path="/login" element={<Login />} />
 
-        {/* Protected Dashboard Layout */}
+        {/* Protected Dashboard Layout: every page comes from NAV_TABLE. */}
         <Route element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-          <Route index element={<Dashboard />} />
-          <Route path="listings" element={<Listings />} />
-          <Route path="verification" element={<VerificationQueue />} />
-          <Route path="users" element={<Users />} />
-          <Route path="agents" element={<Agents />} />
-          <Route path="agent-reviews" element={<AgentReviews />} />
-          <Route path="companies" element={<Companies />} />
-          <Route path="bookings" element={<Bookings />} />
-          <Route path="payments" element={<Payments />} />
-          <Route path="upgrade-requests" element={<UpgradeRequests />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="waitlist" element={<WaitlistData />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="tiers" element={<Tiers />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="audit-logs" element={<AuditLogs />} />
-          <Route path="notifications" element={<PushNotifications />} />
-          <Route path="ads" element={<Ads />} />
+          {NAV_TABLE.map(entry =>
+            entry.path === '/'
+              ? <Route key={entry.path} index element={<RouteGuard entry={entry} />} />
+              : <Route key={entry.path} path={entry.path.slice(1)} element={<RouteGuard entry={entry} />} />,
+          )}
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

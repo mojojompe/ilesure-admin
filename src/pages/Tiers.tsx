@@ -23,6 +23,7 @@ import axios from 'axios';
 import API_BASE_URL from '../lib/config';
 import { getAdminToken, clearAdminSession } from '../api/auth';
 import { can, CAP } from '../lib/rbac';
+import { errorMessage, toAdminApiError } from '../api/errors';
 
 const API_URL = `${API_BASE_URL}/admin/v1`;
 
@@ -52,6 +53,10 @@ tiersApi.interceptors.response.use(
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
+    }
+    // Same error shape as adminFetch: { code, message, details, status } from the envelope.
+    if (typeof status === 'number') {
+      return Promise.reject(toAdminApiError(status, error.response?.data, `Request failed (${status})`));
     }
     return Promise.reject(error);
   },
@@ -139,7 +144,7 @@ const Tiers: React.FC = () => {
       form.resetFields();
       fetchTiers();
     } catch (error: any) {
-      message.error(error.response?.data?.error?.message || 'Failed to save tier');
+      message.error(error.response?.data?.errorMessage(error, 'Failed to save tier'));
     }
   };
 
@@ -150,7 +155,7 @@ const Tiers: React.FC = () => {
       message.success('Tier deleted successfully');
       fetchTiers();
     } catch (error: any) {
-      message.error(error.response?.data?.error?.message || 'Failed to delete tier');
+      message.error(error.response?.data?.errorMessage(error, 'Failed to delete tier'));
     }
   };
 
@@ -161,7 +166,7 @@ const Tiers: React.FC = () => {
       message.success('Tier status updated');
       fetchTiers();
     } catch (error: any) {
-      message.error(error.response?.data?.error?.message || 'Failed to update status');
+      message.error(error.response?.data?.errorMessage(error, 'Failed to update status'));
     }
   };
 

@@ -14,6 +14,7 @@ import { Modal } from '../components/ui/Modal';
 import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
+import { errorMessage } from '../api/errors';
 
 type ReportFilter = 'all' | 'pending' | 'resolved' | 'actioned';
 
@@ -46,7 +47,7 @@ export function Reports() {
         setReports(Array.isArray(res.data) ? res.data : res.data.reports ?? []);
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to fetch reports');
+      toast.error(errorMessage(error, 'Failed to fetch reports'));
       setReports([]);
     } finally {
       setLoading(false);
@@ -61,7 +62,7 @@ export function Reports() {
       await fetchReports();
       setDetail(null);
     } catch (error: any) {
-      toast.error(error?.message || `Failed to ${action} report`);
+      toast.error(errorMessage(error, `Failed to ${action} report`));
     } finally {
       setUpdating(false);
     }

@@ -8,7 +8,8 @@ import {
   SecurityCheckIcon
 } from '@hugeicons/react';
 import { Button } from '../components/ui/Button';
-import { adminLogin, setAdminToken } from '../api/auth';
+import { adminLogin, setAdminToken, setAdminPermissions } from '../api/auth';
+import { errorMessage } from '../api/errors';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -26,10 +27,11 @@ export function Login() {
       const response = await adminLogin({ email, password });
       if (response.success && response.data?.adminToken) {
         setAdminToken(response.data.adminToken);
+        setAdminPermissions(response.data.admin?.permissions);
         localStorage.setItem('ilesure_admin_auth', 'true');
         navigate('/', { replace: true });
       } else {
-        setError(response.error?.message || 'Invalid admin credentials.');
+        setError(errorMessage(response, 'Invalid admin credentials.'));
         setLoading(false);
       }
     } catch {

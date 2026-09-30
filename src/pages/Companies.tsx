@@ -1,78 +1,53 @@
-import { Fragment, useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Building04Icon,
   UserMultipleIcon,
   Home01Icon,
   ArrowDown01Icon,
   ArrowUp01Icon,
-  ViewIcon
+  ViewIcon,
+  UserIcon,
+  UserCheck01Icon
 } from '@hugeicons/react';
+import { clsx } from 'clsx';
 import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
-import { Company } from '../types';
-import { clsx } from 'clsx';
-import { adminApi } from '../api/admin';
+import { adminApi, errorMessage } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
+import {
+  useAccountModeration, AccountTable, StatCards, SearchField,
+  type Column, type CompanyAccount,
+} from '../features/moderation';
+
+// Server totals. "Total Agents" used to be summed over the first page of companies
+// only, so it is replaced by the suspended count.
+const COUNTS = {
+  all: {},
+  verified: { status: 'verified' },
+  pending: { status: 'pending' },
+  suspended: { status: 'suspended' },
+};
 
 export function Companies() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [companyAgents, setCompanyAgents] = useState<Record<string, any[]>>({});
   const [loadingAgents, setLoadingAgents] = useState<Record<string, boolean>>({});
-  const [detailCompany, setDetailCompany] = useState<any | null>(null);
-  const [companies, setCompanies] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [detailCompany, setDetailCompany] = useState<CompanyAccount | null>(null);
+  const [statusConfirm, setStatusConfirm] = useState<CompanyAccount | null>(null);
 
   const canApprove = can(CAP.COMPANIES_APPROVE);
   const canSuspend = can(CAP.COMPANIES_SUSPEND);
+  const list = useAccountModeration('company', { counts: COUNTS });
+  const { counts } = list;
+  // Suspended companies can be reinstated (PUT /companies/:id/unsuspend).
+  const canToggle = (company: CompanyAccount) =>
+    canSuspend && (company.status !== 'suspended' || list.canReinstate);
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
-
-  const fetchCompanies = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await adminApi.companies.list();
-      const companiesData = response.data?.companies || response.data || [];
-
-      if (response.success && companiesData.length > 0) {
-        const formatted = companiesData.map((c: any) => ({
-          id: c._id || c.id,
-          name: c.name,
-          tradingName: c.tradingName,
-          cacNumber: c.cacNumber,
-          tin: c.tin,
-          status: c.status,
-          tier: c.tier,
-          director: c.director,
-          email: c.email,
-          phone: c.phone,
-          officeAddress: c.officeAddress,
-          joinDate: c.joinDate || c.createdAt ? new Date(c.joinDate || c.createdAt).toISOString().split('T')[0] : '',
-          agentsCount: c.agentsCount ?? 0,
-          listingsCount: c.listingsCount ?? 0,
-          bankName: c.bankName,
-          accountName: c.accountName,
-          accountNumber: c.accountNumber,
-          subaccountCode: c.subaccountCode,
-        }));
-        setCompanies(formatted);
-      }
-    } catch (error: any) {
-      console.error('Failed to fetch companies:', error);
-      toast.error(error?.message || 'Failed to fetch companies');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCompanyAgents = async (companyId: string) => {
-    if (companyAgents[companyId]) return; // already fetched
+  const fetchCompanyAgents = async (companyId: string, force = false) => {
+    if (companyAgents[companyId] && !force) return; // already fetched
 
     setLoadingAgents(prev => ({ ...prev, [companyId]: true }));
     try {
@@ -82,7 +57,7 @@ export function Companies() {
       }
     } catch (error: any) {
       console.error('Failed to fetch company agents:', error);
-      toast.error(error?.message || 'Failed to fetch agents');
+      toast.error(errorMessage(error, 'Failed to fetch agents'));
     } finally {
       setLoadingAgents(prev => ({ ...prev, [companyId]: false }));
     }
@@ -97,207 +72,181 @@ export function Companies() {
     }
   };
 
-  const handleApprove = async (company: any) => {
+  const handleApprove = async (company: CompanyAccount) => {
     try {
       await adminApi.companies.approve(company.id);
       toast.success('Company approved successfully');
-      await fetchCompanies();
+      await list.refresh();
       setDetailCompany(null);
     } catch (error: any) {
       console.error('Failed to approve company:', error);
-      toast.error(error?.message || 'Failed to approve company');
+      toast.error(errorMessage(error, 'Failed to approve company'));
     }
   };
 
-  const handleSuspend = async (company: any) => {
+  const handleStatusChange = async (company: CompanyAccount) => {
+    const ok = await list.changeStatus(company, company.status === 'suspended' ? 'reinstate' : 'suspend');
+    if (ok) setStatusConfirm(null);
+  };
+
+  const confirmStatusChange = (company: CompanyAccount) => {
+    setStatusConfirm(company);
+    setDetailCompany(null);
+  };
+
+  const handleCreate = async () => {
+    const name = prompt('Enter new company name:');
+    if (!name) return;
     try {
-      await adminApi.companies.suspend(company.id);
-      toast.success('Company suspended successfully');
-      await fetchCompanies();
-      setDetailCompany(null);
+      await adminApi.companies.create({ name });
+      toast.success('Company created successfully');
+      await list.refresh();
     } catch (error: any) {
-      console.error('Failed to suspend company:', error);
-      toast.error(error?.message || 'Failed to suspend company');
+      toast.error(errorMessage(error, 'Failed to create company'));
     }
+  };
+
+  const handleInvite = async (company: CompanyAccount) => {
+    const email = prompt(`Enter email to invite agent to ${company.name}:`);
+    if (!email) return;
+    try {
+      await adminApi.companies.inviteAgent(company.id, email);
+      toast.success('Agent invited successfully');
+      fetchCompanyAgents(company.id, true);
+    } catch (error: any) {
+      toast.error(errorMessage(error, 'Failed to invite agent'));
+    }
+  };
+
+  const countCell = (value: number, icon: React.ReactNode, bg: string) => (
+    <div className="flex items-center gap-1.5">
+      <div className={`w-6 h-6 rounded-pill ${bg} flex items-center justify-center`}>{icon}</div>
+      <span className="text-sm font-semibold text-text-primary">{value}</span>
+    </div>
+  );
+
+  const columns: Column<CompanyAccount>[] = [
+    {
+      header: 'Company',
+      cell: company => (
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-clay-sm bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white font-bold text-sm shadow-clay-sm flex-shrink-0">
+            {company.name.charAt(0)}
+          </div>
+          <div>
+            <p className="font-semibold text-text-primary text-sm leading-tight">{company.name}</p>
+            {company.tradingName && <p className="text-[11px] text-text-tertiary">t/a {company.tradingName}</p>}
+          </div>
+        </div>
+      ),
+    },
+    { header: 'CAC Number', cell: company => <span className="text-xs font-mono text-text-secondary bg-clay-border-light px-2 py-1 rounded-clay-sm">{company.cacNumber}</span> },
+    { header: 'Director', cell: company => <span className="text-sm text-text-secondary">{company.director}</span> },
+    { header: 'Tier', cell: company => <StatusBadge status={company.tier as any} /> },
+    { header: 'Agents', cell: company => countCell(company.agentsCount, <UserMultipleIcon className="w-3.5 h-3.5 text-mustard" />, 'bg-mustard/10') },
+    { header: 'Listings', cell: company => countCell(company.listingsCount, <Home01Icon className="w-3.5 h-3.5 text-burnt-brown" />, 'bg-burnt-brown-pale') },
+    { header: 'Status', cell: company => <StatusBadge status={company.status as any} /> },
+    { header: 'Joined', cell: company => <span className="text-xs text-text-tertiary">{company.joinDate}</span> },
+    {
+      header: 'Actions',
+      headerClassName: 'text-right pr-5',
+      className: 'text-right pr-4',
+      cell: company => (
+        <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+          <button onClick={() => setDetailCompany(company)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors" title="View">
+            <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
+          </button>
+          <button onClick={() => handleExpand(company.id)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
+            {expandedId === company.id ? <ArrowUp01Icon className="w-3.5 h-3.5 text-text-secondary" /> : <ArrowDown01Icon className="w-3.5 h-3.5 text-text-secondary" />}
+          </button>
+          {/* SECURITY-FIX (AD-H3): suspend/reinstate hidden without companies.suspend. */}
+          {canToggle(company) && (
+            <button
+              onClick={() => setStatusConfirm(company)}
+              className={clsx(
+                'w-7 h-7 flex items-center justify-center rounded-clay-sm transition-colors',
+                company.status === 'suspended'
+                  ? 'bg-status-success/10 hover:bg-status-success/20 text-status-success'
+                  : 'bg-status-error/10 hover:bg-status-error/20 text-status-error',
+              )}
+              title={company.status === 'suspended' ? 'Reinstate' : 'Suspend'}
+            >
+              {company.status === 'suspended'
+                ? <UserCheck01Icon className="w-3.5 h-3.5" />
+                : <UserIcon className="w-3.5 h-3.5" />}
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  const renderAgents = (company: CompanyAccount) => {
+    if (expandedId !== company.id) return null;
+    const agents = companyAgents[company.id];
+    return (
+      <>
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-xs font-bold text-text-secondary uppercase tracking-wide">Sub-Agents under {company.name}</p>
+          <Button variant="secondary" size="sm" onClick={() => handleInvite(company)}>+ Invite Agent</Button>
+        </div>
+
+        {loadingAgents[company.id] ? (
+          <div className="flex items-center gap-2 py-4">
+            <div className="w-4 h-4 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-text-tertiary">Loading agents...</span>
+          </div>
+        ) : agents && agents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {agents.slice(0, 4).map((agent: any, i: number) => (
+              <div key={agent._id || i} className="bg-white rounded-clay-sm border border-clay-border shadow-clay-sm p-3 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-pill bg-burnt-brown-pale flex items-center justify-center text-burnt-brown font-bold text-xs flex-shrink-0">
+                  {(agent.fullName || agent.email || 'A').charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-text-primary">{agent.fullName || 'Unknown Agent'}</p>
+                  <p className="text-xs text-text-tertiary truncate max-w-[150px]">{agent.email}</p>
+                </div>
+                <StatusBadge status={agent.status || 'verified'} showIcon={false} className="ml-auto text-[10px]" />
+              </div>
+            ))}
+            {agents.length > 4 && (
+              <div className="bg-clay-border-light rounded-clay-sm border border-clay-border p-3 flex items-center justify-center text-xs text-text-tertiary font-medium">
+                +{agents.length - 4} more agents
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-text-tertiary py-2">No agents found for this company.</p>
+        )}
+      </>
+    );
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <StatCards cards={[
+        { label: 'Total Companies', value: counts.all, icon: <Building04Icon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
+        { label: 'Verified', value: counts.verified, icon: <Building04Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
+        { label: 'Pending', value: counts.pending, icon: <Building04Icon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
+        { label: 'Suspended', value: counts.suspended, icon: <Building04Icon className="w-5 h-5 text-status-error" />, bg: 'bg-status-error/10' },
+      ]} />
 
-      {/* ── Summary Row ─────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Companies', value: companies.length, icon: <Building04Icon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale' },
-          { label: 'Verified', value: companies.filter((c: any) => c.status === 'verified').length, icon: <Building04Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10' },
-          { label: 'Pending', value: companies.filter((c: any) => c.status === 'pending').length, icon: <Building04Icon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10' },
-          { label: 'Total Agents', value: companies.reduce((s: number, c: any) => s + (c.agentsCount || 0), 0), icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale' },
-        ].map(s => (
-          <div key={s.label} className="bg-white rounded-clay border border-clay-border shadow-clay p-4 flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-clay-sm flex items-center justify-center shadow-clay-sm flex-shrink-0 ${s.bg}`}>{s.icon}</div>
-            <div>
-              <div className="text-2xl font-bold text-text-primary">{s.value}</div>
-              <div className="text-xs text-text-tertiary">{s.label}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Companies Table ─────────────────────────────── */}
       <ClayCard padding="none">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
+        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm">Registered Companies</h3>
-          <Button variant="primary" size="sm" onClick={async () => {
-            const name = prompt('Enter new company name:');
-            if (name) {
-              try {
-                await adminApi.companies.create({ name });
-                toast.success('Company created successfully');
-                fetchCompanies();
-              } catch (error: any) {
-                toast.error(error?.message || 'Failed to create company');
-              }
-            }
-          }}>+ Add Company</Button>
+          <div className="flex items-center gap-2">
+            <SearchField className="w-56" value={list.search} onChange={list.setSearch} placeholder="Search name or CAC..." />
+            <Button variant="primary" size="sm" onClick={handleCreate}>+ Add Company</Button>
+          </div>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full clay-table">
-            <thead>
-              <tr>
-                <th>Company</th>
-                <th>CAC Number</th>
-                <th>Director</th>
-                <th>Tier</th>
-                <th>Agents</th>
-                <th>Listings</th>
-                <th>Status</th>
-                <th>Joined</th>
-                <th className="text-right pr-5">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-12">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
-                      <span className="text-text-tertiary">Loading...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-12">
-                    <p className="text-status-error">{error}</p>
-                  </td>
-                </tr>
-              ) : companies.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-12">
-                    <p className="text-text-tertiary">No companies found</p>
-                  </td>
-                </tr>
-              ) : companies.map(company => (
-                /* BUGFIX (QA-ADM-042): keyed fragment, the key on the inner <tr> is not
-                   the key React needs; the fragment is the child of the mapped array. */
-                <Fragment key={company.id}>
-                  <tr className="cursor-pointer" onClick={() => handleExpand(company.id)}>
-                    <td>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-clay-sm bg-gradient-to-br from-burnt-brown-light to-burnt-brown flex items-center justify-center text-white font-bold text-sm shadow-clay-sm flex-shrink-0">
-                          {company.name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-text-primary text-sm leading-tight">{company.name}</p>
-                          {company.tradingName && <p className="text-[11px] text-text-tertiary">t/a {company.tradingName}</p>}
-                        </div>
-                      </div>
-                    </td>
-                    <td><span className="text-xs font-mono text-text-secondary bg-clay-border-light px-2 py-1 rounded-clay-sm">{company.cacNumber}</span></td>
-                    <td><span className="text-sm text-text-secondary">{company.director}</span></td>
-                    <td><StatusBadge status={company.tier as any} /></td>
-                    <td>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-pill bg-mustard/10 flex items-center justify-center">
-                          <UserMultipleIcon className="w-3.5 h-3.5 text-mustard" />
-                        </div>
-                        <span className="text-sm font-semibold text-text-primary">{company.agentsCount}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-pill bg-burnt-brown-pale flex items-center justify-center">
-                          <Home01Icon className="w-3.5 h-3.5 text-burnt-brown" />
-                        </div>
-                        <span className="text-sm font-semibold text-text-primary">{company.listingsCount}</span>
-                      </div>
-                    </td>
-                    <td><StatusBadge status={company.status as any} /></td>
-                    <td><span className="text-xs text-text-tertiary">{company.joinDate}</span></td>
-                    <td className="text-right pr-4">
-                      <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setDetailCompany(company)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors" title="View">
-                          <ViewIcon className="w-3.5 h-3.5 text-text-secondary" />
-                        </button>
-                        <button onClick={() => handleExpand(company.id)} className="w-7 h-7 flex items-center justify-center rounded-clay-sm bg-clay-border-light hover:bg-clay-border transition-colors">
-                          {expandedId === company.id ? <ArrowUp01Icon className="w-3.5 h-3.5 text-text-secondary" /> : <ArrowDown01Icon className="w-3.5 h-3.5 text-text-secondary" />}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* Expanded: sub-agents list */}
-                  {expandedId === company.id && (
-                    <tr key={`${company.id}-exp`} className="bg-mustard-pale/40">
-                      <td colSpan={9} className="px-6 py-4">
-                        <div className="mb-3 flex items-center justify-between">
-                          <p className="text-xs font-bold text-text-secondary uppercase tracking-wide">Sub-Agents under {company.name}</p>
-                          <Button variant="secondary" size="sm" onClick={async () => {
-                            const email = prompt(`Enter email to invite agent to ${company.name}:`);
-                            if (email) {
-                              await adminApi.companies.inviteAgent(company.id, email);
-                              alert('Agent invited successfully!');
-                              fetchCompanyAgents(company.id); // Refresh agents
-                            }
-                          }}>+ Invite Agent</Button>
-                        </div>
-
-                        {loadingAgents[company.id] ? (
-                          <div className="flex items-center gap-2 py-4">
-                            <div className="w-4 h-4 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
-                            <span className="text-sm text-text-tertiary">Loading agents...</span>
-                          </div>
-                        ) : companyAgents[company.id] && companyAgents[company.id].length > 0 ? (
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            {companyAgents[company.id].slice(0, 4).map((agent: any, i: number) => (
-                              <div key={agent._id || i} className="bg-white rounded-clay-sm border border-clay-border shadow-clay-sm p-3 flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-pill bg-burnt-brown-pale flex items-center justify-center text-burnt-brown font-bold text-xs flex-shrink-0">
-                                  {(agent.fullName || agent.email || 'A').charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-text-primary">{agent.fullName || 'Unknown Agent'}</p>
-                                  <p className="text-xs text-text-tertiary truncate max-w-[150px]">{agent.email}</p>
-                                </div>
-                                <StatusBadge status={agent.status || 'verified'} showIcon={false} className="ml-auto text-[10px]" />
-                              </div>
-                            ))}
-                            {companyAgents[company.id].length > 4 && (
-                              <div className="bg-clay-border-light rounded-clay-sm border border-clay-border p-3 flex items-center justify-center text-xs text-text-tertiary font-medium">
-                                +{companyAgents[company.id].length - 4} more agents
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-text-tertiary py-2">No agents found for this company.</p>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AccountTable
+          list={list}
+          columns={columns}
+          noun="companies"
+          onRowClick={company => handleExpand(company.id)}
+          renderExpanded={renderAgents}
+        />
       </ClayCard>
 
       {/* ── Company Detail Modal ─────────────────────────── */}
@@ -307,7 +256,10 @@ export function Companies() {
             <Button variant="secondary" size="sm" onClick={() => setDetailCompany(null)}>Close</Button>
             {/* SECURITY-FIX (AD-H3): approve/suspend gated on company capabilities. */}
             {detailCompany?.status === 'pending' && canApprove && <Button variant="success" size="sm" onClick={() => detailCompany && handleApprove(detailCompany)}>Approve Company</Button>}
-            {canSuspend && <Button variant="danger" size="sm" onClick={() => detailCompany && handleSuspend(detailCompany)}>Suspend Company</Button>}
+            {detailCompany && canToggle(detailCompany) && (detailCompany.status !== 'suspended'
+              ? <Button variant="danger" size="sm" onClick={() => confirmStatusChange(detailCompany)}>Suspend Company</Button>
+              : <Button variant="success" size="sm" onClick={() => confirmStatusChange(detailCompany)}>Reinstate Company</Button>
+            )}
           </>
         }
       >
@@ -343,7 +295,7 @@ export function Companies() {
                 { label: 'Account Number', value: detailCompany.accountNumber || '—' },
                 {
                   label: 'Subaccount', value: detailCompany.subaccountCode ? (
-                    <span className="flex items-center gap-1 text-status-success text-xs font-semibold">Active {(detailCompany.subaccountCode || '').slice(-6)}</span>
+                    <span className="flex items-center gap-1 text-status-success text-xs font-semibold">Active {detailCompany.subaccountCode.slice(-6)}</span>
                   ) : '—'
                 },
               ].map(({ label, value }) => (
@@ -355,6 +307,24 @@ export function Companies() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* ── Suspend / Reinstate Confirm Modal ────────────── */}
+      <Modal open={!!statusConfirm} onClose={() => setStatusConfirm(null)} title="Confirm Action" size="sm"
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={() => setStatusConfirm(null)}>Cancel</Button>
+            <Button variant={statusConfirm?.status === 'suspended' ? 'success' : 'danger'} size="sm" onClick={() => statusConfirm && handleStatusChange(statusConfirm)}>
+              {statusConfirm?.status === 'suspended' ? 'Reinstate Company' : 'Suspend Company'}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-text-secondary">
+          {statusConfirm?.status === 'suspended'
+            ? `Reinstate ${statusConfirm?.name}? The company and its members will regain access to the platform.`
+            : `Suspend ${statusConfirm?.name}? The company and its members will lose access until reinstated.`}
+        </p>
       </Modal>
     </div>
   );

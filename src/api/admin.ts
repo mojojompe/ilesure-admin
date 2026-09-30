@@ -1,5 +1,6 @@
 import API_BASE_URL from '../lib/config';
 import { getAdminToken, clearAdminSession } from './auth';
+import { toAdminApiError } from './errors';
 
 function getHeaders(): HeadersInit {
   const token = getAdminToken();
@@ -20,49 +21,29 @@ function handleAuthFailure(): void {
   }
 }
 
-/**
- * Thrown for a 403: the admin is signed in but their role lacks the permission the
- * endpoint requires (RBAC). Callers surface `message` (they already toast
- * `error.message`); the session is left intact.
- */
-export class PermissionDeniedError extends Error {
-  readonly status = 403;
-  constructor(message: string) {
-    super(message);
-    this.name = 'PermissionDeniedError';
-  }
-}
+export { AdminApiError, PermissionDeniedError, errorMessage, errorDetails } from './errors';
 
-async function extractErrorMessage(response: Response, fallback: string): Promise<string> {
+async function readBody(response: Response): Promise<unknown> {
   try {
-    const data = await response.json();
-    return data?.error?.message || data?.message || fallback;
+    return await response.json();
   } catch {
-    return fallback;
+    return null;
   }
 }
 
 /**
- * Maps the auth-related statuses. The admin API has no refresh endpoint, so a 401
+ * Maps a non-OK response to a thrown AdminApiError carrying { code, message, details,
+ * status } from the envelope. The admin API has no refresh endpoint, so a 401
  * (missing/expired/revoked admin token) is final: clear the session and go to login.
- * A 403 is NOT a session problem, it is a permission refusal for this one action
- * (e.g. "Missing permission: users.suspend"), so it must never log the admin out.
+ * A 403 is NOT a session problem, it is a permission refusal for this one action, so it
+ * throws PermissionDeniedError and never logs the admin out.
  */
-async function handleAuthStatus(response: Response): Promise<void> {
-  if (response.status === 401) {
-    handleAuthFailure();
-    throw new Error(
-      await extractErrorMessage(response, 'Your session has expired. Please sign in again.'),
-    );
-  }
-  if (response.status === 403) {
-    const detail = await extractErrorMessage(response, '');
-    throw new PermissionDeniedError(
-      detail
-        ? `You don't have permission to do this. ${detail}`
-        : "You don't have permission to do this.",
-    );
-  }
+async function throwForStatus(response: Response): Promise<void> {
+  if (response.ok) return;
+  if (response.status === 401) handleAuthFailure();
+  const fallback =
+    response.status === 401 ? 'Your session has expired. Please sign in again.' : `Request failed (${response.status})`;
+  throw toAdminApiError(response.status, await readBody(response), fallback);
 }
 
 // SECURITY-FIX (AD-H2): adminFetch previously called response.json() unconditionally
@@ -70,7 +51,7 @@ async function handleAuthStatus(response: Response): Promise<void> {
 // was swallowed and the UI stayed "authenticated" forever, and API errors were
 // silently parsed as if successful. Now: 401 clears the session and redirects to
 // login; 403 throws a PermissionDeniedError without touching the session; other
-// non-OK responses throw with a surfaced message; only OK responses are parsed as JSON.
+// non-OK responses throw an AdminApiError built from the error envelope; only OK responses are parsed as JSON.
 export async function adminFetch(url: string, options: RequestInit = {}): Promise<any> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
@@ -80,11 +61,7 @@ export async function adminFetch(url: string, options: RequestInit = {}): Promis
     },
   });
 
-  await handleAuthStatus(response);
-
-  if (!response.ok) {
-    throw new Error(await extractErrorMessage(response, `Request failed (${response.status})`));
-  }
+  await throwForStatus(response);
 
   return response.json();
 }
@@ -101,21 +78,17 @@ export async function adminFetchRaw(url: string, options: RequestInit = {}): Pro
     },
   });
 
-  await handleAuthStatus(response);
-
-  if (!response.ok) {
-    throw new Error(`Request failed (${response.status})`);
-  }
+  await throwForStatus(response);
 
   return response;
 }
 
+// Account list/suspend/reinstate for users, agents and companies lives in
+// src/features/moderation (one adapter owns the three endpoint shapes).
 export const adminApi = {
   users: {
     list: (params?: string) => adminFetch(`/admin/v1/users${params || ''}`),
     getById: (id: string) => adminFetch(`/admin/v1/users/${id}`),
-    suspend: (id: string) => adminFetch(`/admin/v1/users/${id}/suspend`, { method: 'PUT' }),
-    unsuspend: (id: string) => adminFetch(`/admin/v1/users/${id}/unsuspend`, { method: 'PUT' }),
     getListings: (id: string) => adminFetch(`/admin/v1/users/${id}/listings`),
   },
   listings: {
@@ -128,11 +101,9 @@ export const adminApi = {
     updateStatus: (id: string, status: string) => adminFetch(`/admin/v1/listings/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
   },
   companies: {
-    list: (params?: string) => adminFetch(`/admin/v1/companies${params || ''}`),
     getById: (id: string) => adminFetch(`/admin/v1/companies/${id}`),
     create: (data: any) => adminFetch(`/admin/v1/companies`, { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: any) => adminFetch(`/admin/v1/companies/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    suspend: (id: string) => adminFetch(`/admin/v1/companies/${id}/suspend`, { method: 'PUT' }),
     approve: (id: string) => adminFetch(`/admin/v1/companies/${id}/approve`, { method: 'PUT' }),
     reject: (id: string, reason: string) => adminFetch(`/admin/v1/companies/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) }),
     getAgents: (id: string) => adminFetch(`/admin/v1/companies/${id}/agents`),
@@ -175,9 +146,6 @@ export const adminApi = {
     updatePlatform: (data: any) => adminFetch(`/admin/v1/settings/platform`, { method: 'PUT', body: JSON.stringify(data) }),
   },
   agents: {
-    list: (params?: Record<string, any>) => adminFetch(`/admin/v1/agents${params ? '?' + new URLSearchParams(params).toString() : ''}`),
-    suspend: (id: string) => adminFetch(`/admin/v1/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'suspended' }) }),
-    activate: (id: string) => adminFetch(`/admin/v1/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'active' }) }),
     getReviews: () => adminFetch(`/admin/v1/agents/reviews`),
     updateReviewStatus: (id: string, status: string) => adminFetch(`/admin/v1/agents/reviews/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   },

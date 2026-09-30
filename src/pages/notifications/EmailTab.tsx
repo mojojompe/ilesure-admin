@@ -20,7 +20,7 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { clsx } from 'clsx';
-import { adminApi } from '../../api/admin';
+import { adminApi, errorMessage, errorDetails } from '../../api/admin';
 import { can, CAP } from '../../lib/rbac';
 
 type RecipientType = 'all' | 'students' | 'landlords' | 'agents_companies' | 'waitlist';
@@ -85,8 +85,9 @@ export function EmailTab() {
   }, [historyPage]);
 
   // SECURITY-FIX (AD-H3): email broadcast is a privileged action; require the
-  // notifications.broadcast capability (defense-in-depth; backend authoritative).
-  const canBroadcast = can(CAP.NOTIFICATIONS_BROADCAST);
+  // emails.send capability, i.e. write:emails, the permission POST /admin/v1/emails/*
+  // actually checks (defense-in-depth; backend authoritative).
+  const canBroadcast = can(CAP.EMAILS_SEND);
   const canSend = canBroadcast && subject.trim().length > 0 && body.trim().length > 0;
 
   const handleSend = async () => {
@@ -101,31 +102,29 @@ export function EmailTab() {
       });
       const sentCount = res.data?.sent ?? 0;
       const failedCount = res.data?.failed ?? 0;
-      if (res.success && sentCount > 0) {
-        setResult({
-          success: true,
-          message: failedCount > 0
-            ? `Sent to ${sentCount} recipient(s), but ${failedCount} failed.`
-            : `Successfully sent to ${sentCount} recipient(s)`,
-        });
-        setSubject('');
-        setBody('');
-        setRecipientType('all');
-        setHistoryPage(1);
-        fetchHistory(1);
-      } else {
-        const fallbackMsg = failedCount > 0
-          ? `All ${failedCount} recipient deliveries failed.`
-          : 'Failed to send broadcast email';
-        setResult({
-          success: false,
-          message: res.error?.message || fallbackMsg,
-        });
+      setResult({
+        success: true,
+        message: failedCount > 0
+          ? `Sent to ${sentCount} recipient(s), but ${failedCount} failed.`
+          : `Successfully sent to ${sentCount} recipient(s)`,
+      });
+      setSubject('');
+      setBody('');
+      setRecipientType('all');
+      setHistoryPage(1);
+      fetchHistory(1);
+    } catch (e: unknown) {
+      // Every delivery failing is a 502 EMAIL_DISPATCH_FAILED whose counts are in
+      // error.details ({ sent: 0, failed }); the broadcast is still recorded in history.
+      const failedCount = Number(errorDetails(e).failed ?? 0);
+      const fallbackMsg = failedCount > 0
+        ? `All ${failedCount} recipient deliveries failed.`
+        : 'Failed to send broadcast email';
+      setResult({ success: false, message: errorMessage(e, fallbackMsg) });
+      if (failedCount > 0) {
         setHistoryPage(1);
         fetchHistory(1);
       }
-    } catch (e: any) {
-      setResult({ success: false, message: e?.message || 'Failed to send email' });
     } finally {
       setSending(false);
     }
