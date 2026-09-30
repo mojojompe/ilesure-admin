@@ -148,7 +148,7 @@ export function Dashboard() {
           icon={<Building04Icon className="w-6 h-6 text-burnt-brown" />}
         />
         <KpiCard
-          label="Active UserMultiple"
+          label="Active Users"
           value={loading ? '—' : (kpis?.activeUsers ?? 0)}
           trend={kpis?.trends?.users ?? 0}
           trendDirection={kpis?.trends?.users >= 0 ? 'up' : 'down'}
@@ -340,7 +340,7 @@ export function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Waitlist Size', value: quickStats?.waitlistSize ?? 0, icon: <ClipboardIcon className="w-5 h-5 text-mustard" />, bg: 'bg-mustard/10', trend: <AnalyticsUpIcon className="w-3 h-3 text-mustard" /> },
-          { label: 'New UserMultiple This Week', value: quickStats?.newUsersThisWeek ?? 0, icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale', trend: <AnalyticsUpIcon className="w-3 h-3 text-status-success" /> },
+          { label: 'New Users This Week', value: quickStats?.newUsersThisWeek ?? 0, icon: <UserMultipleIcon className="w-5 h-5 text-burnt-brown" />, bg: 'bg-burnt-brown-pale', trend: <AnalyticsUpIcon className="w-3 h-3 text-status-success" /> },
           { label: 'Bookings This Month', value: quickStats?.bookingsThisMonth ?? 0, icon: <Tick01Icon className="w-5 h-5 text-status-success" />, bg: 'bg-status-success/10', trend: null },
           { label: 'Active Companies', value: quickStats?.activeCompanies ?? 0, icon: <Layers01Icon className="w-5 h-5 text-burnt-brown-light" />, bg: 'bg-burnt-brown-pale', trend: null },
         ].map((stat) => (

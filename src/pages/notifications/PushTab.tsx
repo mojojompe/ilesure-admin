@@ -186,9 +186,9 @@ export function PushTab() {
             <label className="block text-xs font-bold text-text-tertiary uppercase tracking-wider mb-3">Target Audience</label>
             <div className="flex gap-2 mb-4">
               {[
-                { mode: 'all' as TargetMode, label: 'All UserMultiple', icon: <GlobeIcon className="w-3.5 h-3.5" /> },
+                { mode: 'all' as TargetMode, label: 'All Users', icon: <GlobeIcon className="w-3.5 h-3.5" /> },
                 { mode: 'roles' as TargetMode, label: 'By Role', icon: <UserMultipleIcon className="w-3.5 h-3.5" /> },
-                { mode: 'users' as TargetMode, label: 'Specific UserMultiple', icon: <Search01Icon className="w-3.5 h-3.5" /> },
+                { mode: 'users' as TargetMode, label: 'Specific Users', icon: <Search01Icon className="w-3.5 h-3.5" /> },
               ].map(t => (
                 <button
                   key={t.mode}
@@ -340,7 +340,7 @@ export function PushTab() {
                 <p className="text-[10px] text-text-tertiary mt-2">
                   Type: {NOTIFICATION_TYPES.find(nt => nt.value === type)?.label || type}
                   {' · '}
-                  {targetMode === 'all' ? 'All UserMultiple'
+                  {targetMode === 'all' ? 'All Users'
                     : targetMode === 'roles' ? `Roles: ${selectedRoles.join(', ') || 'none'}`
                       : `${selectedUsers.length} specific user(s)`}
                 </p>
