@@ -109,8 +109,10 @@ export function Companies() {
   const handleInvite = async (company: CompanyAccount) => {
     const email = prompt(`Enter email to invite agent to ${company.name}:`);
     if (!email) return;
+    const fullName = prompt(`Enter the agent's full name:`);
+    if (!fullName || !fullName.trim()) return;
     try {
-      await adminApi.companies.inviteAgent(company.id, email);
+      await adminApi.companies.inviteAgent(company.id, email.trim(), fullName.trim());
       toast.success('Agent invited successfully');
       fetchCompanyAgents(company.id, true);
     } catch (error: any) {

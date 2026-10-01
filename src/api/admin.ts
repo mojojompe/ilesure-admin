@@ -107,7 +107,9 @@ export const adminApi = {
     approve: (id: string) => adminFetch(`/admin/v1/companies/${id}/approve`, { method: 'PUT' }),
     reject: (id: string, reason: string) => adminFetch(`/admin/v1/companies/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) }),
     getAgents: (id: string) => adminFetch(`/admin/v1/companies/${id}/agents`),
-    inviteAgent: (id: string, email: string) => adminFetch(`/admin/v1/companies/${id}/invite-agent`, { method: 'POST', body: JSON.stringify({ email }) }),
+    // The backend requires the invitee's full name as well as the email (it is in the
+    // invitation and on the account); sending only `email` was refused with 400 every time.
+    inviteAgent: (id: string, email: string, fullName: string) => adminFetch(`/admin/v1/companies/${id}/invite-agent`, { method: 'POST', body: JSON.stringify({ email, fullName }) }),
   },
   verifications: {
     list: (params?: string) => adminFetch(`/admin/v1/verifications${params || ''}`),
