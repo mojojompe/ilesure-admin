@@ -88,7 +88,7 @@ describe('moderation api: status changes use each kind’s endpoint', () => {
     ['agent', 'reinstate', '/admin/v1/agents/id1/status', 'PATCH', { status: 'active' }],
     ['company', 'suspend', '/admin/v1/companies/id1/suspend', 'PUT', undefined],
     ['company', 'reinstate', '/admin/v1/companies/id1/unsuspend', 'PUT', undefined],
-  ] as const)('%s %s -> %s %s', async (kind, change, path, method, body) => {
+  ] as const)('%s %s -> %s %s', async (kind: any, change: any, path: string, method: string, body: any) => {
     const { fetchJson, calls } = stubFetch(() => ({ success: true }));
     await createModerationApi(fetchJson).setStatus(kind, 'id1', change);
     expect(calls).toHaveLength(1);
@@ -130,7 +130,7 @@ describe('useAccountModeration', () => {
       useAccountModeration('user', { api, counts: { all: {}, suspended: { status: 'suspended' } } }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.rows.map(r => r.id)).toEqual(['u1']);
+    expect(result.current.rows.map((r: any) => r.id)).toEqual(['u1']);
     expect(result.current.total).toBe(60);
     expect(result.current.totalPages).toBe(3);
     expect(result.current.range).toEqual({ first: 1, last: 1 });
@@ -167,7 +167,7 @@ describe('useAccountModeration', () => {
 
     await act(async () => resolvers['2'](page('agents', [{ id: 'new' }], 30, 2)));
     await act(async () => resolvers['1'](page('agents', [{ id: 'stale' }], 30, 2)));
-    expect(result.current.rows.map(r => r.id)).toEqual(['new']);
+    expect(result.current.rows.map((r: any) => r.id)).toEqual(['new']);
     expect(result.current.page).toBe(2);
   });
 
