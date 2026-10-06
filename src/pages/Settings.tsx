@@ -14,6 +14,7 @@ import { ClayCard } from '../components/ui/ClayCard';
 import { Button } from '../components/ui/Button';
 import { adminApi } from '../api/admin';
 import { getAdminToken } from '../api/auth';
+import { NotificationsPanel } from '../features/settings/NotificationsPanel';
 
 /**
  * BUGFIX (QA-ADM-033): one accessible switch with a single visual polarity, knob to the
@@ -69,12 +70,6 @@ export function Settings() {
   const [adminData, setAdminData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [notifications, setNotifications] = useState({
-    newListings: true,
-    verificationRequests: true,
-    newUserRegistrations: false,
-    criticalAlerts: true,
-  });
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -107,7 +102,6 @@ export function Settings() {
       if (response.success && response.data) {
         setAdminData(response.data.profile);
         setProfileName(response.data.profile?.name || '');
-        setNotifications(response.data.notifications || notifications);
         setPlatform(response.data.platform || {});
         setLimits(response.data.limits || {});
       }
@@ -156,15 +150,6 @@ export function Settings() {
       setTimeout(() => setPasswordSuccess(false), 3000);
     } catch (error: any) {
       setPasswordError(error?.response?.data?.error || 'Failed to update password');
-    }
-  };
-
-  const saveSettings = async () => {
-    try {
-      await adminApi.settings.updateNotifications({ notifications });
-      showToast('Notification preferences saved!');
-    } catch (error) {
-      console.error('Failed to save settings:', error);
     }
   };
 
@@ -335,38 +320,7 @@ export function Settings() {
             </ClayCard>
           )}
 
-          {activeTab === 'notifications' && (
-            <ClayCard padding="md" className="space-y-6">
-              <h3 className="text-base font-bold text-text-primary border-b border-clay-border pb-3">Email Notifications</h3>
-
-              <div className="space-y-4">
-                {[
-                  { key: 'newListings', title: 'New Listings', desc: 'Receive emails when a new listing is submitted for approval' },
-                  { key: 'verificationRequests', title: 'Verification Requests', desc: 'Get notified when an agent or company submits verification docs' },
-                  { key: 'newUserRegistrations', title: 'New User Registrations', desc: 'Weekly summary of new signups' },
-                  { key: 'criticalAlerts', title: 'Critical System Alerts', desc: 'Uptime warnings and platform errors' },
-                ].map(item => (
-                  <label key={item.key} className="flex items-start gap-3 p-3 rounded-clay-sm hover:bg-clay-border-light cursor-pointer transition-colors">
-                    <div
-                      className="mt-0.5 relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-mustard focus:ring-offset-2"
-                      style={{ backgroundColor: notifications[item.key as keyof typeof notifications] ? '#D4821A' : '#E7DCD4' }}
-                      onClick={() => setNotifications(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof prev] }))}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${notifications[item.key as keyof typeof notifications] ? 'translate-x-4' : 'translate-x-0'}`} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">{item.title}</p>
-                      <p className="text-xs text-text-tertiary">{item.desc}</p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex justify-end pt-4 border-t border-clay-border">
-                <Button variant="primary" icon={<FloppyDiskIcon className="w-4 h-4" />} onClick={saveSettings}>Save Preferences</Button>
-              </div>
-            </ClayCard>
-          )}
+          {activeTab === 'notifications' && <NotificationsPanel onToast={showToast} />}
 
           {activeTab === 'platform' && (
             <ClayCard padding="md" className="space-y-6">

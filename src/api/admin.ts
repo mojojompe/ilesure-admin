@@ -144,7 +144,11 @@ export const adminApi = {
     get: () => adminFetch(`/admin/v1/settings`),
     updateProfile: (data: any) => adminFetch(`/admin/v1/settings/profile`, { method: 'PUT', body: JSON.stringify(data) }),
     updatePassword: (data: any) => adminFetch(`/admin/v1/auth/change-password`, { method: 'POST', body: JSON.stringify(data) }),
-    updateNotifications: (data: any) => adminFetch(`/admin/v1/settings/notifications`, { method: 'PUT', body: JSON.stringify(data) }),
+    // Admin alert emails are platform-wide: { recipients?, events? }. Needs write:settings.
+    getNotifications: () => adminFetch(`/admin/v1/settings/notifications`),
+    updateNotifications: (data: { recipients?: string[]; events?: Record<string, boolean> }) =>
+      adminFetch(`/admin/v1/settings/notifications`, { method: 'PUT', body: JSON.stringify(data) }),
+    testNotifications: () => adminFetch(`/admin/v1/settings/notifications/test`, { method: 'POST' }),
     updatePlatform: (data: any) => adminFetch(`/admin/v1/settings/platform`, { method: 'PUT', body: JSON.stringify(data) }),
   },
   agents: {
