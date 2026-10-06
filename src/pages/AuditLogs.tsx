@@ -175,8 +175,13 @@ export function AuditLogs() {
   }, [page]);
 
   const handleSearch = () => {
-    setPage(1);
-    fetchLogs();
+    // fetchLogs reads `page` from this render's closure, so calling it right after
+    // setPage(1) still asked for the old page, and the [page] effect then fired a second
+    // request for page 1. The two raced and the stale one could win. From page 1 the
+    // setter is a no-op and nothing refetches, so fetch directly; otherwise let the
+    // effect do the single fetch with the new page.
+    if (page !== 1) setPage(1);
+    else fetchLogs();
   };
 
   const handleCopyJson = (event: IAuditEvent) => {

@@ -78,8 +78,11 @@ export function VerificationQueue() {
   useEffect(() => {
     const t = setTimeout(() => {
       setSelected(null);
-      setPage(1);
-      fetchVerifications();
+      // fetchVerifications reads `page` from this closure, so calling it after setPage(1)
+      // searched the old page while the [page] effect fetched page 1, and the two raced.
+      // Off page 1, let that effect do the single fetch.
+      if (page !== 1) setPage(1);
+      else fetchVerifications();
     }, 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps

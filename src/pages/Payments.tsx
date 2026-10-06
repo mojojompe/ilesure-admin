@@ -62,8 +62,6 @@ function PayoutsSection() {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => { fetchPayments(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, flaggedOnly, payPage]);
-  // A filter change restarts at page 1; staying on page 3 of a 1-page result shows nothing.
-  useEffect(() => { setPayPage(1); }, [filter, flaggedOnly]);
 
   const fetchPayments = async () => {
     setLoading(true);
@@ -200,7 +198,10 @@ function PayoutsSection() {
             see which. The tile is the filter, clicking it narrows the table to those rows. */}
         <button
           type="button"
-          onClick={() => setFlaggedOnly(v => !v)}
+          // A filter change restarts at page 1; staying on page 3 of a 1-page result shows
+          // nothing. Reset here, with the filter, so the fetch effect runs once with both;
+          // a follow-up reset effect fired the old page's request first and the two raced.
+          onClick={() => { setFlaggedOnly(v => !v); setPayPage(1); }}
           aria-pressed={flaggedOnly}
           title={flaggedOnly ? 'Show all payments' : 'Show only payments flagged for review'}
           className={`text-left bg-white rounded-clay border shadow-clay p-5 transition-all hover:border-status-error ${flaggedOnly ? 'border-status-error ring-2 ring-status-error/30' : 'border-clay-border'}`}
@@ -217,7 +218,7 @@ function PayoutsSection() {
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex gap-1.5">
               {tabs.map(t => (
-                <button key={t} onClick={() => setFilter(t)}
+                <button key={t} onClick={() => { setFilter(t); setPayPage(1); }}
                   className={`px-3 py-1 rounded-pill text-xs font-semibold transition-all ${filter === t ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'}`}>
                   {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>

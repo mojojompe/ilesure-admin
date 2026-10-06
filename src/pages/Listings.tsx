@@ -76,9 +76,6 @@ export function Listings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, page]);
 
-  // A filter change re-queries from the first page; staying on page 3 of a 1-page result
-  // would otherwise show an empty table.
-  useEffect(() => { setPage(1); }, [statusFilter]);
 
   const fetchListings = async () => {
     setLoading(true);
@@ -192,7 +189,11 @@ export function Listings() {
         {statusTabs.map(tab => (
           <button
             key={tab.key}
-            onClick={() => setStatusFilter(tab.key)}
+            // A filter change re-queries from the first page; staying on page 3 of a 1-page
+            // result would otherwise show an empty table. The reset is set here, with the
+            // filter, rather than in a follow-up effect: that effect ran after the fetch
+            // effect had already requested the old page, so two requests raced.
+            onClick={() => { setStatusFilter(tab.key); setPage(1); }}
             className={clsx(
               'flex items-center gap-2 rounded-pill px-4 py-1.5 text-xs font-semibold transition-all duration-150',
               statusFilter === tab.key
