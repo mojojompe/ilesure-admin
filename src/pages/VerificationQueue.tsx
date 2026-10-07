@@ -21,6 +21,7 @@ import { safeUrl } from '../lib/safeUrl';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
+import { useDeepLink } from '../lib/useDeepLink';
 
 const docLabels: Record<string, string> = {
   nin: 'Govt. ID (NIN)', bvn: 'BVN', ownershipCert: 'Ownership Certificate',
@@ -67,6 +68,18 @@ export function VerificationQueue() {
   const [totalPages, setTotalPages] = useState(1);
 
   const canReview = can(CAP.VERIFICATIONS_REVIEW);
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  // A linked applicant may already be verified, so the queue widens to every status.
+  useDeepLink({
+    rows: verifications,
+    loading,
+    getId: (v: any) => v.id,
+    onOpen: (v: any) => handleSelect(v, v.checklist, v.adminNotes),
+    onQuery: (q) => {
+      setStatusFilter('all');
+      if (q) setSearch(q);
+    },
+  });
 
   useEffect(() => {
     setSelected(null);

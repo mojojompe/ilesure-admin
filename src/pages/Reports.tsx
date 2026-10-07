@@ -15,6 +15,7 @@ import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
+import { useDeepLink } from '../lib/useDeepLink';
 
 type ReportFilter = 'all' | 'pending' | 'resolved' | 'actioned';
 
@@ -32,6 +33,8 @@ export function Reports() {
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: reports, loading, getId: (r: any) => r.id || r._id, onOpen: setDetail });
 
   const canAction = can(CAP.REPORTS_ACTION);
 

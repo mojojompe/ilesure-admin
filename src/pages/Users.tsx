@@ -14,6 +14,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { clsx } from 'clsx';
 import { can, CAP } from '../lib/rbac';
+import { useDeepLink } from '../lib/useDeepLink';
 import {
   useAccountModeration, AccountTable, StatCards, SearchField,
   type Column, type UserAccount,
@@ -58,6 +59,8 @@ export function Users() {
 
   const list = useAccountModeration('user', { filters: { role: TAB_ROLE[tab] }, counts: COUNTS });
   const { counts } = list;
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: list.rows, loading: list.loading, getId: (u) => u.id, onOpen: setDetailUser, onQuery: (q) => q && list.setSearch(q) });
 
   const handleSuspend = async (user: UserAccount) => {
     const ok = await list.changeStatus(user, user.status === 'suspended' ? 'reinstate' : 'suspend');

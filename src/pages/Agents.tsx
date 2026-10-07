@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { can, CAP } from '../lib/rbac';
+import { useDeepLink } from '../lib/useDeepLink';
 import {
   useAccountModeration, AccountTable, StatCards, SearchField,
   type AgentAccount, type Column,
@@ -31,6 +32,8 @@ export function Agents() {
   const canSuspend = can(CAP.AGENTS_SUSPEND);
   const list = useAccountModeration('agent', { counts: COUNTS });
   const { counts } = list;
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: list.rows, loading: list.loading, getId: (a) => a.id, onOpen: setDetail, onQuery: (q) => q && list.setSearch(q) });
 
   const changeStatus = async (agent: AgentAccount, change: 'suspend' | 'reinstate') => {
     if (await list.changeStatus(agent, change)) setDetail(null);

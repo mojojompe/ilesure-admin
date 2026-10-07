@@ -18,6 +18,7 @@ import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
+import { useDeepLink } from '../lib/useDeepLink';
 
 type PayFilter = 'all' | 'pending' | 'processed' | 'refunded' | 'failed';
 
@@ -60,6 +61,8 @@ function PayoutsSection() {
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: payments, loading, getId: (p: any) => p.id, onOpen: () => undefined, onQuery: (q) => q && setSearch(q) });
 
   useEffect(() => { fetchPayments(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, flaggedOnly, payPage]);
 
@@ -159,7 +162,7 @@ function PayoutsSection() {
   };
 
   const filtered = payments.filter(p =>
-    `${p.agentName} ${p.description}`.toLowerCase().includes(search.toLowerCase())
+    `${p.agentName} ${p.description} ${p.reference || ''}`.toLowerCase().includes(search.toLowerCase())
   );
 
   // BUGFIX (QA-ADM-035): this filtered on 'processed', which the backend never stores,

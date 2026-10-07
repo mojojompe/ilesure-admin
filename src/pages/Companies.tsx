@@ -16,6 +16,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { adminApi, errorMessage } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
+import { useDeepLink } from '../lib/useDeepLink';
 import toast from 'react-hot-toast';
 import {
   useAccountModeration, AccountTable, StatCards, SearchField,
@@ -41,6 +42,8 @@ export function Companies() {
   const canApprove = can(CAP.COMPANIES_APPROVE);
   const canSuspend = can(CAP.COMPANIES_SUSPEND);
   const list = useAccountModeration('company', { counts: COUNTS });
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: list.rows, loading: list.loading, getId: (c) => c.id, onOpen: setDetailCompany, onQuery: (q) => q && list.setSearch(q) });
   const { counts } = list;
   // Suspended companies can be reinstated (PUT /companies/:id/unsuspend).
   const canToggle = (company: CompanyAccount) =>

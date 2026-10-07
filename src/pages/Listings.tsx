@@ -22,6 +22,7 @@ import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
+import { useDeepLink } from '../lib/useDeepLink';
 
 type FilterStatus = 'all' | ListingStatus;
 
@@ -68,6 +69,8 @@ export function Listings() {
   const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: listings, loading, getId: (l: any) => l.id, onOpen: (l: any) => setExpandedId(l.id) });
 
   const canModerate = can(CAP.LISTINGS_MODERATE);
 

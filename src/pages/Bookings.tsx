@@ -18,6 +18,7 @@ import { adminApi } from '../api/admin';
 import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
+import { useDeepLink } from '../lib/useDeepLink';
 import { BOOKING_STATUSES, type BookingStatus } from '../contracts/generated';
 
 // Booking statuses come from the contract. 'refunded' was a tab here but is a payment
@@ -52,6 +53,8 @@ export function Bookings() {
   };
 
   const canResolve = can(CAP.BOOKINGS_RESOLVE);
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: bookings, loading, getId: (b: any) => b.id, onOpen: setDetail });
 
   const handleResolve = async (id: string, action: string) => {
     setUpdating(true);

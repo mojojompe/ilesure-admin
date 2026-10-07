@@ -24,6 +24,7 @@ import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
 import upgradeRequestsApi, { RankedStack, RankedStacksResponse } from '../api/upgradeRequests';
 import { errorMessage } from '../api/errors';
+import { useDeepLink } from '../lib/useDeepLink';
 
 export function UpgradeRequests() {
   const [data, setData] = useState<RankedStacksResponse | null>(null);
@@ -59,6 +60,8 @@ export function UpgradeRequests() {
   useEffect(() => {
     fetchStacks();
   }, [activeTab]);
+  // Admin alert emails link here with ?q=<search>&open=<id> (lib/deepLink.ts).
+  useDeepLink({ rows: data?.data, loading, getId: (s) => s.stackId, onOpen: (s) => setExpandedStackId(s.stackId) });
 
   const handleStatusChange = async (stackId: string, newStatus: string) => {
     try {

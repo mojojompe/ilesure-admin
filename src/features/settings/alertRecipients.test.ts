@@ -37,9 +37,22 @@ describe('alert recipient list', () => {
     expect(isValidEmail('space in@example.com')).toBe(false);
   });
 
-  it('fills every switch the server omitted with on', () => {
+  it('fills every switch the server omitted with its default', () => {
     const events = withDefaultEvents({ supportTickets: false });
     expect(events.supportTickets).toBe(false);
-    for (const e of ALERT_EVENTS) if (e.key !== 'supportTickets') expect(events[e.key]).toBe(true);
+    for (const e of ALERT_EVENTS) if (e.key !== 'supportTickets') expect(events[e.key]).toBe(e.defaultOn);
+  });
+
+  it('defaults every approval queue on and renter sign-ups off', () => {
+    const events = withDefaultEvents(null);
+    for (const key of ['newAccountsAwaitingApproval', 'kycCompleted', 'upgradeRequests', 'bookingsNeedingAttention', 'manualPayouts'] as const) {
+      expect(events[key]).toBe(true);
+    }
+    expect(events.newRenters).toBe(false);
+  });
+
+  it('lists each switch once', () => {
+    const keys = ALERT_EVENTS.map((e) => e.key);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });
