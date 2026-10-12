@@ -167,6 +167,10 @@ export const adminApi = {
     // through refundService.refundPayment, which verifies with Paystack and calls the
     // refund API rather than just flipping a flag.
     refund: (id: string) => adminFetch(`/admin/v1/payments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'refunded' }) }),
+    // What listers owe back after a settled payment was refunded or charged back.
+    listerDebts: (params?: Record<string, any>) => adminFetch(`/admin/v1/payments/lister-debts${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
+    resolveListerDebt: (id: string, status: 'recovered' | 'written_off', note?: string) =>
+      adminFetch(`/admin/v1/payments/lister-debts/${id}`, { method: 'PATCH', body: JSON.stringify({ status, note }) }),
   },
   reports: {
     list: (params?: Record<string, any>) => adminFetch(`/admin/v1/reports${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
