@@ -359,7 +359,7 @@ export function Listings() {
                             { label: 'Water', value: listing.waterSource },
                             { label: 'WiFi Available', value: listing.hasWifi ? 'Yes' : 'No' },
                             { label: 'Security', value: listing.securityType },
-                            { label: 'Dist. from LCU', value: listing.distanceFromLCU || 'N/A' },
+                            { label: 'Distance from campus', value: listing.distanceFromLCU || 'N/A' },
                             { label: 'Interest Count', value: `${listing.interestCount} interested` },
                           ].map(({ label, value }) => (
                             <div key={label} className="bg-white rounded-clay-sm px-3 py-2 shadow-clay-sm">

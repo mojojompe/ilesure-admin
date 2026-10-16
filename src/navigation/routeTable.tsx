@@ -16,6 +16,7 @@ import {
   Megaphone01Icon,
   StarIcon,
   SparklesIcon,
+  CustomerSupportIcon,
 } from '@hugeicons/react';
 import { Dashboard } from '../pages/Dashboard';
 import { Listings } from '../pages/Listings';
@@ -35,6 +36,7 @@ import { AuditLogs } from '../pages/AuditLogs';
 import { PushNotifications } from '../pages/PushNotifications';
 import { Ads } from '../pages/Ads';
 import { UpgradeRequests } from '../pages/UpgradeRequests';
+import { Support } from '../pages/Support';
 import { PAGE_CAP } from '../lib/rbac';
 import type { NavEntry } from './access';
 
@@ -58,6 +60,7 @@ export const NAV_TABLE: readonly NavEntry[] = [
   { section: 'Operations', path: '/bookings', label: 'Bookings', icon: Calendar01Icon, element: <Bookings />, requires: [PAGE_CAP.BOOKINGS] },
   { section: 'Operations', path: '/payments', label: 'Payments', icon: CreditCardIcon, element: <Payments />, requires: [PAGE_CAP.PAYMENTS] },
   { section: 'Operations', path: '/upgrade-requests', label: 'Feature Upgrades', icon: SparklesIcon, element: <UpgradeRequests /> },
+  { section: 'Operations', path: '/support', label: 'Support', icon: CustomerSupportIcon, element: <Support />, requires: [PAGE_CAP.SUPPORT] },
   { section: 'Operations', path: '/reports', label: 'Reports', icon: Flag01Icon, element: <Reports />, requires: [PAGE_CAP.REPORTS] },
   { section: 'Operations', path: '/waitlist', label: 'Waitlist', icon: ClipboardIcon, element: <WaitlistData />, requires: [PAGE_CAP.WAITLIST] },
 

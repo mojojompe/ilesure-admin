@@ -51,6 +51,7 @@ export const CAP = {
   EMAILS_SEND: 'emails.send',
   SETTINGS_MANAGE: 'settings.manage',
   WAITLIST_MANAGE: 'waitlist.manage',
+  SUPPORT_REPLY: 'support.reply',
 } as const satisfies Record<string, AdminAction>;
 
 /**
@@ -68,6 +69,7 @@ export const PAGE_CAP = {
   PAYMENTS: 'read:payments',
   REPORTS: 'read:reports',
   WAITLIST: 'read:waitlist',
+  SUPPORT: 'read:support',
   ANALYTICS: 'read:analytics',
   TIERS: 'read:tiers',
   AUDIT: 'read:audit',
