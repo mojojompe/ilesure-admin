@@ -118,7 +118,7 @@ export function Ads() {
         </div>
         {/* SECURITY-FIX (AD-H3): creating ads is a privileged action, hidden for roles without ads.manage. */}
         {canManage && (
-          <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
+          <Button onClick={() => setShowAddModal(true)} className="w-full sm:w-auto flex items-center justify-center gap-2">
             <PlusSignIcon className="w-4 h-4" />
             Add New Ad
           </Button>
@@ -256,16 +256,16 @@ export function Ads() {
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6 pt-6 border-t border-clay-border">
+            <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 mt-6 pt-6 border-t border-clay-border">
               <Button
                 variant="secondary"
-                className="flex-1"
+                className="w-full sm:flex-1"
                 onClick={() => setShowAddModal(false)}
               >
                 Cancel
               </Button>
               <Button
-                className="flex-1"
+                className="w-full sm:flex-1"
                 onClick={handleCreateAd}
                 loading={isSubmitting}
               >

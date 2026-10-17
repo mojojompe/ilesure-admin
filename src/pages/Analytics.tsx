@@ -97,18 +97,17 @@ export function Analytics() {
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* ── Page Header ─────────────────────────────────── */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text-primary">Demand Intelligence</h2>
           <p className="text-sm text-text-tertiary mt-0.5">Platform performance, demand patterns, and revenue breakdown</p>
         </div>
-        <div className="flex gap-1 p-1 bg-clay-border-light rounded-clay-sm">
+        <div className="flex gap-1 p-1 bg-clay-border-light rounded-clay-sm w-full sm:w-auto overflow-x-auto scrollbar-none justify-between sm:justify-start">
           {rangeOptions.map(opt => (
             <button
               key={opt.key}
               onClick={() => setRange(opt.key)}
-              className={`px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all ${range === opt.key ? 'bg-burnt-brown text-white shadow-clay-sm' : 'text-text-secondary hover:text-text-primary'}`}
+              className={`flex-1 sm:flex-initial text-center px-3 py-1.5 rounded-[10px] text-xs font-semibold whitespace-nowrap transition-all ${range === opt.key ? 'bg-burnt-brown text-white shadow-clay-sm' : 'text-text-secondary hover:text-text-primary'}`}
             >
               {opt.label}
             </button>

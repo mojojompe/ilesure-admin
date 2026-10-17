@@ -180,12 +180,12 @@ export function WaitlistData() {
 
       {/* ── Corridor Demand Chart ────────────────────────── */}
       <ClayCard padding="none">
-        <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-clay-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:px-6 sm:pt-5 sm:pb-3 border-b border-clay-border">
           <div>
             <h3 className="font-bold text-text-primary text-base">Demand by Corridor</h3>
             <p className="text-xs text-text-tertiary mt-0.5">Total waitlist entries per area cluster</p>
           </div>
-          <Button variant="secondary" size="sm" icon={<Download01Icon className="w-3.5 h-3.5" />} onClick={handleExport}>Export CSV</Button>
+          <Button variant="secondary" size="sm" icon={<Download01Icon className="w-3.5 h-3.5" />} onClick={handleExport} className="w-full sm:w-auto justify-center">Export CSV</Button>
         </div>
         <div className="p-6">
           <ResponsiveContainer width="100%" height={200}>
@@ -285,15 +285,15 @@ export function WaitlistData() {
 
       {/* ── Waitlist Table ───────────────────────────────── */}
       <ClayCard padding="none">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:px-5 sm:py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm">All Waitlist Entries</h3>
-          <div className="relative">
+          <div className="relative w-full sm:w-48">
             <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-tertiary" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search..."
-              className="pl-8 pr-4 py-1.5 bg-clay-border-light border border-clay-border rounded-pill text-xs placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all w-48"
+              className="pl-8 pr-4 py-1.5 bg-clay-border-light border border-clay-border rounded-pill text-xs placeholder:text-text-tertiary outline-none focus:border-mustard focus:ring-2 focus:ring-mustard/20 transition-all w-full sm:w-48"
             />
           </div>
         </div>

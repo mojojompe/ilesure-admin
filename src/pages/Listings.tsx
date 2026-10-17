@@ -187,8 +187,8 @@ export function Listings() {
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* ── FilterIcon Tabs ─────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2">
+      {/* ── Status Tabs ─────────────────────────────────── */}
+      <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none sm:flex-wrap">
         {statusTabs.map(tab => (
           <button
             key={tab.key}
@@ -198,14 +198,14 @@ export function Listings() {
             // effect had already requested the old page, so two requests raced.
             onClick={() => { setStatusFilter(tab.key); setPage(1); }}
             className={clsx(
-              'flex items-center gap-2 rounded-pill px-4 py-1.5 text-xs font-semibold transition-all duration-150',
+              'flex items-center gap-2 rounded-pill px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-all duration-150 flex-shrink-0 whitespace-nowrap',
               statusFilter === tab.key
                 ? 'bg-burnt-brown text-white shadow-clay-sm'
                 : 'bg-white text-text-secondary border border-clay-border hover:border-burnt-brown hover:text-burnt-brown',
             )}
           >
-            {tab.label}
-            <span className={clsx('rounded-pill px-1.5 py-0.5 text-[10px] font-bold',
+            <span>{tab.label}</span>
+            <span className={clsx('rounded-pill px-1.5 py-0.5 text-[10px] font-bold flex-shrink-0',
               statusFilter === tab.key ? 'bg-white/20 text-white' : 'bg-clay-border text-text-tertiary'
             )}>
               {tab.count}

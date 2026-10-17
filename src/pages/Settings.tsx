@@ -183,8 +183,8 @@ export function Settings() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* ── Sidebar Nav ─────────────────────────────────── */}
-        <div className="w-full md:w-56 flex-shrink-0 space-y-1">
+        {/* ── Nav Tabs ───────────────────────────────────── */}
+        <div className="w-full md:w-56 flex-shrink-0 flex md:flex-col gap-1.5 md:space-y-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -192,13 +192,13 @@ export function Settings() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-clay-sm text-sm font-semibold transition-all duration-150 ${isActive
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-clay-sm text-xs sm:text-sm font-semibold transition-all duration-150 ${isActive
                   ? 'bg-burnt-brown text-white shadow-clay-sm'
-                  : 'bg-transparent text-text-secondary hover:bg-clay-border-light'
+                  : 'bg-white md:bg-transparent text-text-secondary border border-clay-border md:border-transparent hover:bg-clay-border-light'
                   }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-mustard-light' : 'text-text-tertiary'}`} />
-                {tab.label}
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-mustard-light' : 'text-text-tertiary'}`} />
+                <span>{tab.label}</span>
               </button>
             );
           })}
@@ -406,17 +406,17 @@ export function Settings() {
       </div>
       {/* ── Audit Logs ──────────────────────────────────── */}
       <ClayCard padding="md" className="mt-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-clay bg-burnt-brown-pale flex items-center justify-center flex-shrink-0">
-              <Note01Icon className="w-6 h-6 text-burnt-brown" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-clay bg-burnt-brown-pale flex items-center justify-center flex-shrink-0">
+              <Note01Icon className="w-5 h-5 sm:w-6 sm:h-6 text-burnt-brown" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-text-primary">Audit Logs</h3>
-              <p className="text-sm text-text-tertiary mt-0.5">Review all actions performed across the platform</p>
+              <h3 className="text-sm sm:text-base font-bold text-text-primary">Audit Logs</h3>
+              <p className="text-xs sm:text-sm text-text-tertiary mt-0.5">Review all actions performed across the platform</p>
             </div>
           </div>
-          <Button variant="primary" size="sm" icon={<ArrowRight01Icon className="w-4 h-4" />} onClick={() => navigate('/audit-logs')}>
+          <Button variant="primary" size="sm" icon={<ArrowRight01Icon className="w-4 h-4" />} onClick={() => navigate('/audit-logs')} className="w-full sm:w-auto justify-center">
             View Logs
           </Button>
         </div>

@@ -28,23 +28,23 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
       )}>
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-clay-border">
-            <h2 className="text-lg font-bold text-text-primary">{title}</h2>
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-clay-border">
+            <h2 className="text-base sm:text-lg font-bold text-text-primary truncate mr-2">{title}</h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-pill bg-clay-border-light text-text-secondary hover:bg-clay-border transition-colors duration-150 text-lg leading-none"
+              className="w-8 h-8 flex items-center justify-center rounded-pill bg-clay-border-light text-text-secondary hover:bg-clay-border transition-colors duration-150 text-lg leading-none flex-shrink-0"
             >
               ×
             </button>
           </div>
         )}
         {/* Body */}
-        <div className="px-6 py-5 overflow-y-auto max-h-[70vh]">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto max-h-[75vh]">
           {children}
         </div>
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-clay-border bg-off-white rounded-b-clay-lg">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 px-4 sm:px-6 py-3.5 sm:py-4 border-t border-clay-border bg-off-white rounded-b-clay-lg">
             {footer}
           </div>
         )}

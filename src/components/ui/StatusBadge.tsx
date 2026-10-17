@@ -91,9 +91,9 @@ export function StatusBadge({ status, showIcon = true, className }: StatusBadgeP
     icon: undefined,
   };
   return (
-    <span className={clsx('inline-flex items-center gap-1 rounded-pill px-3 py-1 text-xs font-semibold tracking-wide whitespace-nowrap', baseClass, className)}>
-      {showIcon && Icon && <Icon className="w-3 h-3" />}
-      {label}
+    <span className={clsx('inline-flex items-center gap-1 rounded-pill px-2.5 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold tracking-wide whitespace-nowrap flex-shrink-0', baseClass, className)}>
+      {showIcon && Icon && <Icon className="w-3 h-3 flex-shrink-0" />}
+      <span>{label}</span>
     </span>
   );
 }

@@ -191,9 +191,9 @@ export function Companies() {
     const agents = companyAgents[company.id];
     return (
       <>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <p className="text-xs font-bold text-text-secondary uppercase tracking-wide">Sub-Agents under {company.name}</p>
-          <Button variant="secondary" size="sm" onClick={() => handleInvite(company)}>+ Invite Agent</Button>
+          <Button variant="secondary" size="sm" onClick={() => handleInvite(company)} className="w-full sm:w-auto justify-center">+ Invite Agent</Button>
         </div>
 
         {loadingAgents[company.id] ? (
@@ -238,11 +238,11 @@ export function Companies() {
       ]} />
 
       <ClayCard padding="none">
-        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-clay-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:px-5 sm:py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm">Registered Companies</h3>
-          <div className="flex items-center gap-2">
-            <SearchField className="w-56" value={list.search} onChange={list.setSearch} placeholder="Search name or CAC..." />
-            <Button variant="primary" size="sm" onClick={handleCreate}>+ Add Company</Button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <SearchField className="w-full sm:w-56" value={list.search} onChange={list.setSearch} placeholder="Search name or CAC..." />
+            <Button variant="primary" size="sm" onClick={handleCreate} className="whitespace-nowrap w-full sm:w-auto justify-center">+ Add Company</Button>
           </div>
         </div>
         <AccountTable

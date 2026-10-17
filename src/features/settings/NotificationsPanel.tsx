@@ -190,7 +190,7 @@ export function NotificationsPanel({ onToast }: { onToast: (message: string, typ
 
         {canEdit && (
           <div className="space-y-1.5">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 value={draft}
@@ -208,7 +208,7 @@ export function NotificationsPanel({ onToast }: { onToast: (message: string, typ
                 }}
                 className="flex-1 min-w-0 px-4 py-2.5 bg-clay-border-light border border-clay-border rounded-clay-sm text-sm outline-none focus:border-mustard transition-colors"
               />
-              <Button variant="secondary" size="sm" onClick={handleAdd} disabled={recipients.length >= maxRecipients}>
+              <Button variant="secondary" size="sm" onClick={handleAdd} disabled={recipients.length >= maxRecipients} className="w-full sm:w-auto justify-center">
                 Add
               </Button>
             </div>
@@ -278,11 +278,12 @@ export function NotificationsPanel({ onToast }: { onToast: (message: string, typ
             onClick={handleTest}
             loading={testing}
             disabled={testing || dirty}
+            className="w-full sm:w-auto justify-center"
             title={dirty ? 'Save your changes first; the test uses the saved recipients' : undefined}
           >
             Send test email
           </Button>
-          <Button variant="primary" icon={<FloppyDiskIcon className="w-4 h-4" />} onClick={handleSave} loading={saving} disabled={saving}>
+          <Button variant="primary" icon={<FloppyDiskIcon className="w-4 h-4" />} onClick={handleSave} loading={saving} disabled={saving} className="w-full sm:w-auto justify-center">
             Save Notifications
           </Button>
         </div>

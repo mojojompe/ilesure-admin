@@ -210,7 +210,7 @@ export function UpgradeRequests() {
       {/* FilterIcon and Search01Icon Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-surface p-4 rounded-2xl border border-border shadow-sm">
         {/* Status Tabs */}
-        <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap w-full sm:w-auto">
           {[
             { id: 'all', label: 'All Stacks' },
             { id: 'under_review', label: 'Under Review' },
@@ -222,7 +222,7 @@ export function UpgradeRequests() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={clsx(
-                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors',
+                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap flex-shrink-0',
                 activeTab === tab.id
                   ? 'bg-primary text-white shadow-sm'
                   : 'bg-background hover:bg-neutral-100 text-textSecondary'
@@ -310,7 +310,7 @@ export function UpgradeRequests() {
                     </div>
 
                     {/* Right Metadata & Controls */}
-                    <div className="flex flex-wrap items-center gap-3 self-end lg:self-center">
+                    <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto justify-between sm:justify-start lg:justify-end self-auto lg:self-center">
                       {/* Request Count Badge (The Stack representation) */}
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-extrabold">
                         <Layers01Icon className="w-4 h-4 text-blue-600" />

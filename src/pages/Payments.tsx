@@ -216,20 +216,20 @@ function PayoutsSection() {
       </div>
 
       <ClayCard padding="none">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-3.5 border-b border-clay-border gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:px-5 sm:py-3.5 border-b border-clay-border gap-3">
           <h3 className="font-bold text-text-primary text-sm">Payout Records</h3>
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex gap-1.5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full sm:w-auto">
               {tabs.map(t => (
                 <button key={t} onClick={() => { setFilter(t); setPayPage(1); }}
-                  className={`px-3 py-1 rounded-pill text-xs font-semibold transition-all ${filter === t ? 'bg-burnt-brown text-white' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'}`}>
+                  className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 rounded-pill text-xs font-semibold transition-all ${filter === t ? 'bg-burnt-brown text-white shadow-clay-sm' : 'bg-clay-border-light text-text-secondary hover:bg-clay-border'}`}>
                   {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}
             </div>
-            <div className="relative">
+            <div className="relative w-full sm:w-44 flex-shrink-0">
               <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
-              <input className="clay-input w-44 pl-9 py-1.5 text-sm" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+              <input className="clay-input w-full pl-9 py-1.5 text-sm" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
         </div>

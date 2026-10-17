@@ -184,7 +184,7 @@ export function PushTab() {
           {/* Target Audience */}
           <div>
             <label className="block text-xs font-bold text-text-tertiary uppercase tracking-wider mb-3">Target Audience</label>
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap">
               {[
                 { mode: 'all' as TargetMode, label: 'All Users', icon: <GlobeIcon className="w-3.5 h-3.5" /> },
                 { mode: 'roles' as TargetMode, label: 'By Role', icon: <UserMultipleIcon className="w-3.5 h-3.5" /> },
@@ -194,7 +194,7 @@ export function PushTab() {
                   key={t.mode}
                   onClick={() => setTargetMode(t.mode)}
                   className={clsx(
-                    'flex items-center gap-1.5 px-3 py-2 rounded-clay-sm text-xs font-semibold border transition-all',
+                    'flex items-center gap-1.5 px-3 py-2 rounded-clay-sm text-xs font-semibold border transition-all flex-shrink-0 whitespace-nowrap',
                     targetMode === t.mode
                       ? 'bg-burnt-brown text-white border-burnt-brown shadow-clay-sm'
                       : 'bg-white text-text-secondary border-clay-border hover:border-burnt-brown/30',
@@ -301,8 +301,9 @@ export function PushTab() {
           icon={<SentIcon className="w-4 h-4" />}
           onClick={() => setShowPreview(true)}
           disabled={!canSend}
+          className="w-full sm:w-auto justify-center"
         >
-          Preview & SentIcon
+          Preview & Send
         </Button>
       </div>
 

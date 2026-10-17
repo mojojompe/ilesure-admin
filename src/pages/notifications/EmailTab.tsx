@@ -175,13 +175,13 @@ export function EmailTab() {
             <label className="block text-xs font-bold text-text-tertiary uppercase tracking-wider mb-3">
               Recipient Group *
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 scrollbar-none">
               {RECIPIENT_OPTIONS.map((ro) => (
                 <button
                   key={ro.value}
                   onClick={() => setRecipientType(ro.value as RecipientType)}
                   className={clsx(
-                    'flex items-center gap-1.5 px-3 py-2 rounded-clay-sm text-xs font-semibold border transition-all',
+                    'flex items-center flex-shrink-0 whitespace-nowrap gap-1.5 px-3 py-2 rounded-clay-sm text-xs font-semibold border transition-all',
                     recipientType === ro.value
                       ? 'bg-burnt-brown text-white border-burnt-brown shadow-clay-sm'
                       : 'bg-white text-text-secondary border-clay-border hover:border-burnt-brown/30'
@@ -245,6 +245,7 @@ export function EmailTab() {
           icon={<SentIcon className="w-4 h-4" />}
           onClick={() => setShowPreview(true)}
           disabled={!canSend}
+          className="w-full sm:w-auto justify-center"
         >
           Preview & SentIcon
         </Button>
@@ -252,7 +253,7 @@ export function EmailTab() {
 
       {/* Sent History */}
       <ClayCard>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
             <h2 className="text-lg font-bold text-text-primary">Sent History</h2>
             <p className="text-xs text-text-tertiary mt-0.5">{historyTotal} broadcast(s) total</p>
@@ -349,7 +350,7 @@ export function EmailTab() {
           </table>
         </div>
         {historyPages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t border-clay-border mt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-clay-border mt-4">
             <span className="text-xs text-text-tertiary">
               Page {historyPage} of {historyPages}
             </span>
@@ -381,14 +382,15 @@ export function EmailTab() {
           title="Broadcast Details"
           size="lg"
           footer={
-            <div className="flex items-center justify-between w-full">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2.5 w-full">
               <span className="text-xs text-text-tertiary">
                 ID: {selectedBroadcast._id}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <Button
                   variant="secondary"
                   size="sm"
+                  className="flex-1 sm:flex-initial"
                   onClick={() => setSelectedBroadcast(null)}
                 >
                   Close
@@ -396,6 +398,7 @@ export function EmailTab() {
                 <Button
                   variant="mustard"
                   size="sm"
+                  className="flex-1 sm:flex-initial"
                   icon={<RefreshIcon className="w-3.5 h-3.5" />}
                   onClick={() => {
                     setSubject(selectedBroadcast.subject);

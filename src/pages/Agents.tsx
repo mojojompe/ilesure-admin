@@ -83,9 +83,9 @@ export function Agents() {
       ]} />
 
       <ClayCard padding="none">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:px-5 sm:py-3.5 border-b border-clay-border">
           <h3 className="font-bold text-text-primary text-sm">All Agents</h3>
-          <SearchField className="w-56" value={list.search} onChange={list.setSearch} placeholder="Search agents..." />
+          <SearchField className="w-full sm:w-56" value={list.search} onChange={list.setSearch} placeholder="Search agents..." />
         </div>
         <AccountTable list={list} columns={columns} noun="agents" />
       </ClayCard>

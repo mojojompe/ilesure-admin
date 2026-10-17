@@ -235,25 +235,27 @@ export function VerificationQueue() {
         {/* BUGFIX (QA-ADM-020): the heading counted the rendered page, not the queue, so it
             read "Pending Verifications (20)" while the API reported 22 total, and the list
             was never filtered to pending at all. */}
-        <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-clay-border">
-          <Time02Icon className="w-4 h-4 text-mustard" />
-          <h3 className="font-bold text-text-primary text-sm">
-            {statusFilter === 'all' ? 'All Verifications' : `${statusFilter.charAt(0).toUpperCase()}${statusFilter.slice(1)} Verifications`} ({totalItems})
-          </h3>
-          <div className="ml-auto flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-clay-border">
+          <div className="flex items-center gap-2">
+            <Time02Icon className="w-4 h-4 text-mustard flex-shrink-0" />
+            <h3 className="font-bold text-text-primary text-sm">
+              {statusFilter === 'all' ? 'All Verifications' : `${statusFilter.charAt(0).toUpperCase()}${statusFilter.slice(1)} Verifications`} ({totalItems})
+            </h3>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name or email"
               aria-label="Search verifications by name or email"
-              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white w-52"
+              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white w-full sm:w-52"
             />
             <select
               value={statusFilter}
               onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
               aria-label="Filter verifications by status"
-              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white"
+              className="text-xs px-3 py-1.5 rounded-clay-sm border border-clay-border bg-white w-full sm:w-auto"
             >
               <option value="pending">Pending</option>
               <option value="verified">Verified</option>
@@ -320,13 +322,13 @@ export function VerificationQueue() {
         <div className="xl:col-span-3 space-y-4">
           {/* Doc Tabs */}
           <ClayCard padding="none">
-            <div className="flex items-center gap-1 px-4 pt-4 pb-0 border-b border-clay-border flex-wrap">
+            <div className="flex items-center gap-1 px-4 pt-4 pb-0 border-b border-clay-border overflow-x-auto scrollbar-none sm:flex-wrap">
               {availableDocs.map((docKey) => (
                 <button
                   key={docKey}
                   onClick={() => setActiveDoc(docKey)}
                   className={clsx(
-                    'px-3 py-2 text-xs font-semibold rounded-t-clay-sm -mb-px border-b-2 transition-all duration-150',
+                    'px-3 py-2 text-xs font-semibold rounded-t-clay-sm -mb-px border-b-2 transition-all duration-150 flex-shrink-0 whitespace-nowrap',
                     activeDoc === docKey
                       ? 'border-burnt-brown text-burnt-brown bg-burnt-brown/5'
                       : 'border-transparent text-text-tertiary hover:text-text-secondary',

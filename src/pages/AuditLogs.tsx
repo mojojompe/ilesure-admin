@@ -220,11 +220,11 @@ export function AuditLogs() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/settings')}
-            className="w-9 h-9 rounded-clay-sm bg-clay-border-light flex items-center justify-center hover:bg-clay-border transition-colors"
+            className="w-9 h-9 rounded-clay-sm bg-clay-border-light flex items-center justify-center hover:bg-clay-border transition-colors flex-shrink-0"
           >
             <ArrowLeft01Icon className="w-4 h-4 text-text-secondary" />
           </button>
@@ -239,7 +239,7 @@ export function AuditLogs() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-auto">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-pill bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
             <SecurityCheckIcon className="w-3.5 h-3.5" /> SOC 2 / Event-Standard Active
           </span>
@@ -342,7 +342,7 @@ export function AuditLogs() {
 
       {/* Logs Table */}
       <ClayCard padding="none">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-clay-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-5 py-3.5 border-b border-clay-border gap-1 sm:gap-2">
           <h3 className="font-bold text-text-primary text-sm flex items-center gap-2">
             <Analytics01Icon className="w-4 h-4 text-mustard" />
             Audit Trail ({total})
