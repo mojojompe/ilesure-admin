@@ -23,6 +23,23 @@ function handleAuthFailure(): void {
 
 export { AdminApiError, PermissionDeniedError, errorMessage, errorDetails } from './errors';
 
+export type SupportTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+/** GET /admin/v1/support (tickets from POST /api/v1/support/chat). */
+export interface SupportTicket {
+  id: string;
+  userId: string | null;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: SupportTicketStatus;
+  replies: { message: string; adminName: string | null; sentAt: string }[];
+  lastRepliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 async function readBody(response: Response): Promise<unknown> {
   try {
     return await response.json();
@@ -167,6 +184,20 @@ export const adminApi = {
     // through refundService.refundPayment, which verifies with Paystack and calls the
     // refund API rather than just flipping a flag.
     refund: (id: string) => adminFetch(`/admin/v1/payments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'refunded' }) }),
+    // What listers owe back after a settled payment was refunded or charged back.
+    listerDebts: (params?: Record<string, any>) => adminFetch(`/admin/v1/payments/lister-debts${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
+    resolveListerDebt: (id: string, status: 'recovered' | 'written_off', note?: string) =>
+      adminFetch(`/admin/v1/payments/lister-debts/${id}`, { method: 'PATCH', body: JSON.stringify({ status, note }) }),
+  },
+  support: {
+    list: (params?: Record<string, string>): Promise<{ data: { tickets: SupportTicket[]; summary: Record<string, number> } }> =>
+      adminFetch(`/admin/v1/support${params ? '?' + new URLSearchParams(params).toString() : ''}`),
+    get: (id: string): Promise<{ data: SupportTicket }> => adminFetch(`/admin/v1/support/${id}`),
+    setStatus: (id: string, status: SupportTicketStatus): Promise<{ data: SupportTicket }> =>
+      adminFetch(`/admin/v1/support/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    /** Emails the reply to the ticket's address; nothing is saved if the email fails. */
+    reply: (id: string, message: string, status?: SupportTicketStatus): Promise<{ data: SupportTicket }> =>
+      adminFetch(`/admin/v1/support/${id}/reply`, { method: 'POST', body: JSON.stringify({ message, status }) }),
   },
   reports: {
     list: (params?: Record<string, any>) => adminFetch(`/admin/v1/reports${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),

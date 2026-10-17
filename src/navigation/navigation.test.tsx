@@ -79,12 +79,12 @@ describe('the real NAV_TABLE', () => {
     expect(r.sections.map(s => [s.title, s.items.map(i => i.label)])).toEqual([
       ['Core', ['Dashboard', 'Listings', 'Verification']],
       ['People', ['Users', 'Agents', 'Reviews', 'Companies']],
-      ['Operations', ['Bookings', 'Payments', 'Feature Upgrades', 'Reports', 'Waitlist']],
+      ['Operations', ['Bookings', 'Payments', 'Feature Upgrades', 'Support', 'Reports', 'Waitlist']],
       ['Growth', ['Analytics', 'Tiers', 'Notifications', 'Ads', 'Audit Logs']],
     ]);
     expect(r.footer.map(i => i.path)).toEqual(['/settings']);
-    expect(NAV_TABLE).toHaveLength(18);
-    expect(new Set(NAV_TABLE.map(e => e.path)).size).toBe(18);
+    expect(NAV_TABLE).toHaveLength(19);
+    expect(new Set(NAV_TABLE.map(e => e.path)).size).toBe(19);
   });
 
   it('leaves Dashboard, Feature Upgrades and Settings open to every admin', () => {
@@ -105,7 +105,7 @@ describe('with rbac.can and a real session', () => {
 
   it('super_admin sees every page', () => {
     localStorage.setItem('ilesure_admin_token', token({ role: 'super_admin' }));
-    expect(visible()).toHaveLength(18);
+    expect(visible()).toHaveLength(19);
   });
 
   it('a moderator sees only the pages its saved login permissions allow', () => {
@@ -116,6 +116,6 @@ describe('with rbac.can and a real session', () => {
 
   it('a moderator session without saved permissions keeps every page (backend enforces)', () => {
     localStorage.setItem('ilesure_admin_token', token({ role: 'moderator' }));
-    expect(visible()).toHaveLength(18);
+    expect(visible()).toHaveLength(19);
   });
 });

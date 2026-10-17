@@ -19,10 +19,11 @@ import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
 import { useDeepLink } from '../lib/useDeepLink';
+import { ListerDebtsSection } from '../features/payments/ListerDebtsSection';
 
 type PayFilter = 'all' | 'pending' | 'processed' | 'refunded' | 'failed';
 
-type PSuccessTab = 'payouts' | 'paystack';
+type PSuccessTab = 'payouts' | 'paystack' | 'debts';
 
 export function Payments() {
   const navigate = useNavigate();
@@ -40,9 +41,13 @@ export function Payments() {
           className={`px-4 py-2 rounded-clay-sm text-sm font-semibold transition-all ${successTab === 'paystack' ? 'bg-burnt-brown text-white shadow-clay-sm' : 'text-text-secondary hover:bg-clay-border-light'}`}>
           Paystack Transactions
         </button>
+        <button onClick={() => setSuccessTab('debts')}
+          className={`px-4 py-2 rounded-clay-sm text-sm font-semibold transition-all ${successTab === 'debts' ? 'bg-burnt-brown text-white shadow-clay-sm' : 'text-text-secondary hover:bg-clay-border-light'}`}>
+          Lister Debts
+        </button>
       </div>
 
-      {successTab === 'payouts' ? <PayoutsSection /> : <PaystackSection />}
+      {successTab === 'payouts' ? <PayoutsSection /> : successTab === 'paystack' ? <PaystackSection /> : <ListerDebtsSection />}
     </div>
   );
 }
