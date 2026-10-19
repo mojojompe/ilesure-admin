@@ -188,6 +188,9 @@ export const adminApi = {
     listerDebts: (params?: Record<string, any>) => adminFetch(`/admin/v1/payments/lister-debts${params ? '?' + new URLSearchParams(params as any).toString() : ''}`),
     resolveListerDebt: (id: string, status: 'recovered' | 'written_off', note?: string) =>
       adminFetch(`/admin/v1/payments/lister-debts/${id}`, { method: 'PATCH', body: JSON.stringify({ status, note }) }),
+    // Go-live: payout accounts from Paystack test mode, and asking their owners to add them again.
+    payoutRedoPreview: () => adminFetch(`/admin/v1/payments/payout-redo`),
+    payoutRedoRun: () => adminFetch(`/admin/v1/payments/payout-redo`, { method: 'POST' }),
   },
   support: {
     list: (params?: Record<string, string>): Promise<{ data: { tickets: SupportTicket[]; summary: Record<string, number> } }> =>
