@@ -23,6 +23,7 @@ import { can, CAP } from '../lib/rbac';
 import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
 import { useDeepLink } from '../lib/useDeepLink';
+import { ListingModerationTimeline } from '../components/ListingModerationTimeline';
 
 type FilterStatus = 'all' | ListingStatus;
 
@@ -121,6 +122,7 @@ export function Listings() {
           images: l.images || [],
           interestCount: l.interestCount || 0,
           canBeShared: l.canBeShared || false,
+          moderationTimeline: l.moderationTimeline || [],
         }));
         setListings(formattedListings);
         const pg = response.data?.pagination;
@@ -428,6 +430,14 @@ export function Listings() {
                           )}
                         </div>
 
+                        {/* Moderation timeline: every request sent, with its text, and every lister edit. */}
+                        <div className="mt-4 pt-4 border-t border-clay-border">
+                          <h4 className="text-xs font-bold text-text-primary uppercase tracking-wide mb-3">
+                            Moderation Timeline
+                          </h4>
+                          <ListingModerationTimeline entries={listing.moderationTimeline} />
+                        </div>
+
                         {listing.status === 'pending_approval' && canModerate && (
                           <div className="flex gap-3 mt-4">
                             <Button variant="success" size="sm" onClick={() => handleAction('approve', listing)}>Approve Listing</Button>
@@ -495,6 +505,7 @@ export function Listings() {
               variant={actionModal?.type === 'approve' ? 'success' : actionModal?.type === 'reject' ? 'danger' : 'mustard'}
               size="sm"
               onClick={confirmAction}
+              disabled={actionModal?.type !== 'approve' && !adminNote.trim()}
             >
               {actionModal?.type === 'approve' ? 'Confirm Approval' : actionModal?.type === 'reject' ? 'Confirm Rejection' : 'Send Request'}
             </Button>
