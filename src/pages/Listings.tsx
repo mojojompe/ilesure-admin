@@ -24,6 +24,7 @@ import toast from 'react-hot-toast';
 import { errorMessage } from '../api/errors';
 import { useDeepLink } from '../lib/useDeepLink';
 import { ListingModerationTimeline } from '../components/ListingModerationTimeline';
+import { isVideoUrl } from '../utils/listingMedia';
 
 type FilterStatus = 'all' | ListingStatus;
 
@@ -283,9 +284,9 @@ export function Listings() {
                       <div className="flex items-center gap-2.5">
                         <div className="w-10 h-10 rounded-clay-sm bg-burnt-brown-pale flex items-center justify-center flex-shrink-0 overflow-hidden border border-clay-border relative">
                           <Home01Icon className="w-5 h-5 text-burnt-brown absolute inset-0 m-auto" />
-                          {listing.images && listing.images.length > 0 && listing.images[0] ? (
+                          {(listing.images || []).find((u: string) => u && !isVideoUrl(u)) ? (
                             <img
-                              src={listing.images[0]}
+                              src={(listing.images || []).find((u: string) => u && !isVideoUrl(u))}
                               alt={listing.title}
                               className="w-full h-full object-cover relative z-10"
                               onError={(e) => {
@@ -377,12 +378,12 @@ export function Listings() {
                             <div className="flex items-center gap-2">
                               <ImageIcon className="w-4 h-4 text-burnt-brown" />
                               <h4 className="text-xs font-bold text-text-primary uppercase tracking-wide">
-                                Property Photos ({listing.images?.length || 0})
+                                Photos &amp; Videos ({(listing.images || []).filter((u: string) => !isVideoUrl(u)).length} photos{(listing.images || []).some(isVideoUrl) ? `, ${(listing.images || []).filter(isVideoUrl).length} video${(listing.images || []).filter(isVideoUrl).length > 1 ? 's' : ''}` : ''})
                               </h4>
                             </div>
                             {listing.images && listing.images.length > 0 && (
                               <span className="text-[11px] text-text-tertiary">
-                                Click any photo to view full size
+                                Click any item to view full size
                               </span>
                             )}
                           </div>
@@ -396,19 +397,28 @@ export function Listings() {
                                     e.stopPropagation();
                                     setPreviewImage({
                                       url: imgUrl,
-                                      title: `${listing.title}, Photo ${idx + 1}`,
+                                      title: `${listing.title}, ${isVideoUrl(imgUrl) ? 'Video' : 'Photo'} ${idx + 1}`,
                                     });
                                   }}
                                   className="group relative h-24 rounded-clay-sm overflow-hidden border border-clay-border cursor-pointer shadow-sm hover:shadow-md transition-all bg-clay-border-light"
                                 >
-                                  <img
-                                    src={imgUrl}
-                                    alt={`${listing.title} ${idx + 1}`}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                    onError={(e) => {
-                                      (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/400x300?text=Photo+Unavailable';
-                                    }}
-                                  />
+                                  {isVideoUrl(imgUrl) ? (
+                                    <>
+                                      <video src={imgUrl} muted playsInline preload="metadata" className="w-full h-full object-cover bg-black" />
+                                      <span className="absolute top-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-semibold">
+                                        Video
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <img
+                                      src={imgUrl}
+                                      alt={`${listing.title} ${idx + 1}`}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                      onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/400x300?text=Photo+Unavailable';
+                                      }}
+                                    />
+                                  )}
                                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                                     <ViewIcon className="w-4 h-4 text-white" />
                                   </div>
@@ -540,11 +550,21 @@ export function Listings() {
           }
         >
           <div className="flex flex-col items-center">
-            <img
-              src={previewImage.url}
-              alt={previewImage.title}
-              className="w-full max-h-[70vh] object-contain rounded-clay-sm border border-clay-border bg-black/5"
-            />
+            {isVideoUrl(previewImage.url) ? (
+              <video
+                src={previewImage.url}
+                controls
+                autoPlay
+                playsInline
+                className="w-full max-h-[70vh] object-contain rounded-clay-sm border border-clay-border bg-black"
+              />
+            ) : (
+              <img
+                src={previewImage.url}
+                alt={previewImage.title}
+                className="w-full max-h-[70vh] object-contain rounded-clay-sm border border-clay-border bg-black/5"
+              />
+            )}
           </div>
         </Modal>
       )}
