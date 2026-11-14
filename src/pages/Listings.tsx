@@ -109,6 +109,8 @@ export function Listings() {
           shortletRates: l.shortletRates || [],
           cautionFee: l.cautionFee || 0,
           agencyFee: l.agencyFee || 0,
+          serviceCharge: l.serviceCharge || 0,
+          inspectionFee: l.inspectionFee || 0,
           totalMoveinCost: l.totalMoveinCost || 0,
           status: l.status,
           submittedDate: l.submittedDate || l.createdAt ? new Date(l.submittedDate || l.createdAt).toISOString().split('T')[0] : '',
@@ -355,6 +357,9 @@ export function Listings() {
                             { label: 'Rent', value: formatListingRent(listing, true) },
                             { label: 'Caution Fee', value: `₦${listing.cautionFee.toLocaleString()}` },
                             { label: 'Agency Fee', value: `₦${listing.agencyFee.toLocaleString()}` },
+                            // Declared by the lister, shown to renters, not collected at checkout.
+                            ...(listing.serviceCharge > 0 ? [{ label: 'Service Charge (yearly)', value: `₦${listing.serviceCharge.toLocaleString()}` }] : []),
+                            ...(listing.inspectionFee > 0 ? [{ label: 'Inspection Fee', value: `₦${listing.inspectionFee.toLocaleString()}` }] : []),
                             { label: 'Total Move-in Cost', value: `₦${listing.totalMoveinCost.toLocaleString()}` },
                             { label: 'Furnishing', value: listing.furnishing.replace('_', ' ') },
                             { label: 'Gender Restriction', value: listing.genderRestriction.replace('_', ' ') },

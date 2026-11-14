@@ -79,6 +79,10 @@ export interface Listing {
   annualRent: number;
   cautionFee: number;
   agencyFee: number;
+  /** Yearly service charge the lister declared (informational, 0 when none). */
+  serviceCharge: number;
+  /** One-off viewing fee the lister declared (informational, 0 when none). */
+  inspectionFee: number;
   totalMoveinCost: number;
   status: ListingStatus;
   canBeShared: boolean;

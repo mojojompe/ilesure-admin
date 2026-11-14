@@ -31,7 +31,7 @@ const DOT: Record<ModerationTimelineEntry['action'], string> = {
 
 const FIELD_LABEL: Record<string, string> = {
   rentAnnual: 'rent', annualRent: 'rent', cautionFee: 'caution fee', agencyFee: 'agency fee',
-  securityDeposit: 'security deposit', serviceCharge: 'service charge', shortletPricing: 'shortlet prices',
+  securityDeposit: 'security deposit', serviceCharge: 'service charge', inspectionFee: 'inspection fee', shortletPricing: 'shortlet prices',
   shortletRates: 'shortlet prices', propertyType: 'property type', tenancyAgreement: 'tenancy agreement',
   images: 'photos',
 };
