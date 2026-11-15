@@ -250,6 +250,14 @@ export function Bookings() {
                 { label: 'Platform Fee', value: detail.platformFee != null ? `₦${Number(detail.platformFee).toLocaleString()}` : '—' },
                 { label: 'Move-in Date', value: formatDate(detail.moveInDate) },
                 { label: 'Payment', value: detail.paymentStatus || 'pending' },
+                ...(detail.inspectionFee
+                  ? [{
+                    label: 'Inspection Fee',
+                    value: `₦${Number(detail.inspectionFee.total || 0).toLocaleString()} (${detail.inspectionFee.status === 'paid'
+                      ? (detail.inspectionFee.refundRequestedAt ? 'paid, refund by hand' : 'paid')
+                      : 'not paid'})`,
+                  }]
+                  : []),
               ].map(({ label, value }) => (
                 <div key={label} className="bg-clay-border-light rounded-clay-sm px-3 py-2">
                   <p className="text-[10px] text-text-tertiary font-semibold uppercase tracking-wide">{label}</p>
