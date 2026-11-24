@@ -357,6 +357,7 @@ export function Listings() {
                             { label: 'Rent', value: formatListingRent(listing, true) },
                             { label: 'Caution Fee', value: `₦${listing.cautionFee.toLocaleString()}` },
                             { label: 'Agency Fee', value: `₦${listing.agencyFee.toLocaleString()}` },
+                            ...(listing.tenancyAgreementFee && listing.tenancyAgreementFee > 0 ? [{ label: 'Tenancy Agreement', value: `₦${listing.tenancyAgreementFee.toLocaleString()}` }] : []),
                             // Declared by the lister, shown to renters, not collected at checkout.
                             ...(listing.serviceCharge > 0 ? [{ label: 'Service Charge (yearly)', value: `₦${listing.serviceCharge.toLocaleString()}` }] : []),
                             ...(listing.inspectionFee > 0 ? [{ label: 'Inspection Fee', value: `₦${listing.inspectionFee.toLocaleString()}` }] : []),
