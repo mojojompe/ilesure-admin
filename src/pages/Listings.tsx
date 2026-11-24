@@ -255,7 +255,7 @@ export function Listings() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12">
+                  <td colSpan={8} className="text-center py-12">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-mustard border-t-transparent rounded-full animate-spin" />
                       <span className="text-text-tertiary">Loading...</span>
@@ -264,13 +264,13 @@ export function Listings() {
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12">
+                  <td colSpan={8} className="text-center py-12">
                     <p className="text-status-error">{error}</p>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12">
+                  <td colSpan={8} className="text-center py-12">
                     <p className="text-text-tertiary">No listings found</p>
                   </td>
                 </tr>

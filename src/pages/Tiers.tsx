@@ -213,7 +213,11 @@ const Tiers: React.FC = () => {
       render: (text: string, record: Tier) => (
         <span>
           {text}
-          {record.popular && <Tag color="blue" style={{ marginLeft: 8 }}>POPULAR</Tag>}
+          {record.popular && (
+            <Tag style={{ marginLeft: 8, backgroundColor: '#FFF8E7', color: '#6B3A1F', borderColor: '#E1AD01', fontWeight: 'bold' }}>
+              POPULAR
+            </Tag>
+          )}
         </span>
       ),
     },
@@ -251,6 +255,7 @@ const Tiers: React.FC = () => {
           unCheckedChildren="Inactive"
           onChange={() => handleToggleStatus(record.id)}
           disabled={!canManage}
+          style={{ backgroundColor: record.active ? '#E1AD01' : '#D5C4B0' }}
         />
       ),
     },
@@ -295,7 +300,7 @@ const Tiers: React.FC = () => {
         title={<Typography.Title level={3} style={{ margin: 0 }}>Tier Management</Typography.Title>}
         extra={
           canManage ? (
-            <Button type="primary" style={{ backgroundColor: '#8B4513', borderRadius: '5px', color: 'white' }} icon={<PlusOutlined />} onClick={() => openModal()}>
+            <Button type="primary" style={{ backgroundColor: '#6B3A1F', borderRadius: '8px', color: 'white' }} icon={<PlusOutlined />} onClick={() => openModal()}>
               Add New Tier
             </Button>
           ) : null
@@ -406,7 +411,7 @@ const Tiers: React.FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button style={{ backgroundColor: '#8B4513' }} type="primary" htmlType="submit" block size="large">
+            <Button style={{ backgroundColor: '#6B3A1F', borderRadius: '8px' }} type="primary" htmlType="submit" block size="large">
               {editingTier ? 'Update Tier' : 'Create Tier'}
             </Button>
           </Form.Item>
